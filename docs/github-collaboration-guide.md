@@ -255,42 +255,26 @@ git commit -m "fix: resolve merge conflict"
 当前主要文件：
 
 ```text
-src/main.jsx       看板页面和主要交互
-src/mockData.js    默认任务、看板列、样例数据
-src/styles.css     页面样式
-index.html         Vite 页面入口
-package.json       项目依赖和启动命令
-```
-
-后续多人开发时，建议逐步拆成：
-
-```text
-src/
-  components/
-    Sidebar.jsx
-    Topbar.jsx
-    Board.jsx
-    TaskCard.jsx
-    TaskDrawer.jsx
-  modules/
-    scope-init/
-    workspace/
-    progress-board/
-  data/
-    mockData.js
-  styles.css
-  main.jsx
+src/main.jsx                 应用状态和页面编排
+src/components/              通用页面组件
+src/data/mockData.js         默认任务、看板列、样例数据
+src/modules/                 三大功能模块开发目录
+src/styles.css               页面样式
+index.html                   Vite 页面入口
+package.json                 项目依赖和启动命令
 ```
 
 建议三位队友尽量分开改文件，减少冲突：
 
 | 模块 | 建议分支 | 主要改动位置 |
 | --- | --- | --- |
-| 审计定制化 / Scope 初始化 | `feature/scope-init` | 后续新建 `src/modules/scope-init/` |
-| 协同办公 / 个人工作台 | `feature/workspace` | 后续新建 `src/modules/workspace/` |
-| 进度看板 / 依赖可视化 | `feature/progress-board` | 后续新建 `src/modules/progress-board/`，并调整 `src/main.jsx` |
+| 审计定制化 / Scope 初始化 | `feature/scope-init` | 主要在 `src/modules/scope-init/` 开发 |
+| 协同办公 / 个人工作台 | `feature/workspace` | 主要在 `src/modules/workspace/` 开发 |
+| 进度看板 / 依赖可视化 | `feature/progress-board` | 主要在 `src/modules/progress-board/` 开发 |
 
 如果两个人都要改 `src/main.jsx`，先在群里说一声，或者让一个人先负责把组件拆出来。
+
+更详细的模块认领说明见：[docs/module-ownership-guide.md](module-ownership-guide.md)
 
 ## 9. 常见问题
 

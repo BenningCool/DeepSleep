@@ -37,7 +37,9 @@ npm run preview
 ## 协作建议
 
 - 页面入口：`src/main.jsx`
-- 样例数据和看板列：`src/mockData.js`
+- 通用组件：`src/components/`
+- 三大功能模块：`src/modules/`
+- 样例数据和看板列：`src/data/mockData.js`
 - 全局样式：`src/styles.css`
-- 后续如果功能变多，可以把 `src/main.jsx` 中的组件继续拆到 `src/components/`
 - 小白协作教程：[docs/github-collaboration-guide.md](docs/github-collaboration-guide.md)
+- 模块认领与开发指南：[docs/module-ownership-guide.md](docs/module-ownership-guide.md)
