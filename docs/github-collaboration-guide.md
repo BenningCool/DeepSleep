@@ -42,6 +42,23 @@ flowchart LR
   G --> H["合并回 main"]
 ```
 
+如果你不熟悉命令行，也可以用 GitHub Desktop。它的逻辑和上图一样，只是把命令变成按钮。
+
+```mermaid
+flowchart LR
+  A["Clone repository"] --> B["Current Branch: 新建 feature 分支"]
+  B --> C["在 VS Code/Cursor 写代码"]
+  C --> D["GitHub Desktop 填 Summary 并 Commit"]
+  D --> E["Push origin"]
+  E --> F["Create Pull Request"]
+```
+
+GitHub Desktop 下载地址：
+
+```text
+https://desktop.github.com/
+```
+
 ## 3. 三个模块怎么分工
 
 建议把截图里的 3 个 P0 需求拆成 3 个模块，每个人负责一个模块。
@@ -120,6 +137,16 @@ git checkout -b feature/你的功能名
 git checkout -b feature/workspace
 ```
 
+如果用 GitHub Desktop：
+
+1. 打开 GitHub Desktop
+2. 点击 `Current Repository`，选择 `DeepSleep`
+3. 点击 `Fetch origin`，如果出现 `Pull origin` 就点一下
+4. 点击 `Current Branch`
+5. 点击 `New Branch`
+6. 输入自己的分支名，例如 `feature/workspace`
+7. 点击 `Create Branch`
+
 ## 5. 写完代码后怎么提交
 
 先检查改了哪些文件：
@@ -157,6 +184,14 @@ git push origin feature/你的功能名
 ```bash
 git push origin feature/workspace
 ```
+
+如果用 GitHub Desktop：
+
+1. 左侧会显示你改过的文件
+2. 在左下角 `Summary` 写提交说明，例如 `feat: add workspace module`
+3. 点击 `Commit to feature/workspace`
+4. 点击顶部的 `Push origin`
+5. 回到 GitHub 网页，点击 `Compare & pull request`
 
 ## 6. 怎么创建 Pull Request
 
@@ -246,6 +281,16 @@ src/
   styles.css
   main.jsx
 ```
+
+建议三位队友尽量分开改文件，减少冲突：
+
+| 模块 | 建议分支 | 主要改动位置 |
+| --- | --- | --- |
+| 审计定制化 / Scope 初始化 | `feature/scope-init` | 后续新建 `src/modules/scope-init/` |
+| 协同办公 / 个人工作台 | `feature/workspace` | 后续新建 `src/modules/workspace/` |
+| 进度看板 / 依赖可视化 | `feature/progress-board` | 后续新建 `src/modules/progress-board/`，并调整 `src/main.jsx` |
+
+如果两个人都要改 `src/main.jsx`，先在群里说一声，或者让一个人先负责把组件拆出来。
 
 ## 9. 常见问题
 
