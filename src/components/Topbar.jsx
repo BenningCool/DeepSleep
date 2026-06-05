@@ -1,4 +1,11 @@
-export function Topbar({ onNewTask, onReset }) {
+const VIEW_LABELS = {
+  board: "看板",
+  "scope-init": "Scope 初始化"
+};
+
+export function Topbar({ activeView = "board", onNewTask, onReset }) {
+  const viewLabel = VIEW_LABELS[activeView] || "看板";
+
   return (
     <header className="topbar">
       <div className="breadcrumbs">
@@ -6,11 +13,17 @@ export function Topbar({ onNewTask, onReset }) {
         <span>/</span>
         <strong>DeepSleep 项目看板</strong>
         <span>/</span>
-        <span>看板</span>
+        <span>{viewLabel}</span>
       </div>
       <div className="actions">
-        <button className="button" type="button" onClick={onReset}>重置样例</button>
-        <button className="button primary" type="button" onClick={onNewTask}>新建任务</button>
+        {activeView === "board" ? (
+          <>
+            <button className="button" type="button" onClick={onReset}>重置样例</button>
+            <button className="button primary" type="button" onClick={onNewTask}>新建任务</button>
+          </>
+        ) : (
+          <span className="topbar-note">完成 Scope 配置后可导入看板继续推进</span>
+        )}
       </div>
     </header>
   );

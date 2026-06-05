@@ -1,4 +1,5 @@
 import { COLUMNS } from "../data/mockData";
+import { getWorkflowHint } from "../modules/scope-init/scopeRules";
 import { columnTitle } from "../utils/taskUtils";
 
 export function TaskDrawer({ open, editingTask, draft, commentDraft, onClose, onChange, onCommentChange, onSave, onDelete }) {
@@ -9,7 +10,14 @@ export function TaskDrawer({ open, editingTask, draft, commentDraft, onClose, on
         <header className="drawer-header">
           <div>
             <h2>{editingTask ? editingTask.title : "新建任务"}</h2>
-            <p>{editingTask ? `${editingTask.id} · 当前阶段：${columnTitle(editingTask.status)}` : "填写任务内容、字段和批注。"}</p>
+            <p>
+              {editingTask
+                ? `${editingTask.id} · 当前阶段：${columnTitle(editingTask.status)}`
+                : "填写任务内容、字段和批注。"}
+            </p>
+            {editingTask && getWorkflowHint(editingTask) ? (
+              <p className="drawer-hint">{getWorkflowHint(editingTask)}</p>
+            ) : null}
           </div>
           <button className="button icon" type="button" aria-label="关闭" onClick={onClose}>×</button>
         </header>

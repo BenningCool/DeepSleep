@@ -21,6 +21,7 @@ export function TaskCard({ task, onOpen }) {
     >
       <div className="card-meta">
         <span className={`pill ${task.priority.toLowerCase()}`}>{task.priority}</span>
+        {task.scopeCritical ? <span className="pill critical">关键</span> : null}
         <span className={`pill ${platformClass(task.platform)}`}>{task.platform}</span>
       </div>
       <h4 className="card-title">{task.title}</h4>

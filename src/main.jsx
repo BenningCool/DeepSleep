@@ -7,6 +7,8 @@ import { Sidebar } from "./components/Sidebar";
 import { TaskDrawer } from "./components/TaskDrawer";
 import { Topbar } from "./components/Topbar";
 import { COLUMNS, DEFAULT_TASKS, STORAGE_KEY } from "./data/mockData";
+import { ScopeInitPanel } from "./modules/scope-init/ScopeInitPanel";
+import { validateStatusTransition } from "./modules/scope-init/scopeRules";
 import { cloneTasks, columnTitle, nextTaskId } from "./utils/taskUtils";
 
 const emptyTask = {
@@ -47,6 +49,7 @@ function App() {
   const [draft, setDraft] = useState(emptyTask);
   const [commentDraft, setCommentDraft] = useState("");
   const [toast, setToast] = useState("");
+  const [activeView, setActiveView] = useState("board");
 
   useEffect(() => {
     saveTasks(tasks);
@@ -114,6 +117,14 @@ function App() {
     }
 
     const existing = tasks.find((task) => task.id === draft.id);
+    if (existing && draft.status !== existing.status) {
+      const check = validateStatusTransition(existing, draft.status);
+      if (!check.allowed) {
+        setToast(check.message);
+        return;
+      }
+    }
+
     const comments = [...(existing?.comments || draft.comments || [])];
     const nextComment = commentDraft.trim();
     if (nextComment) {
@@ -152,10 +163,32 @@ function App() {
   function moveTask(taskId, nextStatus) {
     const target = tasks.find((task) => task.id === taskId);
     if (!target || target.status === nextStatus) return;
+
+    const check = validateStatusTransition(target, nextStatus);
+    if (!check.allowed) {
+      setToast(check.message);
+      return;
+    }
+
     setTasks((current) => current.map((task) => (
       task.id === taskId ? { ...task, status: nextStatus } : task
     )));
     setToast(`${target.id} 已移动到「${columnTitle(nextStatus)}」。`);
+  }
+
+  function handleGenerateScope(scopeTasks, projectName) {
+    setTasks((current) => {
+      let working = [...current];
+      const imported = scopeTasks.map((task) => {
+        const id = nextTaskId(working);
+        const next = { ...task, id };
+        working = [next, ...working];
+        return next;
+      });
+      return [...imported, ...current];
+    });
+    setFilters((current) => ({ ...current, product: projectName }));
+    setActiveView("board");
   }
 
   function resetData() {
@@ -168,21 +201,27 @@ function App() {
 
   return (
     <div className="app">
-      <Sidebar />
+      <Sidebar activeView={activeView} onNavigate={setActiveView} />
       <main className="content">
-        <Topbar onNewTask={() => openTask()} onReset={resetData} />
-        <BoardHeader
-          stats={stats}
-          filters={filters}
-          filterOptions={filterOptions}
-          onFilterChange={updateFilter}
-        />
-        <Board
-          columns={COLUMNS}
-          tasks={visibleTasks}
-          onOpenTask={openTask}
-          onMoveTask={moveTask}
-        />
+        <Topbar activeView={activeView} onNewTask={() => openTask()} onReset={resetData} />
+        {activeView === "scope-init" ? (
+          <ScopeInitPanel onGenerate={handleGenerateScope} onToast={setToast} />
+        ) : (
+          <>
+            <BoardHeader
+              stats={stats}
+              filters={filters}
+              filterOptions={filterOptions}
+              onFilterChange={updateFilter}
+            />
+            <Board
+              columns={COLUMNS}
+              tasks={visibleTasks}
+              onOpenTask={openTask}
+              onMoveTask={moveTask}
+            />
+          </>
+        )}
       </main>
       <TaskDrawer
         open={Boolean(editingTask) || draft.id === ""}
