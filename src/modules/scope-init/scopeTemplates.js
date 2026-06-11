@@ -1,3 +1,7 @@
+import { getSystemTasks, labelOfSystem } from "./scopeSystems";
+
+export const SCOPE_DRAFT_KEY = "deepsleep-scope-draft-v1";
+
 export const INDUSTRIES = [
   { id: "finance", label: "金融服务 / 银行", hint: "核心系统、支付清算、监管报送" },
   { id: "manufacturing", label: "制造业", hint: "ERP、MES、供应链与生产系统" },
@@ -21,6 +25,42 @@ export const PROJECT_TYPES = [
   { id: "special", label: "专项 IT 审计", hint: "聚焦单一风险域或监管要求" },
   { id: "ipo", label: "IPO 就绪评估", hint: "上市前 IT 内控成熟度评估" },
   { id: "mna", label: "并购 IT 尽职调查", hint: "目标公司 IT 风险与整合评估" }
+];
+
+export const QUICK_PRESETS = [
+  {
+    id: "bank-itgc",
+    label: "银行 ITGC 年报",
+    form: {
+      projectName: "某银行 2026 年度 ITGC 审计",
+      industry: "finance",
+      auditDomain: "itgc",
+      projectType: "annual",
+      systems: ["core-banking", "iam", "bi"]
+    }
+  },
+  {
+    id: "tech-soc2",
+    label: "互联网 SOC 2",
+    form: {
+      projectName: "某科技公司 SOC 2 Type II",
+      industry: "tech",
+      auditDomain: "cyber",
+      projectType: "soc",
+      systems: ["iam", "oa"]
+    }
+  },
+  {
+    id: "mfg-itac",
+    label: "制造业 ITAC 专项",
+    form: {
+      projectName: "某制造企业 ITAC 专项审计",
+      industry: "manufacturing",
+      auditDomain: "itac",
+      projectType: "special",
+      systems: ["erp", "scm"]
+    }
+  }
 ];
 
 const DOMAIN_TASKS = {
@@ -255,6 +295,8 @@ const PROJECT_ADDONS = {
   }
 };
 
+const MANUAL_TASK_ESTIMATE = 12;
+
 function addDays(baseDate, days) {
   const date = new Date(baseDate);
   date.setDate(date.getDate() + days);
@@ -266,11 +308,37 @@ function labelOf(options, id) {
 }
 
 export function buildScopeSummary(selection) {
-  const { industry, auditDomain, projectType } = selection;
+  const { industry, auditDomain, projectType, systems = [] } = selection;
   return {
     industryLabel: labelOf(INDUSTRIES, industry),
     auditDomainLabel: labelOf(AUDIT_DOMAINS, auditDomain),
-    projectTypeLabel: labelOf(PROJECT_TYPES, projectType)
+    projectTypeLabel: labelOf(PROJECT_TYPES, projectType),
+    systemsLabel: systems.length
+      ? systems.map(labelOfSystem).join("、")
+      : "未选择关键系统"
+  };
+}
+
+export function computeScopeStats(tasks) {
+  const criticalCount = tasks.filter((task) => task.scopeCritical).length;
+  const p0Count = tasks.filter((task) => task.priority === "P0").length;
+  const systemCount = tasks.filter((task) => task.systemScoped).length;
+  const coverage = Math.min(95, Math.round((tasks.length / MANUAL_TASK_ESTIMATE) * 80));
+
+  const startDate = tasks[0]?.due;
+  const estimatedDays = tasks.length && startDate
+    ? Math.max(...tasks.map((task) => (
+      (new Date(task.due) - new Date(startDate)) / 86400000
+    ))) + 7
+    : 0;
+
+  return {
+    total: tasks.length,
+    criticalCount,
+    p0Count,
+    systemCount,
+    coverage,
+    estimatedDays
   };
 }
 
@@ -280,6 +348,7 @@ export function generateScopeTasks(selection, startId = 200) {
     industry,
     auditDomain,
     projectType,
+    systems = [],
     owner = "未分配",
     startDate = new Date().toISOString().slice(0, 10)
   } = selection;
@@ -289,17 +358,24 @@ export function generateScopeTasks(selection, startId = 200) {
   const baseTasks = DOMAIN_TASKS[auditDomain] || DOMAIN_TASKS.itgc;
   const industryAddon = INDUSTRY_ADDONS[industry];
   const projectAddon = PROJECT_ADDONS[projectType];
+  const systemTasks = getSystemTasks(systems);
 
   const templates = [
     ...baseTasks,
     ...(industryAddon ? [industryAddon] : []),
+    ...systemTasks,
     ...(projectAddon ? [projectAddon] : [])
   ];
 
   return templates.map((template, index) => ({
     id: `DS-${startId + index}`,
     title: template.title,
-    description: `${template.description}\n\n【Scope】${summary.industryLabel} · ${summary.auditDomainLabel} · ${summary.projectTypeLabel}`,
+    description: [
+      template.description,
+      "",
+      `【Scope】${summary.industryLabel} · ${summary.auditDomainLabel} · ${summary.projectTypeLabel}`,
+      summary.systemsLabel !== "未选择关键系统" ? `【关键系统】${summary.systemsLabel}` : ""
+    ].filter(Boolean).join("\n"),
     priority: template.priority,
     platform: "PC 端",
     product,
@@ -315,11 +391,26 @@ export function generateScopeTasks(selection, startId = 200) {
     scopeGenerated: true,
     scopeCritical: Boolean(template.scopeCritical),
     auditPhase: template.auditPhase,
+    systemScoped: Boolean(template.systemScoped),
     scopeMeta: {
       industry,
       auditDomain,
       projectType,
+      systems,
       projectName: product
     }
   }));
+}
+
+export function loadScopeDraft() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(SCOPE_DRAFT_KEY) || "null");
+    return saved && typeof saved === "object" ? saved : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveScopeDraft(form) {
+  localStorage.setItem(SCOPE_DRAFT_KEY, JSON.stringify(form));
 }

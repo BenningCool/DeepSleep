@@ -3,11 +3,22 @@ import { createRoot } from "react-dom/client";
 import "./styles.css";
 import { Board } from "./components/Board";
 import { BoardHeader } from "./components/BoardHeader";
+import { EmptyBoardState } from "./components/EmptyBoardState";
 import { Sidebar } from "./components/Sidebar";
 import { TaskDrawer } from "./components/TaskDrawer";
 import { Topbar } from "./components/Topbar";
-import { COLUMNS, DEFAULT_TASKS, STORAGE_KEY } from "./data/mockData";
-import { ScopeInitPanel } from "./modules/scope-init/ScopeInitPanel";
+import { COLUMNS, STORAGE_KEY } from "./data/mockData";
+import { CreateProjectPage } from "./modules/project/CreateProjectPage";
+import { ProjectDetailPage } from "./modules/project/ProjectDetailPage";
+import { ProjectMembersPage } from "./modules/project/ProjectMembersPage";
+import { ProjectsHomePage } from "./modules/project/ProjectsHomePage";
+import {
+  deleteProject,
+  getProject,
+  loadCurrentProjectId,
+  loadProjects,
+  saveCurrentProjectId
+} from "./modules/project/projectStore";
 import { validateStatusTransition } from "./modules/scope-init/scopeRules";
 import { cloneTasks, columnTitle, nextTaskId } from "./utils/taskUtils";
 
@@ -16,19 +27,20 @@ const emptyTask = {
   description: "",
   priority: "P1",
   platform: "PC 端",
-  product: "DeepSleep 项目看板",
+  product: "",
   owner: "",
   due: "",
   status: "todo",
-  comments: []
+  comments: [],
+  projectId: ""
 };
 
 function loadTasks() {
   try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-    return Array.isArray(saved) && saved.length ? saved : cloneTasks(DEFAULT_TASKS);
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    return Array.isArray(saved) ? saved : [];
   } catch {
-    return cloneTasks(DEFAULT_TASKS);
+    return [];
   }
 }
 
@@ -37,6 +49,11 @@ function saveTasks(tasks) {
 }
 
 function App() {
+  const [projects, setProjects] = useState(loadProjects);
+  const [currentProjectId, setCurrentProjectId] = useState(loadCurrentProjectId);
+  const [activeView, setActiveView] = useState(
+    loadCurrentProjectId() ? "detail" : "home"
+  );
   const [tasks, setTasks] = useState(loadTasks);
   const [filters, setFilters] = useState({
     search: "",
@@ -49,26 +66,23 @@ function App() {
   const [draft, setDraft] = useState(emptyTask);
   const [commentDraft, setCommentDraft] = useState("");
   const [toast, setToast] = useState("");
-  const [activeView, setActiveView] = useState("board");
+  const [detailTick, setDetailTick] = useState(0);
 
-  useEffect(() => {
-    saveTasks(tasks);
-  }, [tasks]);
+  const currentProject = useMemo(
+    () => getProject(currentProjectId),
+    [currentProjectId, projects, detailTick]
+  );
 
-  useEffect(() => {
-    if (!toast) return undefined;
-    const timer = window.setTimeout(() => setToast(""), 2200);
-    return () => window.clearTimeout(timer);
-  }, [toast]);
+  const scopePending = currentProject?.scopeStatus === "pending";
 
-  const filterOptions = useMemo(() => ({
-    products: [...new Set(tasks.map((task) => task.product).filter(Boolean))].sort(),
-    owners: [...new Set(tasks.map((task) => task.owner).filter(Boolean))].sort()
-  }), [tasks]);
+  const projectTasks = useMemo(() => {
+    if (!currentProjectId) return [];
+    return tasks.filter((task) => task.projectId === currentProjectId);
+  }, [tasks, currentProjectId]);
 
   const visibleTasks = useMemo(() => {
     const keyword = filters.search.trim().toLowerCase();
-    return tasks.filter((task) => {
+    return projectTasks.filter((task) => {
       const searchable = `${task.title} ${task.description}`.toLowerCase();
       return (!keyword || searchable.includes(keyword))
         && (!filters.priority || task.priority === filters.priority)
@@ -76,23 +90,68 @@ function App() {
         && (!filters.product || task.product === filters.product)
         && (!filters.owner || task.owner === filters.owner);
     });
-  }, [filters, tasks]);
+  }, [filters, projectTasks]);
+
+  const filterOptions = useMemo(() => ({
+    products: [...new Set(projectTasks.map((task) => task.product).filter(Boolean))].sort(),
+    owners: [...new Set(projectTasks.map((task) => task.owner).filter(Boolean))].sort()
+  }), [projectTasks]);
 
   const stats = useMemo(() => {
-    const done = tasks.filter((task) => task.status === "done").length;
+    const done = projectTasks.filter((task) => task.status === "done").length;
     return {
-      total: tasks.length,
-      doing: tasks.length - done,
+      total: projectTasks.length,
+      doing: projectTasks.length - done,
       done
     };
+  }, [projectTasks]);
+
+  useEffect(() => {
+    saveTasks(tasks);
   }, [tasks]);
+
+  useEffect(() => {
+    if (!toast) return undefined;
+    const timer = window.setTimeout(() => setToast(""), 2600);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
+  function refreshProjects() {
+    setProjects(loadProjects());
+  }
+
+  function openProject(projectId, view = "detail") {
+    setCurrentProjectId(projectId);
+    saveCurrentProjectId(projectId);
+    setActiveView(view);
+    refreshProjects();
+  }
+
+  function goHome() {
+    setCurrentProjectId("");
+    saveCurrentProjectId("");
+    setActiveView("home");
+    refreshProjects();
+  }
+
+  function handleProjectCreated(project) {
+    refreshProjects();
+    openProject(project.id, "detail");
+  }
 
   function updateFilter(name, value) {
     setFilters((current) => ({ ...current, [name]: value }));
   }
 
   function openTask(task) {
-    const nextTask = task || { ...emptyTask, id: "", comments: [] };
+    if (scopePending) return;
+    const nextTask = task || {
+      ...emptyTask,
+      id: "",
+      comments: [],
+      projectId: currentProjectId,
+      product: currentProject?.name || ""
+    };
     setEditingTask(task || null);
     setDraft(nextTask);
     setCommentDraft("");
@@ -118,7 +177,7 @@ function App() {
 
     const existing = tasks.find((task) => task.id === draft.id);
     if (existing && draft.status !== existing.status) {
-      const check = validateStatusTransition(existing, draft.status);
+      const check = validateStatusTransition(existing, draft.status, projectTasks);
       if (!check.allowed) {
         setToast(check.message);
         return;
@@ -136,8 +195,9 @@ function App() {
       id: existing?.id || nextTaskId(tasks),
       title,
       description: draft.description.trim(),
-      product: draft.product.trim() || "DeepSleep 项目看板",
+      product: draft.product.trim() || currentProject?.name || "",
       owner: draft.owner.trim() || "未分配",
+      projectId: currentProjectId,
       comments
     };
 
@@ -161,10 +221,11 @@ function App() {
   }
 
   function moveTask(taskId, nextStatus) {
+    if (scopePending) return;
     const target = tasks.find((task) => task.id === taskId);
     if (!target || target.status === nextStatus) return;
 
-    const check = validateStatusTransition(target, nextStatus);
+    const check = validateStatusTransition(target, nextStatus, projectTasks);
     if (!check.allowed) {
       setToast(check.message);
       return;
@@ -176,57 +237,141 @@ function App() {
     setToast(`${target.id} 已移动到「${columnTitle(nextStatus)}」。`);
   }
 
-  function handleGenerateScope(scopeTasks, projectName) {
-    setTasks((current) => {
-      let working = [...current];
-      const imported = scopeTasks.map((task) => {
-        const id = nextTaskId(working);
-        const next = { ...task, id };
-        working = [next, ...working];
-        return next;
-      });
-      return [...imported, ...current];
-    });
-    setFilters((current) => ({ ...current, product: projectName }));
-    setActiveView("board");
+  function handleDeleteProject(projectId, projectName) {
+    const confirmed = window.confirm(
+      `确定要删除项目「${projectName}」吗？\n\n此操作不可恢复。项目成员、Scope 与关联看板任务将一并移除。`
+    );
+    if (!confirmed) return;
+
+    deleteProject(projectId);
+    setTasks((current) => current.filter((task) => task.projectId !== projectId));
+    setCurrentProjectId("");
+    saveCurrentProjectId("");
+    setActiveView("home");
+    refreshProjects();
+    setToast(`项目「${projectName}」已删除。`);
   }
 
-  function resetData() {
-    const confirmed = window.confirm("重置后会覆盖当前浏览器里的看板数据，确定恢复样例吗？");
-    if (!confirmed) return;
-    setTasks(cloneTasks(DEFAULT_TASKS));
-    setFilters({ search: "", priority: "", platform: "", product: "", owner: "" });
-    setToast("已恢复默认样例数据。");
+  function renderMain() {
+    if (activeView === "home") {
+      return (
+        <ProjectsHomePage
+          projects={projects}
+          currentProjectId={currentProjectId}
+          onCreate={() => setActiveView("create")}
+          onOpen={(projectId) => openProject(projectId, "detail")}
+        />
+      );
+    }
+
+    if (activeView === "create") {
+      return (
+        <CreateProjectPage
+          onCreated={handleProjectCreated}
+          onCancel={() => setActiveView(currentProjectId ? "detail" : "home")}
+          onToast={setToast}
+        />
+      );
+    }
+
+    if (!currentProject) {
+      return (
+        <ProjectsHomePage
+          projects={projects}
+          currentProjectId=""
+          onCreate={() => setActiveView("create")}
+          onOpen={(projectId) => openProject(projectId, "detail")}
+        />
+      );
+    }
+
+    if (activeView === "detail") {
+      return (
+        <ProjectDetailPage
+          projectId={currentProjectId}
+          refreshToken={detailTick}
+          onOpenBoard={() => setActiveView("board")}
+          onOpenMembers={() => setActiveView("members")}
+          onBack={goHome}
+          onDelete={() => handleDeleteProject(currentProjectId, currentProject.name)}
+          onToast={setToast}
+          onProjectChange={() => setDetailTick((value) => value + 1)}
+        />
+      );
+    }
+
+    if (activeView === "members") {
+      return (
+        <ProjectMembersPage
+          projectId={currentProjectId}
+          refreshToken={detailTick}
+          onBack={goHome}
+          onToast={setToast}
+          onProjectChange={() => setDetailTick((value) => value + 1)}
+        />
+      );
+    }
+
+    if (activeView === "board") {
+      if (scopePending) {
+        return (
+          <EmptyBoardState
+            projectName={currentProject.name}
+            onGoDetail={() => setActiveView("detail")}
+          />
+        );
+      }
+
+      return (
+        <>
+          <BoardHeader
+            stats={stats}
+            filters={filters}
+            filterOptions={filterOptions}
+            onFilterChange={updateFilter}
+          />
+          <Board
+            columns={COLUMNS}
+            tasks={visibleTasks}
+            onOpenTask={openTask}
+            onMoveTask={moveTask}
+          />
+        </>
+      );
+    }
+
+    return (
+      <ProjectsHomePage
+        projects={projects}
+        currentProjectId={currentProjectId}
+        onCreate={() => setActiveView("create")}
+        onOpen={(projectId) => openProject(projectId, "detail")}
+      />
+    );
   }
 
   return (
     <div className="app">
-      <Sidebar activeView={activeView} onNavigate={setActiveView} />
-      <main className="content">
-        <Topbar activeView={activeView} onNewTask={() => openTask()} onReset={resetData} />
-        {activeView === "scope-init" ? (
-          <ScopeInitPanel onGenerate={handleGenerateScope} onToast={setToast} />
-        ) : (
-          <>
-            <BoardHeader
-              stats={stats}
-              filters={filters}
-              filterOptions={filterOptions}
-              onFilterChange={updateFilter}
-            />
-            <Board
-              columns={COLUMNS}
-              tasks={visibleTasks}
-              onOpenTask={openTask}
-              onMoveTask={moveTask}
-            />
-          </>
-        )}
+      <Sidebar
+        activeView={activeView}
+        currentProject={currentProject}
+        onNavigate={setActiveView}
+        onGoHome={goHome}
+      />
+      <main className="content content-fluid">
+        <Topbar
+          activeView={activeView}
+          project={currentProject}
+          scopePending={scopePending && activeView === "board"}
+          onNewTask={() => openTask()}
+        />
+        {renderMain()}
       </main>
       <TaskDrawer
         open={Boolean(editingTask) || draft.id === ""}
         editingTask={editingTask}
         draft={draft}
+        allTasks={projectTasks}
         commentDraft={commentDraft}
         onClose={closeDrawer}
         onChange={updateDraft}

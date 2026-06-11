@@ -1,36 +1,57 @@
-const NAV_ITEMS = [
-  { id: "board", icon: "K", label: "看板" },
-  { id: "scope-init", icon: "S", label: "Scope 初始化" },
-  { id: "requirements", icon: "L", label: "需求列表", disabled: true },
-  { id: "members", icon: "M", label: "成员", disabled: true },
-  { id: "settings", icon: "C", label: "设置", disabled: true }
-];
+export function Sidebar({
+  activeView,
+  currentProject,
+  onNavigate,
+  onGoHome
+}) {
+  const projectNav = currentProject ? [
+    { id: "detail", icon: "O", label: "项目概览" },
+    { id: "members", icon: "M", label: "成员管理" },
+    { id: "board", icon: "K", label: "看板" }
+  ] : [];
 
-export function Sidebar({ activeView, onNavigate }) {
+  const globalNav = [
+    { id: "home", icon: "P", label: "项目列表" },
+    { id: "create", icon: "+", label: "新建项目" }
+  ];
+
+  const navItems = currentProject ? projectNav : globalNav;
+
   return (
     <aside className="sidebar" aria-label="项目导航">
       <section className="project">
         <div className="project-mark">DS</div>
         <div>
-          <h1>DeepSleep 项目看板</h1>
-          <p>IT Audit / Kanban</p>
+          <h1>DeepSleep</h1>
+          <p>{currentProject ? currentProject.name : "Engagement Platform"}</p>
         </div>
       </section>
-      <nav className="nav" aria-label="看板菜单">
-        {NAV_ITEMS.map((item) => (
+
+      <nav className="nav" aria-label="主导航">
+        {navItems.map((item) => (
           <button
             key={item.id}
             className={activeView === item.id ? "active" : ""}
             type="button"
-            disabled={item.disabled}
-            onClick={() => !item.disabled && onNavigate(item.id)}
+            onClick={() => onNavigate(item.id)}
           >
             <span className="nav-icon">{item.icon}</span>
             <span>{item.label}</span>
           </button>
         ))}
       </nav>
-      <div className="sidebar-footer">黑客松协作原型，数据保存在当前浏览器。</div>
+
+      {currentProject ? (
+        <div className="sidebar-project-actions">
+          <button className="sidebar-link" type="button" onClick={onGoHome}>
+            ← 全部项目
+          </button>
+        </div>
+      ) : null}
+
+      <div className="sidebar-footer">
+        审计友好 · 轻量协作 · 数据保存在当前浏览器
+      </div>
     </aside>
   );
 }

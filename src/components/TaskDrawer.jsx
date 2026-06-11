@@ -1,8 +1,9 @@
 import { COLUMNS } from "../data/mockData";
 import { getWorkflowHint } from "../modules/scope-init/scopeRules";
+import { labelOfSystem } from "../modules/scope-init/scopeSystems";
 import { columnTitle } from "../utils/taskUtils";
 
-export function TaskDrawer({ open, editingTask, draft, commentDraft, onClose, onChange, onCommentChange, onSave, onDelete }) {
+export function TaskDrawer({ open, editingTask, draft, commentDraft, allTasks = [], onClose, onChange, onCommentChange, onSave, onDelete }) {
   return (
     <>
       <div className={`overlay ${open ? "open" : ""}`} onClick={onClose} />
@@ -15,14 +16,26 @@ export function TaskDrawer({ open, editingTask, draft, commentDraft, onClose, on
                 ? `${editingTask.id} · 当前阶段：${columnTitle(editingTask.status)}`
                 : "填写任务内容、字段和批注。"}
             </p>
-            {editingTask && getWorkflowHint(editingTask) ? (
-              <p className="drawer-hint">{getWorkflowHint(editingTask)}</p>
+            {editingTask && getWorkflowHint(editingTask, allTasks) ? (
+              <p className="drawer-hint">{getWorkflowHint(editingTask, allTasks)}</p>
             ) : null}
           </div>
           <button className="button icon" type="button" aria-label="关闭" onClick={onClose}>×</button>
         </header>
 
         <section className="drawer-body">
+          {draft.scopeMeta ? (
+            <section className="scope-meta-card" aria-label="Scope 信息">
+              <span className="label">Scope 信息</span>
+              <p>{draft.scopeMeta.projectName}</p>
+              {draft.scopeMeta.systems?.length ? (
+                <p className="scope-meta-systems">
+                  关键系统：{draft.scopeMeta.systems.map(labelOfSystem).join("、")}
+                </p>
+              ) : null}
+            </section>
+          ) : null}
+
           <form id="taskForm" className="form-grid" onSubmit={onSave}>
             <FormField label="标题" full>
               <input required maxLength="90" value={draft.title} onChange={(event) => onChange("title", event.target.value)} placeholder="例如：审计定制化的逻辑/勾稽关系" />
