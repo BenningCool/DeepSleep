@@ -2,7 +2,7 @@
 
 > **文档用途**：黑客松 DeepSleep 项目的产品需求定稿。  
 > **同步说明**：请将本文档内容复制至飞书 Wiki：[产品需求文档](https://my.feishu.cn/wiki/GDGcwzpuciqBpjkgoCdcLYO2n3c)  
-> **当前版本**：v1.3 · 2026-06-04
+> **当前版本**：v1.5 · 2026-06-11
 
 ---
 
@@ -10,10 +10,11 @@
 
 | 项目 | 内容 |
 |------|------|
-| 版本号 | v1.3 |
+| 版本号 | v1.5 |
 | 创建日期 | 2026-06-04 |
+| 最近更新 | 2026-06-11 |
 | 审核人 | 待定 |
-| 状态 | 黑客松 MVP 需求冻结稿 |
+| 状态 | 黑客松 MVP 迭代中 |
 
 ---
 
@@ -24,7 +25,9 @@
 | 2026-06-04 | v1.0 | 团队 | 初版：三大模块分工、Scope 初始化方向 |
 | 2026-06-04 | v1.1 | 团队 | 明确两步流：基本信息 → Scope 初始化 |
 | 2026-06-04 | v1.2 | 团队 | **收窄 MVP**：暂不做 Scope 自动生成；新增 New Engagement / Recurring |
-| 2026-06-04 | v1.3 | 团队 | 创建成功进入**项目详情页**；行业清单定稿；看板 Scope 未明确前为空 + 提示；去掉关键系统、审计领域、Tax/Cyber |
+| 2026-06-04 | v1.3 | 团队 | 创建成功进入**项目详情页**；行业清单定稿；看板 Scope 未明确前为空 + 提示 |
+| 2026-06-11 | v1.4 | 团队 | Audit 牵头项目支持 **Specialist 团队**（ITA/Tax/FRM）；邀请改回 **Mock**；Scope 初始化 MVP 维持现状 |
+| 2026-06-11 | v1.5 | 团队 | 新增**客户名称**；项目列表**模糊搜索**与**排序**（行业/客户/年份） |
 
 ---
 
@@ -36,17 +39,14 @@
 |--------------|------|
 | **DeepSleep** | 面向审计团队的项目管理与协作看板（黑客松原型） |
 | **ITA** | IT Audit，IT 审计团队 |
-| **Audit** | 财务报表审计团队（IT 相关部分） |
-| **ITGC** | IT General Controls，IT 一般控制 |
-| **ITAC** | IT Application Controls，IT 应用控制 |
-| **Scope** | 审计范围，包括项目边界、关键系统、控制点与任务清单 |
-| **New Engagement** | 新项目 / 首年项目 / 新客户业务 |
-| **Recurring** | 续聘项目 / 滚动项目 / 可沿用上年底稿 |
-| **Partner** | 合伙人 |
-| **Manager** | 经理 |
-| **In-charge（IC）** | 项目负责人 |
-| **Senior Manager（SM）** | 高级经理 |
-| **Staff** | 项目组成员 |
+| **Audit** | 财务报表审计团队 |
+| **Specialist 团队** | Audit 牵头项目中的专家组：ITA team、Tax team、FRM team |
+| **Specialist Lead** | 某 Specialist 团队的负责人，角色为 IC / Manager / SM 之一 |
+| **客户名称** | Client Name，被审计/服务对象名称（如「某银行股份有限公司」） |
+| **Scope** | 审计范围，包括项目边界、控制点与任务清单 |
+| **New Engagement** | 新项目 / 首年项目 |
+| **Recurring** | 续聘项目 / 滚动项目 |
+| **Partner / Manager / In-charge / SM / Staff** | 项目成员角色 |
 | **Engagement** | 审计项目（客户委托的一次审计业务） |
 
 ### 3.2 阅读对象
@@ -69,45 +69,42 @@
 |------|------|
 | 里程碑不适配 | 无法贴合财务审计 / IT 审计的阶段与里程碑 |
 | 数据模型别扭 | Issue/Epic/Story 面向软件开发，审计天然是「客户 → 控制域 → 测试点 → 底稿」 |
-| 多项目视图弱 | 切换项目、看整体进度累，缺少全局视角 |
+| 多项目视图弱 | 切换项目、看整体进度累，缺少搜索与排序 |
 | 配置复杂 | 自定义字段、工作流、权限方案学习成本高 |
-| 移动端体验差 | 现场审计移动场景支持不足 |
-| 高级功能付费 | 部分能力需额外采购 |
+| 跨组协作弱 | Audit 牵头拉 ITA/Tax/FRM 专家时，缺乏结构化协作入口 |
 
 ### 4.3 竞品：JIRA 可借鉴 vs. 我方策略
 
 | 维度 | JIRA 优势 | DeepSleep 策略 |
 |------|----------|----------------|
-| 工作流 | 复杂状态流转、转换条件 | **保留**：审计阶段预设路径，关键步骤不可跳过 |
-| 合规 | 流转条件、审批 | **保留**：阶段门禁；后期可加审批 |
-| 仪表盘 | 个人待办、到期、阻塞 | **保留**：个人工作台（模块 B） |
-| 角色 | 成熟权限模型 | **收窄 MVP**：四级角色 + 邮箱邀请；权限 mock |
-| 审计日志 | 完整变更记录 | **保留方向**：操作留痕（后期） |
-| 依赖可视化 | 阻塞与依赖图 | **增强**：ITGC/ITAC 依赖（模块 C，一套 UI） |
-| 项目初始化 | 需手工建任务 | **重建**：按团队 + 项目类型 + 行业自动生成 Scope（**后期**） |
-| 查询 | JQL | **增强方向**：自然语言筛选（后期） |
+| 工作流 | 复杂状态流转 | **保留**：关键步骤不可跳过（Scope 明确后） |
+| 多项目视图 | 过滤器、仪表盘 | **增强**：项目列表模糊搜索 + 按客户/行业/年份排序 |
+| 跨团队协作 | 弱 | **增强**：Audit + Specialist 团队分层邀请 |
+| 项目初始化 | 需手工建任务 | **后期**：Scope 自动生成（MVP 仅占位） |
+| 查询 | JQL | **后期**：自然语言筛选 |
 
 ### 4.4 产品设计策略（黑客松 MVP）
 
 **保留**
 
-1. 审计阶段预设流转路径，不允许跳过关键步骤（Scope 明确后生效）
-2. 个人工作台：「我负责的、今天到期的、被阻塞的」
+1. 审计阶段预设流转路径，关键步骤不可跳过（Scope 明确后生效）
+2. 个人工作台方向：「我负责的、今天到期的、被阻塞的」
 3. 项目角色：Partner、Manager、In-charge、Senior Manager、Staff
-4. 操作留痕方向：时间戳 + 操作人（后期）
+4. Specialist Lead 后续补充本组 Staff
 
 **收窄（MVP）**
 
-1. 不做复杂管理员配置
-2. 不做真实邮件与完整账号体系（邀请 mock）
-3. 仅支持 **ITA、Audit** 两个团队（Tax、Cyber 后期）
-4. **本期不做 Scope 自动生成**，仅录入基本信息 + 项目详情页
+1. 不做真实邮件（**Mock 邀请链接**，避免办公环境 SMTP 权限问题）
+2. 不做完整账号体系（链接 + token mock 身份）
+3. 主责团队仅 **ITA、Audit**
+4. **Scope 初始化维持现状**（占位，不自动生成任务）
+5. 不做 AI 功能
 
-**增强（后期）**
+**增强（本期 v1.5）**
 
-1. ITGC / ITAC 依赖关系可视化（一套 UI，按团队切换数据）
-2. 自然语言替代 JQL
-3. 创建项目时 AI / 规则自动完成约 80% Scope 初始化
+1. Audit 项目支持 Specialist 团队（ITA / Tax / FRM）
+2. 客户名称字段
+3. 项目列表模糊搜索与排序
 
 ---
 
@@ -117,7 +114,7 @@
 |------|------|
 | 产品名 | DeepSleep 项目看板 |
 | 目标用户 | 四大 **ITA**、**Audit** 团队审计师 |
-| 核心价值 | 审计友好的项目创建、成员协作、进度与 Scope 管理 |
+| 核心价值 | 审计友好的项目创建、跨 Specialist 协作、项目检索与 Scope 管理 |
 | 黑客松形态 | Vite + React 前端原型，数据存浏览器 `localStorage` |
 | 仓库 | https://github.com/BenningCool/DeepSleep |
 
@@ -127,58 +124,104 @@
 
 ```text
 DeepSleep
-├── 项目创建（本期 MVP）
-│   ├── 基本信息表单
-│   ├── 成员邮箱与邀请（mock）
-│   └── 创建成功 → 项目详情页
-├── 项目详情页（本期 MVP）
-│   ├── 基本信息展示
-│   ├── 成员管理
-│   ├── Scope 区（占位，待明确）
-│   └── 看板入口（Scope 未明确前：空看板 + 提示）
-├── 模块 A：Scope 初始化（后期）
-├── 模块 B：协同办公 / 个人工作台（后期）
-└── 模块 C：进度看板 / 依赖可视化（后期）
+├── 项目列表（本期）
+│   ├── 模糊搜索（项目名称、客户、行业、成员等）
+│   └── 排序（行业 / 客户 / 年份）
+├── 项目创建（本期）
+│   ├── 基本信息（含客户名称）
+│   ├── 主责团队成员
+│   ├── Audit：Specialist 团队（可选）
+│   └── Mock 邀请 → 项目详情页
+├── 项目详情 / 成员管理（本期）
+│   ├── 可编辑：项目名称、客户名称、日期、成员
+│   ├── Specialist Lead 填本组 Staff
+│   └── Scope 占位 + 删除项目
+├── 看板（Scope 未明确前为空 + 提示）
+├── Scope 初始化（MVP 维持现状，后期）
+├── 个人工作台（后期）
+└── 依赖可视化（后期）
 ```
-
-### 6.1 模块分工（开发分支）
-
-| 模块 | 分支 | 负责人 | MVP 状态 |
-|------|------|--------|----------|
-| 项目创建 + 详情页 | `feature/scope-init` | 队友 A | **本期** |
-| 协同办公 / 个人工作台 | `feature/workspace` | 队友 B | 后期 |
-| 进度看板 / 依赖可视化 | `feature/progress-board` | 队友 C | 后期 |
 
 ---
 
-## 七、功能需求 · 项目创建（本期 MVP）
+## 七、功能需求 · 项目列表（v1.5 新增）
 
-### 7.1 流程
+### 7.1 列表展示
+
+每张项目卡片展示（至少）：
+
+- 客户名称
+- 项目名称
+- 团队、Engagement 类型
+- 行业
+- 计划开始日期 / 报告日（如有）
+- Scope 状态、成员数量
+
+### 7.2 模糊搜索
+
+列表页顶部提供**搜索框**，对当前用户所有项目做**模糊匹配**。
+
+**可搜索范围（任一命中即展示）**：
+
+| 类别 | 示例 |
+|------|------|
+| 客户名称 | 「某银行」 |
+| 项目名称 | 「2026 年度」 |
+| 行业 | 「TMT」「金融」 |
+| 团队 / 类型 | 「Audit」「IPO」 |
+| 成员邮箱 | 「@kpmg.com」、某人邮箱 |
+| Specialist | 「ITA team」「Tax」 |
+| 项目 ID | 「PRJ-101」 |
+
+**规则**：
+
+- 不区分大小写
+- 多关键词可按空格拆分（可选，MVP 至少支持单串模糊匹配）
+- 无结果时展示空状态提示
+
+### 7.3 排序
+
+提供排序下拉或切换按钮：
+
+| 排序项 | 说明 |
+|--------|------|
+| **默认** | 最近创建（`createdAt` 降序） |
+| **按客户名称** | Client Name A→Z（支持中文拼音/ locale 排序或简单字符序） |
+| **按行业** | Industry 分组排序 |
+| **按年份** | 以计划开始日期的**年份**降序（新的在前） |
+
+排序与搜索**可叠加**：先搜索过滤，再对结果排序。
+
+---
+
+## 八、功能需求 · 项目创建
+
+### 8.1 流程
 
 ```text
-填写基本信息 → 确认创建项目 → Mock 成员邀请 → 进入项目详情页
+填写基本信息 + 成员 → 确认创建 → Mock 邀请 → 项目详情页
 ```
 
-- **本期无** Scope 初始化步骤
-- **本期无** 关键系统、审计领域字段
+### 8.2 基本信息字段
 
-### 7.2 基本信息字段
+| 字段 | 必填 | 类型 | 创建后是否可改 |
+|------|------|------|----------------|
+| 团队 | ✅ | ITA \| Audit | ❌ 锁定 |
+| 项目性质 | ✅ | New Engagement \| Recurring | ❌ 锁定 |
+| 项目类型 | ✅ | 5 类 | ❌ 锁定 |
+| 行业 | ✅ | 见 8.4 | ❌ 锁定 |
+| **客户名称** | ✅ | 文本 | ✅ **可改** |
+| 项目名称 | ✅ | 文本 | ✅ 可改 |
+| 计划开始日期 | ✅ | 日期 | ✅ 可改 |
+| 项目报告日 | ❌ | 日期 | ✅ 可改（选填，可后补） |
 
-| 字段 | 必填 | 类型 | 说明 |
-|------|------|------|------|
-| 团队 | ✅ | 单选 | `ITA` \| `Audit`（MVP 仅两项） |
-| 项目性质 | ✅ | 单选 | `New Engagement` \| `Recurring`（**界面英文**） |
-| 项目类型 | ✅ | 单选 | 见 7.3，与团队**无限制** |
-| 行业 | ✅ | 单选 | 见 7.4，中英混合文案 |
-| 项目名称 | ✅ | 文本 | 最长建议 60 字 |
-| 计划开始日期 | ✅ | 日期 | — |
+**客户名称说明**
 
-**项目规则**
+- 界面文案：`Client Name / 客户名称`
+- 示例：「某某银行股份有限公司」「ABC Technology Ltd.」
+- 与**项目名称**区分：客户是主体，项目名称是 engagement 描述（如「2026 年度财务报表审计」）
 
-- **一个项目 = 一个主责团队**（不跨团队协作）
-- 团队与项目类型任意组合，不做限制
-
-### 7.3 项目类型（5 类）
+### 8.3 项目类型（5 类）
 
 1. 年度财务报表审计
 2. 专项 IT 审计
@@ -186,311 +229,226 @@ DeepSleep
 4. SOC 1 / SOC 2 审计
 5. 个人信息保护合规审计
 
-### 7.4 行业清单（MVP）
+### 8.4 行业清单
 
-> 粒度：不做半导体、生物科技等过细分类。  
-> 文案：**中英混合**（符合四大风格）。
+> 粒度：MVP 不过细。文案：**中英混合**。
 
-#### 金融 Financial Services
+（行业枚举同 v1.3，共约 24 项：金融、制造、零售、TMT、医药、能源等，详见原表。）
 
-| 值 | 显示名称 |
-|----|----------|
-| finance-banking | 金融 — Banking / 银行 |
-| finance-insurance | 金融 — Insurance / 保险 |
-| finance-securities | 金融 — Securities & Asset Mgmt / 证券资管 |
-| finance-other | 金融 — Other / 其他 |
+### 8.5 主责项目成员
 
-#### 制造业 Manufacturing
+与现有一致：
 
-| 值 | 显示名称 |
-|----|----------|
-| mfg-general | 制造业 — General / 通用 |
-| mfg-automotive | 制造业 — Automotive / 汽车 |
-| mfg-chemicals | 制造业 — Chemicals / 化工 |
-| mfg-industrial | 制造业 — Industrial / 工业装备 |
+| 角色 | 必填 | 说明 |
+|------|------|------|
+| Partner | ✅ | 邮箱独立，不与 Manager/In-charge 重复 |
+| Manager | ✅ | 可与 In-charge 相同 |
+| In-charge | ✅ | 项目负责人 |
+| Senior Manager | ❌ | 选填 |
+| Staff | ❌ | 多个，无上限 |
 
-#### 零售与消费 Retail & Consumer
+### 8.6 Audit 专属：Specialist 团队（v1.4）
 
-| 值 | 显示名称 |
-|----|----------|
-| retail-general | 零售 — General / 通用 |
-| retail-fmcg | 零售 — FMCG / 快消 |
-| retail-ecommerce | 零售 — E-commerce / 电商 |
+**仅当团队 = Audit** 时展示此区块；**ITA 团队创建项目不出现**。
 
-#### TMT
+可选勾选以下 Specialist 团队（可多选）：
 
-| 值 | 显示名称 |
-|----|----------|
-| tmt-technology | TMT — Technology / 科技互联网 |
-| tmt-media | TMT — Media / 传媒 |
-| tmt-telecom | TMT — Telecom / 电信 |
+| Specialist | 说明 |
+|------------|------|
+| **ITA team** | IT 审计专家组 |
+| **Tax team** | 税务专家组 |
+| **FRM team** | 金融风险相关专家组 |
 
-#### 其他行业
+每个勾选的 Specialist 须指定：
 
-| 值 | 显示名称 |
-|----|----------|
-| healthcare-pharma | 医药健康 — Pharma / 制药 |
-| healthcare-devices | 医药健康 — MedTech / 医疗器械 |
-| healthcare-services | 医药健康 — Healthcare Services / 医疗服务 |
-| energy-oil-gas | 能源 — Oil & Gas / 石油天然气 |
-| energy-power | 能源 — Power & Utilities / 电力公用 |
-| real-estate | 房地产 — Real Estate |
-| construction | 建筑 — Construction & Engineering |
-| transport-logistics | 交通运输 — Transport & Logistics |
-| hospitality-leisure | 酒店餐饮 — Hospitality & Leisure |
-| education | 教育 — Education |
-| agriculture | 农业 — Agriculture |
-| mining | 采矿 — Mining |
-| government-public | 政府公共 — Government & Public Sector |
-| private-equity | 私募股权 — Private Equity |
-| other | 其他 — Other |
+| 字段 | 必填 | 说明 |
+|------|------|------|
+| 负责人角色 | ✅ | `In-charge` \| `Manager` \| `Senior Manager` 三选一 |
+| 负责人邮箱 | ✅ | 该专家组 Lead 邮箱 |
 
-### 7.5 项目成员（邮箱）
+**创建后流程（Mock）**
 
-| 角色 | 必填 | 填写内容 | 说明 |
-|------|------|----------|------|
-| Partner | ✅ | 邮箱 | 独立角色，**不得**与 Manager / In-charge 重复 |
-| Manager | ✅ | 邮箱 | 可与 In-charge 相同 |
-| In-charge | ✅ | 邮箱 | **项目负责人**；可与 Staff 相同 |
-| Senior Manager | ❌ | 邮箱 | 选填 |
-| Staff | ❌ | 多个邮箱 | **无人数上限**；可与 In-charge 相同 |
+1. 为 Audit 成员 + 各 Specialist Lead 生成 Mock 邀请链接  
+2. Specialist Lead 通过链接进入项目  
+3. Lead **仅可填写本组 Staff 邮箱**（Audit 管理员也可代填）  
+4. 保存后为新增 Staff 生成 Mock 邀请  
 
-**邮箱校验**
+**创建后仍可修改**：在「成员管理」中可增删 Specialist 团队、修改 Lead 角色/邮箱；取消勾选将移除该组；更换 Lead 邮箱将清空该组 Staff 并重新生成邀请链接。
 
-- 合法邮箱格式
-- Partner 邮箱全局唯一（相对 Manager、In-charge）
-- Staff 列表内不建议重复同一邮箱
-
-### 7.6 邀请机制（Mock）
-
-| 项目 | 说明 |
-|------|------|
-| 真实邮件 | **本期不做** |
-| 行为 | 创建成功后为每个成员生成邀请链接，界面展示可复制 |
-| 模板 | **固定模板，中英双语**（项目名、团队、角色、链接） |
-| 创建后 | 可新增 / 修改 / 删除成员；**删除即失去项目权限** |
-| 必填角色 | Partner、Manager、In-charge 始终各至少 1 人 |
-
-**邀请邮件模板（示例）**
+**Specialist 邀请模板补充（示例）**
 
 ```text
 【中文】
-您已被邀请加入审计项目「{项目名称}」。
-团队：{ITA/Audit} · 角色：{Partner/Manager/...}
-请点击链接加入项目：{url}
+您已被邀请作为 {ITA/Tax/FRM} team 的 {IC/Manager/SM} 加入项目「{项目名称}」。
+客户：{客户名称}
+请登录并补充本组 Staff：{url}
 
 【English】
-You have been invited to join the engagement "{Project Name}".
-Team: {ITA/Audit} · Role: {Partner/Manager/...}
-Please click the link below to join: {url}
+You have been invited as {Role} for the {Team} specialist group on "{Project Name}".
+Client: {Client Name}
+Please join and add your team staff: {url}
 ```
+
+### 8.7 邀请机制（Mock，不发真实邮件）
+
+| 项目 | 说明 |
+|------|------|
+| 真实 SMTP | **不使用**（演示环境权限不稳定） |
+| 行为 | 生成邀请链接，界面展示 + 可复制 |
+| 模板 | 固定模板，**中英双语** |
+| 成员变更 | 新增 / 修改 / 删除；删除即 revoke 权限 |
 
 ---
 
-## 八、功能需求 · 项目详情页（本期 MVP）
+## 九、功能需求 · 项目详情页
 
-### 8.1 定位
-
-- 创建项目成功后的**默认落地页**
-- 汇总展示已确认的基本信息
-- 为后续**协同办公 / 个人工作台**提供项目锚点
-- 为后续 **Scope 明确**预留区域
-
-### 8.2 页面结构
+### 9.1 概览展示
 
 | 区块 | 内容 |
 |------|------|
-| **概览** | 项目名称、团队、New Engagement / Recurring、项目类型、行业、开始日期 |
-| **成员** | 各角色邮箱、邀请状态（已发送 mock）、可复制链接 |
-| **Scope** | 占位：「项目 Scope 尚未明确，后续将在此初始化审计范围与任务清单」 |
-| **快捷入口** | 看板、工作台（可灰显）、依赖图（可灰显） |
+| 客户名称 | Client Name（可编辑） |
+| 项目名称 | 可编辑 |
+| 锁定信息 | Team、Engagement、Type、Industry |
+| 日期 | Start Date、Report Date（可编辑） |
+| Scope | 占位 Pending |
+| 成员 | 分区：Audit 成员 / 各 Specialist 团队 |
 
-### 8.3 看板入口（方案 A）
+### 9.2 可编辑 vs 锁定
 
-- Scope **未明确前**：可进入看板，展示**空看板 + 提示文案**
-- 提示示例：「请先在项目详情中明确 Scope，再开始任务管理」
-- Scope 明确后（后期）：导入任务，看板正常展示
+| 可编辑 | 锁定 |
+|--------|------|
+| 客户名称、项目名称 | 团队 |
+| Start Date、Report Date | 项目性质、项目类型、行业 |
+| 全部成员邮箱（含 Specialist） | — |
+| Specialist 团队配置 | 可增删改：勾选/取消 ITA·Tax·FRM，修改 Lead 角色与邮箱 |
 
-### 8.4 成员管理
+### 9.3 成员管理
 
-| 操作 | 行为 |
-|------|------|
-| 编辑基本信息 | 修改团队、项目性质、类型、行业等 |
-| 新增成员 | 补录邮箱 → 生成新 mock 邀请 |
-| 修改成员 | 更新邮箱 → 旧 token 失效（建议）→ 新邀请 |
-| 删除成员 | 移除 → 权限 revoke |
+- 独立「成员管理」导航入口  
+- Audit 成员与 Specialist 分区展示  
+- Specialist Lead 视图：仅编辑本组 Staff  
+- 删除项目：二次确认  
 
----
+### 9.4 看板（方案 A）
 
-## 九、功能需求 · Scope 初始化（后期，本期不做）
-
-> 本期仅在详情页保留 Scope 占位区。下列需求供下一阶段开发。
-
-### 9.1 触发时机
-
-用户在项目详情页点击「初始化 Scope」后进入。
-
-### 9.2 输入维度
-
-```text
-团队 × 项目类型 × 行业 × 开始日期
-（无关键系统、无审计领域）
-```
-
-### 9.3 输出
-
-- 自动生成约 **80%** 初始化任务清单
-- 按审计阶段分组预览
-- 确认后导入看板
-- 关键步骤阶段门禁：不可跨列跳转；前置关键任务未完成则不可推进
-
-### 9.4 任务默认规则
-
-- Owner 默认 **In-charge**
-- 任务 `product` = 项目名称
-- 标记 `scopeGenerated`、`scopeCritical`（关键步骤）
+Scope 未明确前：空看板 + 提示「请先在项目详情中明确 Scope」。
 
 ---
 
-## 十、功能需求 · 协同办公 / 个人工作台（后期）
+## 十、功能需求 · Scope 初始化
 
-| 能力 | 说明 |
-|------|------|
-| 我的任务 | 按负责人聚合 |
-| 我的项目 | 按成员邮箱关联 |
-| 工作负荷 | 任务数、P0 数、逾期数（mock 统计） |
-| 与详情页关系 | 以项目 ID 为锚点；Scope 明确后展示任务负荷 |
-
-**分支**：`feature/workspace` · 目录 `src/modules/workspace/`
+> **MVP 维持现状**：详情页 Scope 区仅占位文案，不触发任务生成。  
+> 后期再按 `团队 × 项目类型 × 行业` 做约 80% 自动初始化。
 
 ---
 
-## 十一、功能需求 · 进度看板 / 依赖可视化（后期）
-
-| 能力 | 说明 |
-|------|------|
-| 看板增强 | 在通用 Kanban 上增强筛选与阶段统计 |
-| 依赖可视化 | **一套 UI 组件**，按项目 `team` 加载不同 mock 数据 |
-| ITA 数据 | 偏系统 / 控制域依赖 |
-| Audit 数据 | 偏业务流程 / 认定依赖 |
-
-**不做**：每个团队独立一套页面。
-
-**分支**：`feature/progress-board` · 目录 `src/modules/progress-board/`
-
----
-
-## 十二、看板列（全局共用）
-
-| 列 ID | 显示名称 |
-|-------|----------|
-| todo | 待办 |
-| grooming | 需求梳理 |
-| design | 设计中 |
-| development | 开发中 |
-| review | 测试/复核 |
-| done | 已完成 |
-
-ITA、Audit 共用同一套列名（黑客松 MVP）。
-
----
-
-## 十三、非功能需求
-
-| 项目 | 要求 |
-|------|------|
-| 技术栈 | Vite + React + CSS |
-| 数据持久化 | 浏览器 `localStorage`（演示级） |
-| 构建 | `npm run build` 须通过 |
-| 协作 | 功能分支 + Pull Request，不直接改 `main` |
-| 语言 | 界面中英混合（行业、角色、项目性质等） |
-
----
-
-## 十四、MVP 范围总览
-
-### 14.1 本期交付
-
-- [ ] 项目创建表单（团队、New Engagement/Recurring、项目类型、行业、成员邮箱）
-- [ ] 校验规则（必填、Partner 邮箱独立、邮箱格式）
-- [ ] 确认创建 → 保存项目 → mock 邀请列表
-- [ ] 项目详情页（概览 + 成员 + Scope 占位）
-- [ ] 看板：Scope 未明确时空状态 + 提示
-- [ ] 成员增删改 + 删除 revoke
-
-### 14.2 本期不做
-
-- [ ] Scope 自动生成与导入
-- [ ] 关键系统、审计领域
-- [ ] Tax、Cyber 团队
-- [ ] 真实邮件服务
-- [ ] 完整登录与权限系统
-- [ ] 跨团队协作
-- [ ] 依赖可视化（模块 C 完整版）
-- [ ] 个人工作台完整版（模块 B）
-
----
-
-## 十五、数据模型（概念）
+## 十一、数据模型（概念 · v1.5）
 
 ```text
 Project
 ├── id
-├── name
+├── clientName              # 客户名称（新增）
+├── name                    # 项目名称
 ├── team                    # ITA | Audit
-├── engagementType          # new | recurring
-├── projectType             # 5 类枚举
-├── industry                # 行业 ID
+├── engagementType
+├── projectType
+├── industry
 ├── startDate
-├── members[]
-│   ├── email
-│   ├── role                # partner | manager | in_charge | sm | staff
+├── reportDate              # 选填
+├── scopeStatus             # pending | defined
+├── members[]               # 主责团队成员
+│   ├── email, role, inviteToken, status
+├── specialistTeams[]       # 仅 Audit 项目（新增）
+│   ├── team                # ita | tax | frm
+│   ├── leadRole            # in_charge | manager | sm
+│   ├── leadEmail
 │   ├── inviteToken
-│   ├── status              # active | revoked
-│   └── invitedAt
-├── scopeStatus             # pending | defined（本期恒为 pending）
-└── tasks[]                 # Scope 明确后才有（本期为空）
+│   ├── status              # pending_staff | active
+│   └── staff[]
+│       ├── email, inviteToken, status
+├── createdAt
+└── tasks[]                 # Scope 明确后
 ```
 
 ---
 
-## 十六、决策记录（已冻结）
+## 十二、MVP 交付清单（v1.5 更新）
 
-| # | 决策 |
-|---|------|
-| 1 | 一项目一团队（ITA / Audit） |
-| 2 | 团队与项目类型无限制 |
-| 3 | 项目性质 UI 英文：New Engagement / Recurring |
-| 4 | 行业 ~24 项，中英混合，MVP 不过细 |
-| 5 | 成员邮箱制；Partner 不与 Manager/In-charge 重复 |
-| 6 | Manager↔In-charge、In-charge↔Staff 可重复 |
-| 7 | Staff 无上限；邀请 mock，中英模板 |
-| 8 | 创建成功 → 项目详情页（非直接空看板） |
-| 9 | Scope 未明确前看板为空 + 提示（方案 A） |
-| 10 | Scope 初始化、关键系统、审计领域 — 本期不做 |
-| 11 | 依赖可视化后期：一套 UI + 按团队换数据 |
-| 12 | Tax、Cyber — 本期不做 |
+### 12.1 已完成（v1.3 代码）
+
+- [x] 项目创建表单（团队、Engagement、类型、行业、成员）
+- [x] 项目详情页 + 成员管理
+- [x] Mock 邀请（曾接 SMTP，**v1.5 改回纯 Mock**）
+- [x] Scope 占位 + 空看板提示
+- [x] 删除项目（二次确认）
+
+### 12.2 待开发（v1.5）
+
+- [ ] **客户名称**字段（创建 + 详情可编辑 + 列表展示）
+- [ ] **项目列表模糊搜索**
+- [ ] **项目列表排序**（客户 / 行业 / 年份 / 默认）
+- [ ] **Audit Specialist 团队**（ITA/Tax/FRM + Lead + Staff 流程）
+- [ ] **移除/降级真实邮件依赖**（演示路径不依赖 SMTP）
+- [ ] Specialist Lead 专属填 Staff 页面或视图
+
+### 12.3 本期仍不做
+
+- Scope 自动生成、AI 功能、真实邮件、Tax/Cyber 主责团队、关键系统、审计领域
 
 ---
 
-## 十七、附录
+## 十三、决策记录（已冻结 · 至 v1.5）
 
-### A. 相关文档
+| # | 决策 |
+|---|------|
+| 1 | 一项目一主责团队（ITA / Audit） |
+| 2 | 新增**客户名称**，必填，创建后可改 |
+| 3 | 项目列表支持**全字段模糊搜索** + **按客户/行业/年份排序** |
+| 4 | Audit 项目可添加 Specialist：ITA / Tax / FRM |
+| 5 | Specialist Lead 角色：IC / Manager / SM；Lead 后续填本组 Staff |
+| 6 | ITA 创建项目**无** Specialist 区块 |
+| 7 | 邀请统一 **Mock**，不发真实邮件 |
+| 8 | Scope 初始化 MVP **维持现状**（占位） |
+| 9 | 可改字段：客户名、项目名、Start/Report Date、成员；其余锁定 |
+| 10 | Partner 邮箱不与 Manager/In-charge 重复 |
+| 11 | Scope 未明确前看板为空 + 提示 |
+| 12 | 依赖可视化后期：一套 UI + 按团队换数据 |
 
-- 协作教程：`docs/github-collaboration-guide.md`
-- 模块认领：`docs/module-ownership-guide.md`
-- GitHub：https://github.com/BenningCool/DeepSleep
+---
+
+## 十四、附录
+
+### A. 项目列表示意图（概念）
+
+```
+┌─ 项目列表 ─────────────────────────────────────────────┐
+│  [ 🔍 搜索客户、项目、行业、成员…          ]              │
+│  排序：[ 最近创建 ▼ ]  （客户 / 行业 / 年份）            │
+├────────────────────────────────────────────────────────┤
+│  ┌──────────────────────────────────────────────────┐  │
+│  │ 某银行股份有限公司          Audit · New Engagement │  │
+│  │ 2026 年度财务报表审计                              │  │
+│  │ 金融 — Banking · 2026 · Scope Pending · 8 members │  │
+│  └──────────────────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────┘
+```
 
 ### B. 界面文案速查
 
 | 场景 | 文案 |
 |------|------|
-| 创建按钮 | 确认创建项目 |
-| 项目性质 | New Engagement / Recurring |
-| Scope 占位 | 项目 Scope 尚未明确。后续将在此初始化审计范围与任务清单。 |
-| 空看板提示 | 请先在项目详情中明确 Scope，再开始任务管理。 |
-| 邀请成功 | 已生成邀请链接（演示模式，未发送真实邮件） |
+| 客户名称 | Client Name / 客户名称 |
+| 搜索占位 | 搜索客户、项目、行业或成员… |
+| 邀请成功 | 已生成邀请链接（演示模式，未发送邮件） |
+| Specialist | Specialist Teams / 专家组 |
+| Scope 占位 | 项目 Scope 尚未明确 |
+
+### C. 相关文档
+
+- 协作教程：`docs/github-collaboration-guide.md`
+- 模块认领：`docs/module-ownership-guide.md`
+- GitHub：https://github.com/BenningCool/DeepSleep
 
 ---
 
-*文档结束 · DeepSleep PRD v1.3*
+*文档结束 · DeepSleep PRD v1.5*

@@ -7,6 +7,10 @@ import {
   labelOfTeam
 } from "../../data/projectConstants";
 import {
+  labelOfSpecialistLeadRole,
+  labelOfSpecialistTeam
+} from "./specialistConstants";
+import {
   getProject,
   updateEditableProject
 } from "./projectStore";
@@ -34,12 +38,18 @@ export function ProjectDetailPage({
 }) {
   const project = useMemo(() => getProject(projectId), [projectId, refreshToken]);
 
-  const [basics, setBasics] = useState({ name: "", startDate: "", reportDate: "" });
+  const [basics, setBasics] = useState({
+    clientName: "",
+    name: "",
+    startDate: "",
+    reportDate: ""
+  });
   const [savingBasics, setSavingBasics] = useState(false);
 
   useEffect(() => {
     if (!project) return;
     setBasics({
+      clientName: project.clientName || "",
       name: project.name,
       startDate: project.startDate,
       reportDate: project.reportDate || ""
@@ -58,6 +68,7 @@ export function ProjectDetailPage({
   }
 
   const activeMembers = project.members.filter((member) => member.status === "active");
+  const specialistTeams = project.specialistTeams || [];
 
   function refresh() {
     onProjectChange(getProject(projectId));
@@ -67,7 +78,7 @@ export function ProjectDetailPage({
     setBasics((current) => ({ ...current, [name]: value }));
   }
 
-  async function handleSaveBasics() {
+  function handleSaveBasics() {
     const check = validateEditableProject(basics);
     if (!check.ok) {
       onToast(check.message);
@@ -90,7 +101,9 @@ export function ProjectDetailPage({
         <div>
           <p className="page-eyebrow">{labelOfTeam(project.team)} · {labelOfEngagement(project.engagementType)}</p>
           <h2>{project.name}</h2>
-          <p className="page-lead">{labelOfProjectType(project.projectType)}</p>
+          <p className="page-lead">
+            {project.clientName || "未填写客户"} · {labelOfProjectType(project.projectType)}
+          </p>
         </div>
         <div className="header-actions">
           <button className="button" type="button" onClick={onBack}>项目列表</button>
@@ -114,6 +127,14 @@ export function ProjectDetailPage({
           </div>
 
           <div className="editable-grid">
+            <label className="field">
+              <span className="label">客户名称 Client Name *</span>
+              <input
+                value={basics.clientName}
+                onChange={(e) => updateBasicField("clientName", e.target.value)}
+              />
+            </label>
+
             <label className="field">
               <span className="label">项目名称 Project Name *</span>
               <input
@@ -171,7 +192,7 @@ export function ProjectDetailPage({
           <div className="panel-toolbar">
             <div>
               <h3>项目成员</h3>
-              <p className="panel-note">共 {activeMembers.length} 位活跃成员</p>
+              <p className="panel-note">共 {activeMembers.length} 位核心成员</p>
             </div>
             <button className="button primary" type="button" onClick={onOpenMembers}>
               编辑成员
@@ -187,6 +208,37 @@ export function ProjectDetailPage({
             ))}
           </ul>
         </section>
+
+        {specialistTeams.length ? (
+          <section className="detail-panel full members-summary">
+            <div className="panel-toolbar">
+              <div>
+                <h3>Specialist 团队</h3>
+                <p className="panel-note">Audit 跨组协作 · 共 {specialistTeams.length} 个专家组（可在成员管理中增删改）</p>
+              </div>
+              <button className="button" type="button" onClick={onOpenMembers}>
+                管理 Specialist
+              </button>
+            </div>
+
+            <ul className="member-summary-list">
+              {specialistTeams.map((team) => (
+                <li key={team.id} className="member-summary-item specialist-summary-item">
+                  <span className="role-pill">{labelOfSpecialistTeam(team.team)}</span>
+                  <div>
+                    <strong>{team.leadEmail}</strong>
+                    <span className="member-subline">
+                      {labelOfSpecialistLeadRole(team.leadRole)} ·
+                      {" "}
+                      {(team.staff || []).filter((member) => member.status === "active").length} staff
+                    </span>
+                  </div>
+                  <span className={`status-pill ${team.status}`}>{team.status}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         <section className="detail-panel full danger-panel">
           <h3>删除项目</h3>

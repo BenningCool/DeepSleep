@@ -1,9 +1,12 @@
+import { useMemo, useState } from "react";
 import {
   labelOfEngagement,
   labelOfIndustry,
   labelOfProjectType,
   labelOfTeam
 } from "../../data/projectConstants";
+import { countActiveMembers, filterProjects, sortProjects } from "./projectSearch";
+import { PROJECT_SORT_OPTIONS } from "./specialistConstants";
 
 function ProjectCard({ project, active, onOpen }) {
   return (
@@ -16,6 +19,7 @@ function ProjectCard({ project, active, onOpen }) {
         <span className="team-pill">{labelOfTeam(project.team)}</span>
         <span className="engagement-pill">{labelOfEngagement(project.engagementType)}</span>
       </div>
+      <p className="project-card-client">{project.clientName || "未填写客户"}</p>
       <h3>{project.name}</h3>
       <p>{labelOfProjectType(project.projectType)}</p>
       <div className="project-card-meta">
@@ -29,13 +33,21 @@ function ProjectCard({ project, active, onOpen }) {
         <span className={`scope-badge ${project.scopeStatus}`}>
           Scope {project.scopeStatus === "pending" ? "Pending" : "Defined"}
         </span>
-        <span>{project.members.filter((m) => m.status === "active").length} members</span>
+        <span>{countActiveMembers(project)} members</span>
       </div>
     </button>
   );
 }
 
 export function ProjectsHomePage({ projects, currentProjectId, onCreate, onOpen }) {
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("recent");
+
+  const visibleProjects = useMemo(() => {
+    const filtered = filterProjects(projects, search);
+    return sortProjects(filtered, sortBy);
+  }, [projects, search, sortBy]);
+
   return (
     <section className="page-shell">
       <header className="page-header">
@@ -43,27 +55,56 @@ export function ProjectsHomePage({ projects, currentProjectId, onCreate, onOpen 
           <p className="page-eyebrow">Engagement Portfolio</p>
           <h2>项目列表</h2>
           <p className="page-lead">
-            审计友好的项目入口：比 JIRA 更轻量，聚焦项目基本信息、成员邀请与后续 Scope 协同。
+            像 JIRA 一样快速检索多项目，但更轻量：聚焦客户、行业、成员与后续 Scope 协同。
           </p>
         </div>
         <button className="button primary" type="button" onClick={onCreate}>新建项目</button>
       </header>
 
       {projects.length ? (
-        <div className="project-grid">
-          {projects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              active={project.id === currentProjectId}
-              onOpen={onOpen}
-            />
-          ))}
-        </div>
+        <>
+          <div className="list-toolbar">
+            <label className="search-field">
+              <span className="label">搜索项目</span>
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="客户、项目名、行业、成员邮箱、Specialist..."
+              />
+            </label>
+            <label className="sort-field">
+              <span className="label">排序</span>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                {PROJECT_SORT_OPTIONS.map((option) => (
+                  <option key={option.id} value={option.id}>{option.label}</option>
+                ))}
+              </select>
+            </label>
+            <span className="list-count">{visibleProjects.length} / {projects.length} 个项目</span>
+          </div>
+
+          {visibleProjects.length ? (
+            <div className="project-grid">
+              {visibleProjects.map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  active={project.id === currentProjectId}
+                  onOpen={onOpen}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state large">
+              <h3>没有匹配的项目</h3>
+              <p>试试其他关键词，或清空搜索框查看全部项目。</p>
+            </div>
+          )}
+        </>
       ) : (
         <div className="empty-state large">
           <h3>还没有项目</h3>
-          <p>创建第一个审计项目，填写基本信息并邀请 Partner / Manager / In-charge。</p>
+          <p>创建第一个审计项目，填写客户名称、基本信息并邀请 Partner / Manager / In-charge。</p>
           <button className="button primary" type="button" onClick={onCreate}>创建项目</button>
         </div>
       )}

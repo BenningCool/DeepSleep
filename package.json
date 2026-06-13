@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"vite\" \"node server/index.js\"",
+    "dev": "vite",
     "dev:web": "vite",
     "dev:mail": "node server/index.js",
     "build": "vite build",

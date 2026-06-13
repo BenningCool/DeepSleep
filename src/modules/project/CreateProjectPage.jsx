@@ -5,11 +5,17 @@ import {
   PROJECT_TYPES,
   TEAMS
 } from "../../data/projectConstants";
-import { sendProjectInvites } from "./emailService";
+import { notifyMockInvites } from "./inviteService";
 import { createProject } from "./projectStore";
 import { validateProjectForm } from "./projectValidation";
+import {
+  defaultSpecialistForm,
+  SPECIALIST_LEAD_ROLES,
+  SPECIALIST_TEAMS
+} from "./specialistConstants";
 
 const defaultForm = {
+  clientName: "",
   name: "",
   team: "ita",
   engagementType: "new",
@@ -21,7 +27,8 @@ const defaultForm = {
   managerEmail: "",
   inChargeEmail: "",
   smEmail: "",
-  staffEmails: [""]
+  staffEmails: [""],
+  specialists: defaultSpecialistForm()
 };
 
 export function CreateProjectPage({ onCreated, onCancel, onToast }) {
@@ -54,7 +61,17 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
     }));
   }
 
-  async function handleSubmit(event) {
+  function updateSpecialist(teamId, patch) {
+    setForm((current) => ({
+      ...current,
+      specialists: {
+        ...current.specialists,
+        [teamId]: { ...current.specialists[teamId], ...patch }
+      }
+    }));
+  }
+
+  function handleSubmit(event) {
     event.preventDefault();
     const check = validateProjectForm(form);
     if (!check.ok) {
@@ -67,19 +84,14 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
       const project = createProject(form);
       onCreated(project);
 
-      const mailResult = await sendProjectInvites(project, project.members);
-      if (mailResult.ok) {
-        onToast(`项目已创建，已向 ${mailResult.sent} 位成员发送邀请邮件。`);
-      } else {
-        onToast(
-          mailResult.message
-          || `项目已创建，但 ${mailResult.failed || 0} 封邮件发送失败，请检查 SMTP 配置。`
-        );
-      }
+      const inviteCount = project.members.length + (project.specialistTeams?.length || 0);
+      notifyMockInvites(onToast, inviteCount);
     } finally {
       setSubmitting(false);
     }
   }
+
+  const showSpecialists = form.team === "audit";
 
   return (
     <section className="page-shell">
@@ -88,7 +100,7 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
           <p className="page-eyebrow">New Engagement Setup</p>
           <h2>创建审计项目</h2>
           <p className="page-lead">
-            填写项目基本信息与成员邮箱。创建后将发送真实邀请邮件，并进入项目详情页。
+            填写项目基本信息与成员邮箱。创建后生成邀请链接（演示模式），并进入项目详情页。
           </p>
         </div>
         <button className="button" type="button" onClick={onCancel}>返回项目列表</button>
@@ -150,6 +162,17 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
             </label>
 
             <label className="field full">
+              <span className="label">客户名称 Client Name *</span>
+              <input
+                required
+                maxLength="80"
+                value={form.clientName}
+                onChange={(e) => updateField("clientName", e.target.value)}
+                placeholder="例如：某银行股份有限公司"
+              />
+            </label>
+
+            <label className="field full">
               <span className="label">项目名称 Project Name *</span>
               <input
                 required
@@ -184,7 +207,7 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
         <div className="form-panel">
           <h3>项目成员 Members</h3>
           <p className="panel-note">
-            Partner 邮箱不可与 Manager / In-charge 重复。创建后将向所有成员发送邀请邮件。
+            Partner 邮箱不可与 Manager / In-charge 重复。创建后将生成邀请链接供复制分享。
           </p>
 
           <div className="form-grid two-col">
@@ -259,10 +282,65 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
           </div>
         </div>
 
+        {showSpecialists ? (
+          <div className="form-panel">
+            <h3>Specialist 团队</h3>
+            <p className="panel-note">
+              Audit 项目可邀请 ITA / Tax / FRM 专家组。Lead 收到链接后补充本组 Staff。
+            </p>
+
+            <div className="specialist-grid">
+              {SPECIALIST_TEAMS.map((item) => {
+                const entry = form.specialists[item.id];
+                return (
+                  <article className={`specialist-card ${entry.enabled ? "active" : ""}`} key={item.id}>
+                    <label className="specialist-toggle">
+                      <input
+                        type="checkbox"
+                        checked={entry.enabled}
+                        onChange={(e) => updateSpecialist(item.id, { enabled: e.target.checked })}
+                      />
+                      <div>
+                        <strong>{item.label}</strong>
+                        <span>{item.hint}</span>
+                      </div>
+                    </label>
+
+                    {entry.enabled ? (
+                      <div className="specialist-fields">
+                        <label className="field">
+                          <span className="label">Lead 角色 *</span>
+                          <select
+                            value={entry.leadRole}
+                            onChange={(e) => updateSpecialist(item.id, { leadRole: e.target.value })}
+                          >
+                            {SPECIALIST_LEAD_ROLES.map((role) => (
+                              <option key={role.id} value={role.id}>{role.label}</option>
+                            ))}
+                          </select>
+                        </label>
+                        <label className="field">
+                          <span className="label">Lead 邮箱 *</span>
+                          <input
+                            type="email"
+                            value={entry.leadEmail}
+                            onChange={(e) => updateSpecialist(item.id, { leadEmail: e.target.value })}
+                            placeholder={`${item.id}@firm.com`}
+                          />
+                        </label>
+                      </div>
+                    ) : null}
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
+
         <div className="form-actions">
           <button className="button" type="button" onClick={onCancel} disabled={submitting}>取消</button>
           <button className="button primary" type="submit" disabled={submitting}>
-            {submitting ? "创建并发送邀请..." : "确认创建项目"}
+            {submitting ? "创建中..." : "确认创建项目"}
           </button>
         </div>
       </form>

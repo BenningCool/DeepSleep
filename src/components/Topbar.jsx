@@ -5,7 +5,8 @@ const VIEW_LABELS = {
   create: "新建项目",
   detail: "项目概览",
   members: "成员管理",
-  board: "看板"
+  board: "看板",
+  "specialist-staff": "Specialist Staff"
 };
 
 export function Topbar({
@@ -23,7 +24,13 @@ export function Topbar({
         {project ? (
           <>
             <span>/</span>
-            <strong>{project.name}</strong>
+            <strong>{project.clientName || project.name}</strong>
+            {project.clientName ? (
+              <>
+                <span>/</span>
+                <span>{project.name}</span>
+              </>
+            ) : null}
           </>
         ) : null}
         <span>/</span>

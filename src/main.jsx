@@ -12,8 +12,10 @@ import { CreateProjectPage } from "./modules/project/CreateProjectPage";
 import { ProjectDetailPage } from "./modules/project/ProjectDetailPage";
 import { ProjectMembersPage } from "./modules/project/ProjectMembersPage";
 import { ProjectsHomePage } from "./modules/project/ProjectsHomePage";
+import { SpecialistStaffPage } from "./modules/project/SpecialistStaffPage";
 import {
   deleteProject,
+  findInviteContext,
   getProject,
   loadCurrentProjectId,
   loadProjects,
@@ -67,6 +69,7 @@ function App() {
   const [commentDraft, setCommentDraft] = useState("");
   const [toast, setToast] = useState("");
   const [detailTick, setDetailTick] = useState(0);
+  const [specialistTeamId, setSpecialistTeamId] = useState("");
 
   const currentProject = useMemo(
     () => getProject(currentProjectId),
@@ -115,6 +118,32 @@ function App() {
     const timer = window.setTimeout(() => setToast(""), 2600);
     return () => window.clearTimeout(timer);
   }, [toast]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const projectId = params.get("project");
+    const inviteToken = params.get("invite");
+    if (!projectId || !inviteToken) return;
+
+    const context = findInviteContext(projectId, inviteToken);
+    if (!context) return;
+
+    setCurrentProjectId(projectId);
+    saveCurrentProjectId(projectId);
+    setProjects(loadProjects());
+
+    if (context.type === "specialist_lead") {
+      setSpecialistTeamId(context.specialistTeam.id);
+      setActiveView("specialist-staff");
+      setToast(`欢迎，请补充 ${context.specialistTeam.team.toUpperCase()} 组 Staff。`);
+    } else {
+      setActiveView("detail");
+      setToast("已通过邀请链接打开项目。");
+    }
+
+    const cleanUrl = `${window.location.origin}${window.location.pathname}`;
+    window.history.replaceState({}, "", cleanUrl);
+  }, []);
 
   function refreshProjects() {
     setProjects(loadProjects());
@@ -306,6 +335,19 @@ function App() {
           projectId={currentProjectId}
           refreshToken={detailTick}
           onBack={goHome}
+          onToast={setToast}
+          onProjectChange={() => setDetailTick((value) => value + 1)}
+        />
+      );
+    }
+
+    if (activeView === "specialist-staff" && specialistTeamId) {
+      return (
+        <SpecialistStaffPage
+          projectId={currentProjectId}
+          specialistTeamId={specialistTeamId}
+          refreshToken={detailTick}
+          onDone={() => setActiveView("detail")}
           onToast={setToast}
           onProjectChange={() => setDetailTick((value) => value + 1)}
         />
