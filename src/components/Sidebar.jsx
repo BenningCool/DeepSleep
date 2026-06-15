@@ -7,6 +7,7 @@ export function Sidebar({
   const projectNav = currentProject ? [
     { id: "detail", icon: "O", label: "项目概览" },
     { id: "members", icon: "M", label: "成员管理" },
+    { id: "workspace", icon: "W", label: "工作台" },
     { id: "board", icon: "K", label: "看板" }
   ] : [];
 

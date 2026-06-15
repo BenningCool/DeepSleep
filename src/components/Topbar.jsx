@@ -5,6 +5,7 @@ const VIEW_LABELS = {
   create: "新建项目",
   detail: "项目概览",
   members: "成员管理",
+  workspace: "工作台",
   board: "看板",
   "specialist-staff": "Specialist Staff"
 };

@@ -13,6 +13,7 @@ import { ProjectDetailPage } from "./modules/project/ProjectDetailPage";
 import { ProjectMembersPage } from "./modules/project/ProjectMembersPage";
 import { ProjectsHomePage } from "./modules/project/ProjectsHomePage";
 import { SpecialistStaffPage } from "./modules/project/SpecialistStaffPage";
+import { WorkspacePage } from "./modules/workspace/WorkspacePage";
 import {
   deleteProject,
   findInviteContext,
@@ -64,6 +65,7 @@ function App() {
     product: "",
     owner: ""
   });
+  const [taskDrawerOpen, setTaskDrawerOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [draft, setDraft] = useState(emptyTask);
   const [commentDraft, setCommentDraft] = useState("");
@@ -184,9 +186,11 @@ function App() {
     setEditingTask(task || null);
     setDraft(nextTask);
     setCommentDraft("");
+    setTaskDrawerOpen(true);
   }
 
   function closeDrawer() {
+    setTaskDrawerOpen(false);
     setEditingTask(null);
     setDraft(emptyTask);
     setCommentDraft("");
@@ -341,6 +345,16 @@ function App() {
       );
     }
 
+    if (activeView === "workspace") {
+      return (
+        <WorkspacePage
+          project={currentProject}
+          tasks={projectTasks}
+          onToast={setToast}
+        />
+      );
+    }
+
     if (activeView === "specialist-staff" && specialistTeamId) {
       return (
         <SpecialistStaffPage
@@ -410,7 +424,7 @@ function App() {
         {renderMain()}
       </main>
       <TaskDrawer
-        open={Boolean(editingTask) || draft.id === ""}
+        open={taskDrawerOpen}
         editingTask={editingTask}
         draft={draft}
         allTasks={projectTasks}
@@ -428,4 +442,7 @@ function App() {
   );
 }
 
-createRoot(document.getElementById("root")).render(<App />);
+const rootElement = document.getElementById("root");
+const root = rootElement._deepsleepRoot || createRoot(rootElement);
+rootElement._deepsleepRoot = root;
+root.render(<App />);
