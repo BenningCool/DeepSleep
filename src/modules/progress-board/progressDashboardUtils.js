@@ -31,6 +31,55 @@ export function computeWorkspaceStatusBreakdown(controls = []) {
   return breakdown;
 }
 
+/** 占当前筛选控制点总数的百分比（整数，无分母时返回 —） */
+export function formatSharePercent(count, total) {
+  if (!total || total <= 0) return "—";
+  const numeric = typeof count === "number" ? count : 0;
+  return `${Math.round((numeric / total) * 100)}%`;
+}
+
+/** 按控制点类型筛选（ALL / GITC / ITAC） */
+export const CONTROL_TYPE_FILTER_TABS = [
+  { id: "ALL", label: "全部" },
+  { id: "GITC", label: "GITC" },
+  { id: "ITAC", label: "ITAC" }
+];
+
+export function filterControlsByControlType(controls = [], typeFilter = "ALL") {
+  if (!typeFilter || typeFilter === "ALL") return controls;
+  return controls.filter((control) => control.controlType === typeFilter);
+}
+
+export function countControlsByType(controls = []) {
+  return {
+    ALL: controls.length,
+    GITC: controls.filter((control) => control.controlType === "GITC").length,
+    ITAC: controls.filter((control) => control.controlType === "ITAC").length
+  };
+}
+
+/** 各控制点节点完成度（completedNodes / totalNodes） */
+export function computeControlNodeProgressRows(controls = []) {
+  return controls
+    .map((control) => {
+      const completedNodes = control.completedNodes || 0;
+      const totalNodes = control.totalNodes || 0;
+      return {
+        id: control.id,
+        title: control.title || control.id,
+        controlType: control.controlType || "TASK",
+        owner: control.owner || "",
+        completedNodes,
+        totalNodes,
+        percent: totalNodes ? Math.round((completedNodes / totalNodes) * 100) : 0
+      };
+    })
+    .sort((left, right) => {
+      if (left.percent !== right.percent) return left.percent - right.percent;
+      return left.title.localeCompare(right.title, "zh-CN");
+    });
+}
+
 export function buildDonutStyle(breakdown) {
   const total = breakdown.total || 0;
   if (!total) {
@@ -104,29 +153,6 @@ export function computeDashboardKpis(controls = [], taskMap = {}) {
     blocked,
     dueRisk: overdue + dueSoon
   };
-}
-
-export function computeControlTypeDistribution(controls = []) {
-  const buckets = new Map();
-
-  controls.forEach((control) => {
-    const type = control.controlType || "TASK";
-    if (!buckets.has(type)) {
-      buckets.set(type, { id: type, total: 0, completed: 0 });
-    }
-    const entry = buckets.get(type);
-    entry.total += 1;
-    if (control.workspaceStatus === PROGRESS_STATUS.COMPLETED) {
-      entry.completed += 1;
-    }
-  });
-
-  return [...buckets.values()]
-    .map((entry) => ({
-      ...entry,
-      percent: entry.total ? Math.round((entry.completed / entry.total) * 100) : 0
-    }))
-    .sort((a, b) => b.total - a.total);
 }
 
 export function computeAttentionBuckets(controls = [], taskMap = {}, projectStartDate = "") {

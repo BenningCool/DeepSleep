@@ -53,6 +53,11 @@ const snapshot = getControlProgressSnapshot(projectId, projectTasks);
         tod: { completedNodes: 4, totalNodes: 6 },
         toe: { completedNodes: 2, totalNodes: 6 }
       },
+      currentNodeId: "gitc-tod-design",
+      currentNodeLabel: "上传制度",
+      currentNodePhaseId: "tod",
+      currentNodePhaseLabel: "TOD",
+      allNodesComplete: false,
       evidenceStatus: "partial_uploaded",
       evidenceCount: 0,
       meetingMinutesCount: 1,
@@ -92,13 +97,17 @@ const snapshot = getControlProgressSnapshot(projectId, projectTasks);
 | `progressPercent` | 由节点完成度计算，等于 `completedNodes / totalNodes` |
 | `completedNodes` / `totalNodes` | 当前测试点总完成节点数，适合显示 `6/12`；不要写死分母 |
 | `phaseProgress` | 分阶段完成度，按返回 key 动态显示；GITC 通常有 `tod` / `toe`，ITAC 只有 `tod` |
+| `currentNodeId` | 当前所处工作台节点 id（首个未完成 required 节点；全部完成时为最后一个节点） |
+| `currentNodeLabel` | 当前节点中文名；进度看板列表/抽屉「当前 · xxx」 |
+| `currentNodePhaseId` / `currentNodePhaseLabel` | 当前节点所属阶段 |
+| `allNodesComplete` | 全部 required 节点是否已完成 |
 | `evidenceCount` / `meetingMinutesCount` / `sppCount` | 旧材料类别数量，继续兼容 |
 | `policyCount` / `supportingMaterialCount` | GITC TOD 使用：制度、支持性材料数量 |
 | `requirementListCount` / `samplePoolCount` / `returnedSampleSupportCount` | GITC TOE 使用：需求清单、样本池、客户返回样本支持材料数量 |
 | `reviewStatus` | 复核状态，可用于 sign-off 标识 |
 | `milestones` / `milestoneActors` | 旧版兼容字段。Planning / Review 节点已移除，模块 3 不应展示或依赖 |
-| `nodeDueDates` | 节点预计完成日期 map，key 为节点 id，value 为 `YYYY-MM-DD`；模块 3 可用于逾期提醒 |
-| `fieldReviewSummary` | 字段级复核意见数量汇总，按 `open`、`replied`、`accepted` 统计 |
+| `nodeDueDates` | 节点预计完成日期 map，key 为节点 id，value 为 `YYYY-MM-DD`；抽屉优先读 `detail.phases[].nodes[].dueDate`，回退此 map |
+| `fieldReviewSummary` | 字段级复核意见数量汇总（v1.6.10 进度看板抽屉**不展示**，数据仍存在于 snapshot） |
 | `blockers` | 当前测试点被哪些前置关键任务阻塞 |
 | `dependencies` | 当前测试点依赖的前置任务，MVP 与 `blockers` 同源 |
 
@@ -404,10 +413,10 @@ REVIEW_STATUS = {
 
 1. 依赖图初始化时调用 `getControlProgressSnapshot(projectId, projectTasks)`。
 2. 用 `controls` 生成图节点，用 `dependencies` 生成边。
-3. 节点主标签显示 `title`，副标签显示 `completedNodes/totalNodes` 和 `progressPercent`。
+3. 节点主标签显示 `title`，副标签显示 `completedNodes/totalNodes`、`progressPercent` 与 `currentNodeLabel`。
 4. 节点颜色按 `progressStatus`，其中 `blocked` 优先级最高。
 5. 点击节点时调用 `getControlProgressDetail(controlId, task, projectTasks)`。
-6. 详情抽屉展示 `phases`、`materials`、`fieldReviews`、`reviewStatus`，不要展示 Planning / Review 旧流程节点。
+6. 详情抽屉（v1.6.10）展示：**控制点状态**（`workspaceStatus`）、**节点进度**（`currentNodeLabel` + 计数 + 百分比）、计划完成日、**全部节点预计完成日**（`phases[].nodes`）、材料计数；**不展示**看板 `task.status`、字段复核、测试摘要、Planning/Review 旧流程节点。
 7. 模块 2 保存后，模块 3 重新调用 snapshot/detail 即可拿到最新进度。
 
 ## 注意事项

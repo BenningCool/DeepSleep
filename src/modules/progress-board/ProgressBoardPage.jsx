@@ -2,19 +2,17 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ATTENTION_LABELS,
   CONTRIBUTOR_FILTER_OPTIONS,
-  DRAWER_PREREQUISITE_LABELS,
   DRAWER_WORKSPACE_LABELS,
-  PROGRESS_LIST_LABELS,
   labelOfProgressStatus,
-  labelOfWorkspaceStatus
+  labelOfWorkspaceStatus,
+  PROGRESS_LIST_LABELS
 } from "../../data/progressLabels";
 import { labelOfContributorGroup } from "../project/contributorGroup";
 import {
   buildTaskMap,
-  isBoardProgressMismatch,
-  labelOfAuditPhase
+  controlTypeClass,
+  isBoardProgressMismatch
 } from "./progressBoardUtils";
-import { columnTitle } from "../../utils/taskUtils";
 import {
   getControlProgressDetail,
   getControlProgressSnapshot,
@@ -22,20 +20,63 @@ import {
 } from "../../services/workspaceProgressService";
 import { ProgressAttentionPanel } from "./ProgressAttentionPanel";
 import { ProgressDashboard } from "./ProgressDashboard";
+import { ControlNodeProgressDisplay } from "./ControlNodeProgressDisplay";
+import { ProgressOwnerLabel } from "./ProgressOwnerLabel";
 import { isControlOverdue } from "./attentionItemsUtils";
-import { countControlsWithPlanDue, daysOverdueForControl } from "./progressDueUtils";
+import { daysOverdueForControl, resolveControlPlanDue } from "./progressDueUtils";
 import { workspaceStatusClass } from "./progressVisualTokens";
+import { ProgressOwnerFilter } from "./ProgressOwnerFilter";
+import { matchesOwnerFilter } from "./progressOwnerUtils";
+import { collectNodeDueDateEntries } from "./progressNodeDisplay";
 
 function statusClass(status) {
   return workspaceStatusClass(status);
 }
 
-function formatNodePhase(control) {
-  const tod = control.phaseProgress?.tod;
-  const toe = control.phaseProgress?.toe;
-  const parts = [`${control.completedNodes || 0}/${control.totalNodes || 0}`];
-  if (tod) parts.push(`TOD ${tod.completedNodes}/${tod.totalNodes}`);
-  if (toe) parts.push(`TOE ${toe.completedNodes}/${toe.totalNodes}`);
+function formatNodeDueDatesList(detail) {
+  const entries = collectNodeDueDateEntries(detail);
+  const showPhase = new Set(entries.map((entry) => entry.phaseId).filter(Boolean)).size > 1;
+
+  if (!entries.length) {
+    return <p className="progress-node-due-empty">—</p>;
+  }
+
+  return (
+    <ul className="progress-node-due-list">
+      {entries.map((entry) => (
+        <li key={entry.id}>
+          <span className="progress-node-due-copy">
+            {showPhase && entry.phaseId ? (
+              <span className="progress-node-due-phase">{entry.phaseId.toUpperCase()}</span>
+            ) : null}
+            <span className="progress-node-due-label">{entry.label}</span>
+          </span>
+          <span className="progress-node-due-date">{entry.dueDate || "—"}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function formatMaterialSummary(control) {
+  const parts = [
+    `制度 ${control.policyCount || 0}`,
+    `纪要 ${control.meetingMinutesCount || 0}`,
+    `支持性材料 ${control.supportingMaterialCount || 0}`,
+    `SPP ${control.sppCount || 0}`,
+    `测试资料 ${control.evidenceCount || 0}`
+  ];
+
+  if (control.requirementListCount) {
+    parts.push(`需求清单 ${control.requirementListCount}`);
+  }
+  if (control.samplePoolCount) {
+    parts.push(`样本池 ${control.samplePoolCount}`);
+  }
+  if (control.returnedSampleSupportCount) {
+    parts.push(`返回材料 ${control.returnedSampleSupportCount}`);
+  }
+
   return parts.join(" · ");
 }
 
@@ -48,9 +89,8 @@ export function ProgressBoardPage({
   dataRefreshKey = 0
 }) {
   const [groupFilter, setGroupFilter] = useState("");
-  const [workspaceStatusFilter, setWorkspaceStatusFilter] = useState("");
-  const [overdueOnlyFilter, setOverdueOnlyFilter] = useState(false);
-  const [controlTypeTab, setControlTypeTab] = useState("GITC");
+  const [ownerFilter, setOwnerFilter] = useState("");
+  const [controlTypeTab, setControlTypeTab] = useState("ALL");
   const [selectedId, setSelectedId] = useState(focusControlId);
   const [refreshToken, setRefreshToken] = useState(0);
 
@@ -62,11 +102,11 @@ export function ProgressBoardPage({
   );
 
   const enrichedControls = useMemo(() => (
-    snapshot.controls.map((control) => ({
+    (snapshot?.controls || []).map((control) => ({
       ...control,
       contributorGroup: taskMap[control.id]?.contributorGroup || "audit"
     }))
-  ), [snapshot.controls, taskMap]);
+  ), [snapshot?.controls, taskMap]);
 
   const groupFilteredControls = useMemo(() => (
     enrichedControls.filter((control) => (
@@ -74,20 +114,9 @@ export function ProgressBoardPage({
     ))
   ), [enrichedControls, groupFilter]);
 
-  const statusFilteredControls = useMemo(() => (
-    groupFilteredControls.filter((control) => (
-      !workspaceStatusFilter || control.workspaceStatus === workspaceStatusFilter
-    ))
-  ), [groupFilteredControls, workspaceStatusFilter]);
-
-  const overdueFilteredControls = useMemo(() => {
-    if (!overdueOnlyFilter) return statusFilteredControls;
-    return statusFilteredControls.filter((control) => (
-      isControlOverdue(control, taskMap[control.id])
-    ));
-  }, [statusFilteredControls, overdueOnlyFilter, taskMap]);
-
-  const filteredControls = overdueFilteredControls;
+  const filteredControls = useMemo(() => (
+    groupFilteredControls.filter((control) => matchesOwnerFilter(control, ownerFilter))
+  ), [groupFilteredControls, ownerFilter]);
 
   const attentionControls = groupFilteredControls;
 
@@ -106,14 +135,6 @@ export function ProgressBoardPage({
       tasks
     );
   }, [selectedControl, taskMap, tasks, refreshToken]);
-
-  const blockerTitles = useMemo(() => {
-    if (!selectedControl?.blockers?.length) return [];
-    return selectedControl.blockers.map((id) => ({
-      id,
-      title: taskMap[id]?.title || id
-    }));
-  }, [selectedControl, taskMap]);
 
   const gitcControls = useMemo(
     () => filteredControls.filter((control) => control.controlType === "GITC"),
@@ -134,6 +155,7 @@ export function ProgressBoardPage({
 
   const controlTypeTabs = useMemo(() => {
     const tabs = [
+      { id: "ALL", label: "全部", count: filteredControls.length },
       { id: "GITC", label: "GITC", count: gitcControls.length },
       { id: "ITAC", label: "ITAC", count: itacControls.length }
     ];
@@ -141,13 +163,14 @@ export function ProgressBoardPage({
       tabs.push({ id: "OTHER", label: "其他", count: otherControls.length });
     }
     return tabs;
-  }, [gitcControls.length, itacControls.length, otherControls.length]);
+  }, [filteredControls.length, gitcControls.length, itacControls.length, otherControls.length]);
 
   const activeTypeControls = useMemo(() => {
+    if (controlTypeTab === "ALL") return filteredControls;
     if (controlTypeTab === "ITAC") return itacControls;
     if (controlTypeTab === "OTHER") return otherControls;
     return gitcControls;
-  }, [controlTypeTab, gitcControls, itacControls, otherControls]);
+  }, [controlTypeTab, filteredControls, gitcControls, itacControls, otherControls]);
 
   useEffect(() => {
     setRefreshToken((value) => value + 1);
@@ -160,14 +183,22 @@ export function ProgressBoardPage({
 
   useEffect(() => {
     if (!selectedId) return;
-    if (!groupFilteredControls.some((control) => control.id === selectedId)) {
+    if (!filteredControls.some((control) => control.id === selectedId)) {
       setSelectedId("");
     }
-  }, [groupFilteredControls, selectedId]);
+  }, [filteredControls, selectedId]);
+
+  useEffect(() => {
+    if (!ownerFilter) return;
+    const stillValid = groupFilteredControls.some((control) => matchesOwnerFilter(control, ownerFilter));
+    if (!stillValid) {
+      setOwnerFilter("");
+    }
+  }, [groupFilteredControls, ownerFilter]);
 
   useEffect(() => {
     if (controlTypeTab === "OTHER" && !otherControls.length) {
-      setControlTypeTab("GITC");
+      setControlTypeTab("ALL");
     }
   }, [controlTypeTab, otherControls.length]);
 
@@ -178,31 +209,6 @@ export function ProgressBoardPage({
   function handleSelectControl(id) {
     if (!id) return;
     setSelectedId(id);
-  }
-
-  function handleWorkspaceStatusFilter(status) {
-    setWorkspaceStatusFilter(status);
-    if (status) setOverdueOnlyFilter(false);
-  }
-
-  function handleOverdueFilter() {
-    if (!countControlsWithPlanDue(groupFilteredControls, taskMap)) return;
-    setOverdueOnlyFilter((value) => !value);
-    if (!overdueOnlyFilter) setWorkspaceStatusFilter("");
-  }
-
-  function renderFieldReviewSummary(summary = {}) {
-    const open = summary.open || 0;
-    const replied = summary.replied || 0;
-    const accepted = summary.accepted || 0;
-    if (!open && !replied && !accepted) {
-      return <p>暂无字段级复核意见。</p>;
-    }
-    return (
-      <p>
-        待回复 {open} · 已回复 {replied} · 已接受 {accepted}
-      </p>
-    );
   }
 
   function renderControlTable(controls, emptyText) {
@@ -221,9 +227,8 @@ export function ProgressBoardPage({
             <th>控制点</th>
             <th>负责人</th>
             <th>负责组</th>
-            <th>底稿状态</th>
+            <th>控制点状态</th>
             <th>节点进度</th>
-            <th>阶段</th>
           </tr>
         </thead>
         <tbody>
@@ -242,8 +247,8 @@ export function ProgressBoardPage({
                 onClick={() => setSelectedId(control.id)}
               >
                 <td>
-                  <span className={`control-type inline ${control.controlType.toLowerCase()}`}>
-                    {control.controlType}
+                  <span className={`control-type inline ${controlTypeClass(control.controlType)}`}>
+                    {control.controlType || "TASK"}
                   </span>
                   {rowOverdue ? (
                     <span className="progress-flag overdue compact">
@@ -253,12 +258,11 @@ export function ProgressBoardPage({
                   ) : null}
                   <span className="progress-control-title">{control.title}</span>
                   <small>{control.id}</small>
-                  {control.progressStatus === PROGRESS_STATUS.BLOCKED ? (
-                    <small className="progress-inline-flag blocked">被阻塞</small>
-                  ) : null}
                 </td>
-                <td>{control.owner}</td>
-                <td>{labelOfContributorGroup(control.contributorGroup)}</td>
+                <td className="progress-owner-cell">
+                  <ProgressOwnerLabel owner={control.owner} />
+                </td>
+                <td className="progress-group-cell">{labelOfContributorGroup(control.contributorGroup)}</td>
                 <td>
                   <span className={`progress-pill workspace-status ${statusClass(control.workspaceStatus)}`}>
                     {labelOfWorkspaceStatus(control.workspaceStatus)}
@@ -270,13 +274,24 @@ export function ProgressBoardPage({
                       </small>
                     ) : null}
                 </td>
-                <td>{formatNodePhase(control)}</td>
-                <td>{labelOfAuditPhase(control.auditPhase)}</td>
+                <td className="progress-node-cell">
+                  <ControlNodeProgressDisplay control={control} />
+                </td>
               </tr>
             );
           })}
         </tbody>
       </table>
+    );
+  }
+
+  if (!project) {
+    return (
+      <section className="progress-board-page">
+        <div className="empty-state compact">
+          <p>未找到当前项目，请从项目列表重新进入。</p>
+        </div>
+      </section>
     );
   }
 
@@ -304,24 +319,6 @@ export function ProgressBoardPage({
           </button>
         ))}
 
-        {workspaceStatusFilter ? (
-          <button
-            type="button"
-            className="filter-chip active subtle-clear"
-            onClick={() => setWorkspaceStatusFilter("")}
-          >
-            清除状态筛选 · {labelOfWorkspaceStatus(workspaceStatusFilter)}
-          </button>
-        ) : null}
-        {overdueOnlyFilter ? (
-          <button
-            type="button"
-            className="filter-chip active subtle-clear overdue-clear"
-            onClick={() => setOverdueOnlyFilter(false)}
-          >
-            清除逾期筛选
-          </button>
-        ) : null}
       </div>
 
       <ProgressDashboard
@@ -331,18 +328,11 @@ export function ProgressBoardPage({
         memberControls={groupFilteredControls}
         taskMap={taskMap}
         groupFilter={groupFilter}
-        workspaceStatusFilter={workspaceStatusFilter}
-        overdueOnlyFilter={overdueOnlyFilter}
-        onWorkspaceStatusFilter={handleWorkspaceStatusFilter}
-        onOverdueFilter={handleOverdueFilter}
+        ownerFilter={ownerFilter}
+        ownerFilterControls={groupFilteredControls}
+        onOwnerFilterChange={setOwnerFilter}
         onSelectControl={handleSelectControl}
       />
-
-      {!filteredControls.length && groupFilteredControls.length ? (
-        <div className="empty-state compact progress-filter-empty">
-          <p>{PROGRESS_LIST_LABELS.filterEmpty}</p>
-        </div>
-      ) : null}
 
       <ProgressAttentionPanel
         controls={attentionControls}
@@ -356,25 +346,38 @@ export function ProgressBoardPage({
         <section className="progress-table-panel">
           <div className="progress-table-head">
             <h3>控制点列表</h3>
-            {filteredControls.length ? (
-              <div className="progress-type-tabs">
-                {controlTypeTabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    className={`filter-chip ${controlTypeTab === tab.id ? "active" : ""}`}
-                    onClick={() => setControlTypeTab(tab.id)}
-                  >
-                    {tab.label} · {tab.count}
-                  </button>
-                ))}
+            {groupFilteredControls.length ? (
+              <div className="progress-table-tools">
+                <ProgressOwnerFilter
+                  project={project}
+                  groupFilter={groupFilter}
+                  controls={groupFilteredControls}
+                  value={ownerFilter}
+                  onChange={setOwnerFilter}
+                />
+                <div className="progress-type-tabs">
+                  {controlTypeTabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      className={`filter-chip ${controlTypeTab === tab.id ? "active" : ""}`}
+                      onClick={() => setControlTypeTab(tab.id)}
+                    >
+                      {tab.label} · {tab.count}
+                    </button>
+                  ))}
+                </div>
               </div>
             ) : null}
           </div>
-          {filteredControls.length ? (
+          {groupFilteredControls.length ? (
             renderControlTable(
               activeTypeControls,
-              `当前筛选下暂无 ${controlTypeTab === "OTHER" ? "其他" : controlTypeTab} 控制点。`
+              ownerFilter
+                ? PROGRESS_LIST_LABELS.filterEmpty
+                : controlTypeTab === "ALL"
+                  ? "当前筛选下暂无控制点。"
+                  : `当前筛选下暂无 ${controlTypeTab === "OTHER" ? "其他" : controlTypeTab} 控制点。`
             )
           ) : (
             <div className="empty-state compact">
@@ -385,108 +388,63 @@ export function ProgressBoardPage({
 
         <aside className="progress-drawer-panel">
           {selectedControl && detail ? (
-            <>
-              <div className="progress-drawer-head">
-                <span className={`control-type ${selectedControl.controlType.toLowerCase()}`}>
-                  {selectedControl.controlType}
-                </span>
-                <h3>{selectedControl.title}</h3>
-                <p>{selectedControl.id} · {selectedControl.owner || "未分配"}</p>
-              </div>
+            <div className="progress-drawer-shell">
+              <div className="progress-drawer-scroll">
+                <div className="progress-drawer-head">
+                  <span className={`control-type ${controlTypeClass(selectedControl.controlType)}`}>
+                    {selectedControl.controlType || "TASK"}
+                  </span>
+                  <h3>{selectedControl.title}</h3>
+                  <p>
+                    {selectedControl.id}
+                    {" · "}
+                    <ProgressOwnerLabel owner={selectedControl.owner || "未分配"} />
+                  </p>
+                </div>
 
-              <div className="progress-dual-status">
-                <div className="dual-status-row">
-                  <span className="dual-status-label">执行状态（看板）</span>
-                  <span className="progress-pill board-status">
-                    {columnTitle(selectedControl.taskStatus)}
-                  </span>
-                </div>
-                <div className="dual-status-row">
-                  <span className="dual-status-label">底稿状态（工作台）</span>
-                  <span className={`progress-pill workspace-status ${statusClass(selectedControl.workspaceStatus)}`}>
-                    {labelOfWorkspaceStatus(selectedControl.workspaceStatus)}
-                  </span>
-                </div>
-                <div className="dual-status-row">
-                  <span className="dual-status-label">{DRAWER_WORKSPACE_LABELS.detailProgress}</span>
-                  <span className={`progress-pill ${statusClass(selectedControl.progressStatus)}`}>
-                    {labelOfProgressStatus(selectedControl.progressStatus)}
-                  </span>
-                </div>
-                {isBoardProgressMismatch(selectedControl) ? (
-                  <p className="progress-status-hint">{DRAWER_WORKSPACE_LABELS.mismatchHint}</p>
-                ) : null}
-              </div>
-
-              {blockerTitles.length ? (
-                <div className="progress-prerequisite-block">
-                  <h4>{DRAWER_PREREQUISITE_LABELS.title}</h4>
-                  <ul className="progress-prerequisite-list">
-                    {blockerTitles.map((item) => (
-                      <li key={item.id}>
-                        <strong>{item.title}</strong>
-                        <span>{item.id} · 看板 {columnTitle(taskMap[item.id]?.status)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  {onGoBoard ? (
-                    <button
-                      className="button subtle"
-                      type="button"
-                      onClick={() => onGoBoard(blockerTitles[0].id)}
-                    >
-                      {DRAWER_PREREQUISITE_LABELS.goBoard}
-                    </button>
+                <div className="progress-dual-status">
+                  <div className="dual-status-row">
+                    <span className="dual-status-label">控制点状态</span>
+                    <div className="progress-status-value">
+                      <span className={`progress-pill workspace-status ${statusClass(selectedControl.workspaceStatus)}`}>
+                        {labelOfWorkspaceStatus(selectedControl.workspaceStatus)}
+                      </span>
+                      {selectedControl.progressStatus !== selectedControl.workspaceStatus
+                        && selectedControl.progressStatus !== PROGRESS_STATUS.BLOCKED ? (
+                          <small className="progress-inline-sub">
+                            {labelOfProgressStatus(selectedControl.progressStatus)}
+                          </small>
+                        ) : null}
+                    </div>
+                  </div>
+                  <div className="dual-status-row dual-status-row-node-progress">
+                    <span className="dual-status-label">{DRAWER_WORKSPACE_LABELS.detailProgress}</span>
+                    <ControlNodeProgressDisplay control={selectedControl} align="right" />
+                  </div>
+                  {isBoardProgressMismatch(selectedControl) ? (
+                    <p className="progress-status-hint">{DRAWER_WORKSPACE_LABELS.mismatchHint}</p>
                   ) : null}
                 </div>
-              ) : null}
 
-              <div className="progress-detail-block">
-                <h4>{DRAWER_WORKSPACE_LABELS.workspaceSummary}</h4>
-                <p>
-                  {DRAWER_WORKSPACE_LABELS.nodeProgress}：
-                  {selectedControl.completedNodes}/{selectedControl.totalNodes}
-                  {selectedControl.phaseProgress?.tod
-                    ? ` · TOD ${selectedControl.phaseProgress.tod.completedNodes}/${selectedControl.phaseProgress.tod.totalNodes}`
-                    : ""}
-                  {selectedControl.phaseProgress?.toe
-                    ? ` · TOE ${selectedControl.phaseProgress.toe.completedNodes}/${selectedControl.phaseProgress.toe.totalNodes}`
-                    : ""}
-                </p>
-                <p>
-                  {DRAWER_WORKSPACE_LABELS.milestones}：
-                  Planning {selectedControl.milestones?.planning ? "✓" : "—"}
-                  {selectedControl.milestoneActors?.planning
-                    ? ` (${selectedControl.milestoneActors.planning})`
-                    : ""}
-                  {" · "}
-                  Review {selectedControl.milestones?.review ? "✓" : "—"}
-                  {selectedControl.milestoneActors?.review
-                    ? ` (${selectedControl.milestoneActors.review})`
-                    : ""}
-                </p>
+                <div className="progress-detail-block progress-drawer-fill">
+                  <h4>{DRAWER_WORKSPACE_LABELS.workspaceSummary}</h4>
+                  <p>
+                    {ATTENTION_LABELS.dueLabel}：
+                    {resolveControlPlanDue(selectedControl, taskMap[selectedControl.id]) || "—"}
+                  </p>
+                  <div className="progress-detail-subfield progress-drawer-due-field">
+                    <strong>{DRAWER_WORKSPACE_LABELS.nodeDueDates}</strong>
+                    {formatNodeDueDatesList(detail)}
+                  </div>
+                </div>
+
+                <div className="progress-detail-block">
+                  <h4>{DRAWER_WORKSPACE_LABELS.materials}</h4>
+                  <p>{formatMaterialSummary(selectedControl)}</p>
+                </div>
               </div>
 
-              <div className="progress-detail-block">
-                <h4>{DRAWER_WORKSPACE_LABELS.materials}</h4>
-                <p>
-                  SPP {selectedControl.sppCount || 0} · 会议纪要 {selectedControl.meetingMinutesCount || 0}
-                  {" · "}测试资料 {selectedControl.evidenceCount || 0}
-                </p>
-              </div>
-
-              <div className="progress-detail-block">
-                <h4>{DRAWER_WORKSPACE_LABELS.fieldReviews}</h4>
-                {renderFieldReviewSummary(selectedControl.fieldReviewSummary)}
-              </div>
-
-              <div className="progress-detail-block">
-                <h4>测试摘要</h4>
-                <p>{detail.nodeResponses?.["tod-objective"] || detail.testContent.objective || "尚未填写测试目标。"}</p>
-                <p>{detail.nodeResponses?.["toe-procedure"] || detail.testContent.procedure || "尚未填写测试程序。"}</p>
-              </div>
-
-              <div className="panel-footer-actions">
+              <div className="panel-footer-actions progress-drawer-footer">
                 {onGoBoard ? (
                   <button className="button" type="button" onClick={() => onGoBoard(selectedControl.id)}>
                     去看板
@@ -497,9 +455,9 @@ export function ProgressBoardPage({
                 </button>
                 <button className="button subtle" type="button" onClick={refresh}>刷新</button>
               </div>
-            </>
+            </div>
           ) : (
-            <div className="empty-state compact">
+            <div className="progress-drawer-placeholder">
               <p>选择控制点或点击「近期动态」「需关注事项」中的条目，查看只读详情。</p>
             </div>
           )}

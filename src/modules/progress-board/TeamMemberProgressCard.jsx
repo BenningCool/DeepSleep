@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { DASHBOARD_CARD_LABELS } from "../../data/progressLabels";
 import { computeMemberWorkloadRows } from "./memberWorkloadUtils";
+import { ProgressOwnerLabel } from "./ProgressOwnerLabel";
+import { UNASSIGNED_MEMBER_KEY } from "./progressOwnerUtils";
 import {
   formatWorkspaceStatusSummary,
   getBreakdownCompletionPercent,
@@ -16,7 +18,10 @@ function MemberProgressRow({ row }) {
   return (
     <div className="progress-member-row">
       <div className="progress-member-head">
-        <span>{row.label}</span>
+        <ProgressOwnerLabel
+          owner={row.id === UNASSIGNED_MEMBER_KEY ? "" : row.label}
+          compact
+        />
         <strong>
           {total
             ? `${completedCount}/${total} 已完成 · ${percent}%`
@@ -39,7 +44,7 @@ function MemberProgressRow({ row }) {
 }
 
 /**
- * 成员列表与柱图跟随页顶负责组筛选；「全部」时展示 Audit + 已启用 Specialist 全部成员。
+ * 成员列表与柱图跟随页顶负责组筛选；仅展示 In-charge（IC）与 Staff 及其负责的控制点。
  */
 export function TeamMemberProgressCard({
   project,

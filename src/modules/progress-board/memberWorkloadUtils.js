@@ -10,6 +10,9 @@ import {
 export { UNASSIGNED_MEMBER_KEY };
 const UNASSIGNED_KEY = UNASSIGNED_MEMBER_KEY;
 
+/** 执行层成员：Audit 的 In-charge + Staff；Specialist 仅 Staff（不含 Lead） */
+const EXECUTION_AUDIT_ROLES = new Set(["in_charge", "staff"]);
+
 function normalizeEmail(value) {
   return normalizeOwnerEmail(value);
 }
@@ -44,6 +47,35 @@ export function getTeamMemberEmails(project, teamId) {
       if (email) emails.add(email);
     });
 
+  return [...emails];
+}
+
+/** Audit / Specialist 执行层成员邮箱（IC + Staff） */
+export function getExecutionMemberEmails(project, teamId) {
+  if (teamId === "audit") {
+    return (project?.members || [])
+      .filter((member) => (
+        member.status === "active" && EXECUTION_AUDIT_ROLES.has(member.role)
+      ))
+      .map((member) => normalizeEmail(member.email))
+      .filter(Boolean);
+  }
+
+  const specialistTeam = (project?.specialistTeams || []).find((team) => team.team === teamId);
+  if (!specialistTeam) return [];
+
+  return (specialistTeam.staff || [])
+    .filter((member) => member.status === "active")
+    .map((member) => normalizeEmail(member.email))
+    .filter(Boolean);
+}
+
+/** 「全部」负责组：各组 IC + Staff（去重） */
+export function getAllExecutionMemberEmails(project) {
+  const emails = new Set();
+  getProjectTeamIds(project).forEach((teamId) => {
+    getExecutionMemberEmails(project, teamId).forEach((email) => emails.add(email));
+  });
   return [...emails];
 }
 
@@ -84,12 +116,20 @@ export function getMemberFilterOptions(project, teamId = "", controls = []) {
 
 export function computeMemberWorkloadRows(teamId, controls = [], project) {
   const isAllTeams = !teamId;
-  const scopedControls = isAllTeams
-    ? controls
-    : controls.filter((control) => (control.contributorGroup || "audit") === teamId);
   const rosterEmails = isAllTeams
-    ? getAllProjectMemberEmails(project)
-    : getTeamMemberEmails(project, teamId);
+    ? getAllExecutionMemberEmails(project)
+    : getExecutionMemberEmails(project, teamId);
+  const executionOwnerSet = new Set(rosterEmails);
+
+  const scopedControls = (isAllTeams
+    ? controls
+    : controls.filter((control) => (control.contributorGroup || "audit") === teamId)
+  ).filter((control) => {
+    if (isUnassignedOwner(control.owner)) return true;
+    const email = normalizeEmail(control.owner);
+    return email && executionOwnerSet.has(email);
+  });
+
   const controlsByOwner = new Map();
 
   scopedControls.forEach((control) => {
@@ -118,15 +158,6 @@ export function computeMemberWorkloadRows(teamId, controls = [], project) {
     });
     controlsByOwner.delete(UNASSIGNED_KEY);
   }
-
-  controlsByOwner.forEach((assignedControls, email) => {
-    rows.push({
-      id: email,
-      label: email,
-      breakdown: computeWorkspaceStatusBreakdown(assignedControls),
-      isRoster: false
-    });
-  });
 
   return sortMemberWorkloadRows(rows);
 }

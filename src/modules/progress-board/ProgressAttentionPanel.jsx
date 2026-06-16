@@ -1,4 +1,5 @@
 import { ATTENTION_LABELS, labelOfWorkspaceStatus } from "../../data/progressLabels";
+import { ProgressOwnerLabel } from "./ProgressOwnerLabel";
 import {
   getOverdueControls,
   getStaleNotStartedControls
@@ -61,9 +62,14 @@ export function ProgressAttentionPanel({
                     </div>
                     <strong>{control.title}</strong>
                     <small> · {control.id}</small>
-                    <p>
+                    <p className="attention-item-meta">
                       {ATTENTION_LABELS.dueLabel}：{planDue || "—"}
-                      {control.owner ? ` · ${control.owner}` : ""}
+                      {control.owner ? (
+                        <>
+                          {" · "}
+                          <ProgressOwnerLabel owner={control.owner} compact inline />
+                        </>
+                      ) : null}
                     </p>
                   </div>
                   <span className={`progress-pill compact workspace-status ${workspaceStatusClass(control.workspaceStatus)}`}>
@@ -93,12 +99,17 @@ export function ProgressAttentionPanel({
                   <div>
                     <strong>{control.title}</strong>
                     <small> · {control.id}</small>
-                    <p>
+                    <p className="attention-item-meta">
                       {reason}
                       {resolveControlPlanDue(control, task)
                         ? ` · ${ATTENTION_LABELS.dueLabel}：${resolveControlPlanDue(control, task)}`
                         : ""}
-                      {control.owner ? ` · ${control.owner}` : ""}
+                      {control.owner ? (
+                        <>
+                          {" · "}
+                          <ProgressOwnerLabel owner={control.owner} compact inline />
+                        </>
+                      ) : null}
                     </p>
                   </div>
                   <span className={`progress-pill compact workspace-status ${workspaceStatusClass(control.workspaceStatus)}`}>

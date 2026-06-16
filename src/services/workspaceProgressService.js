@@ -508,9 +508,12 @@ function normalizeMaterial(material = {}) {
 }
 
 function normalizeMilestones(milestones = {}) {
+  const safe = milestones && typeof milestones === "object" && !Array.isArray(milestones)
+    ? milestones
+    : {};
   return {
-    planning: Boolean(milestones.planning),
-    review: Boolean(milestones.review)
+    planning: Boolean(safe.planning),
+    review: Boolean(safe.review)
   };
 }
 
@@ -575,14 +578,14 @@ function normalizeNodeDueDates(nodeDueDates = {}) {
 }
 
 function normalizeRecord(controlId, record = {}) {
-  const safe = record || {};
+  const safe = record && typeof record === "object" && !Array.isArray(record) ? record : {};
   const milestones = normalizeMilestones(safe.milestones);
 
   return {
     id: controlId,
     testContent: {
       ...DEFAULT_TEST_CONTENT,
-      ...(safe.testContent || {})
+      ...(safe.testContent && typeof safe.testContent === "object" ? safe.testContent : {})
     },
     nodeResponses: safe.nodeResponses && typeof safe.nodeResponses === "object"
       ? safe.nodeResponses
@@ -869,6 +872,41 @@ function buildPhaseProgress(record, controlType = "") {
   };
 }
 
+/** 首个未完成 required 节点；若全部完成则返回最后一个节点 */
+function resolveCurrentWorkspaceNode(phases = []) {
+  for (const phase of phases) {
+    const requiredNodes = (phase.nodes || []).filter((node) => node.required !== false);
+    for (const node of requiredNodes) {
+      if (node.status !== NODE_STATUS.COMPLETED) {
+        return {
+          id: node.id,
+          label: node.label,
+          phaseId: phase.id,
+          phaseLabel: phase.label || String(phase.id || "").toUpperCase(),
+          isComplete: false
+        };
+      }
+    }
+  }
+
+  for (let index = phases.length - 1; index >= 0; index -= 1) {
+    const phase = phases[index];
+    const requiredNodes = (phase.nodes || []).filter((node) => node.required !== false);
+    const lastNode = requiredNodes[requiredNodes.length - 1];
+    if (lastNode) {
+      return {
+        id: lastNode.id,
+        label: lastNode.label,
+        phaseId: phase.id,
+        phaseLabel: phase.label || String(phase.id || "").toUpperCase(),
+        isComplete: true
+      };
+    }
+  }
+
+  return null;
+}
+
 function getEvidenceStatus(record, progress) {
   const evidenceCount = getMaterials(record, MATERIAL_CATEGORY.EVIDENCE).length;
   const sppCount = getMaterials(record, MATERIAL_CATEGORY.SPP).length;
@@ -998,6 +1036,7 @@ function buildSnapshotItem(task, record, allTasks) {
   const requirementListCount = getMaterials(detail, MATERIAL_CATEGORY.REQUIREMENT_LIST).length;
   const samplePoolCount = getMaterials(detail, MATERIAL_CATEGORY.SAMPLE_POOL).length;
   const returnedSampleSupportCount = getMaterials(detail, MATERIAL_CATEGORY.RETURNED_SAMPLE_SUPPORT).length;
+  const currentNode = resolveCurrentWorkspaceNode(detail.phases);
 
   return {
     id: task.id,
@@ -1013,6 +1052,11 @@ function buildSnapshotItem(task, record, allTasks) {
     completedNodes: detail.completedNodes,
     totalNodes: detail.totalNodes,
     phaseProgress: detail.phaseProgress,
+    currentNodeId: currentNode?.id || "",
+    currentNodeLabel: currentNode?.label || "",
+    currentNodePhaseId: currentNode?.phaseId || "",
+    currentNodePhaseLabel: currentNode?.phaseLabel || "",
+    allNodesComplete: Boolean(currentNode?.isComplete),
     evidenceStatus: getEvidenceStatus(detail, detail),
     evidenceCount,
     meetingMinutesCount,
@@ -1043,13 +1087,18 @@ export function getControlProgressSnapshot(projectId, tasks = []) {
     saveStore(store);
   }
 
-  const controls = projectTasks.map((task) => (
-    buildSnapshotItem(
-      task,
-      normalizeRecord(task.id, readProjectRecord(store, projectId, task.id)),
-      projectTasks
-    )
-  ));
+  const controls = projectTasks.flatMap((task) => {
+    try {
+      return [buildSnapshotItem(
+        task,
+        readProjectRecord(store, projectId, task.id),
+        projectTasks
+      )];
+    } catch (error) {
+      console.error("[progress] snapshot build failed:", task?.id, error);
+      return [];
+    }
+  });
 
   return {
     projectId,

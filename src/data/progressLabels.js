@@ -46,9 +46,10 @@ export const DASHBOARD_CARD_LABELS = {
   recentActivity: "近期动态",
   recentActivityLead: "按工作台最近保存时间排序",
   recentActivityEmpty: "尚无动态。在工作台保存测试点后，将在此显示最近更新。",
-  controlType: "控制类型分布",
+  controlNodeProgress: "控制点节点进度",
+  controlNodeProgressEmpty: "当前类型下暂无控制点。",
   teamMemberProgress: "组内成员进度",
-  teamMemberProgressLead: "跟随页顶负责组筛选：「全部」展示 Audit 与已启用 Specialist 全部成员；柱体为已完成占比，下方为三态明细。",
+  teamMemberProgressLead: "跟随页顶负责组筛选；仅展示 In-charge 与 Staff 及其负责的控制点；柱体为已完成占比，下方为三态明细。",
   teamMemberProgressEmpty: "当前组暂无成员。",
   teamMemberProgressUnassigned: "未分配",
   blockedNote: "被阻塞"
@@ -82,12 +83,12 @@ export const DRAWER_WORKSPACE_LABELS = {
   overallProgress: "整体进度",
   workspaceSummary: "工作台摘要",
   nodeProgress: "节点进度",
-  milestones: "流程节点",
+  nodeDueDates: "节点预计完成日",
   materials: "材料",
   fieldReviews: "字段复核",
   planning: "Planning",
   review: "Review",
-  detailProgress: "细态进度",
+  detailProgress: "节点进度",
   mismatchHint: "看板已推进，底稿尚未齐备。"
 };
 

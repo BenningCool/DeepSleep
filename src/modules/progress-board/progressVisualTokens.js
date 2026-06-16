@@ -1,14 +1,15 @@
 import { PROGRESS_STATUS } from "../../services/workspaceProgressService";
 
 /**
- * 进度看板视觉 token（合伙人 / 经理鸟瞰：状态一眼可辨，逾期强突出）
+ * 进度看板视觉 token（全页统一：KPI / 环形图 / 图例 / pill 同色）
+ * 未开始=琥珀警示 · 测试中=蓝 · 已完成=绿 · 逾期=红
  */
 export const WORKSPACE_STATUS_VISUAL = {
   [PROGRESS_STATUS.NOT_STARTED]: {
-    fill: "#97a0af",
-    bg: "#f4f5f7",
-    border: "#a5adba",
-    text: "#253858"
+    fill: "#ff991f",
+    bg: "#fffae6",
+    border: "#ffab00",
+    text: "#974f0c"
   },
   [PROGRESS_STATUS.IN_PROGRESS]: {
     fill: "#0052cc",
@@ -54,6 +55,10 @@ export const KPI_TONE_VISUAL = {
     accent: WORKSPACE_STATUS_VISUAL[PROGRESS_STATUS.IN_PROGRESS].fill,
     bg: WORKSPACE_STATUS_VISUAL[PROGRESS_STATUS.IN_PROGRESS].bg
   },
+  notStarted: {
+    accent: WORKSPACE_STATUS_VISUAL[PROGRESS_STATUS.NOT_STARTED].fill,
+    bg: WORKSPACE_STATUS_VISUAL[PROGRESS_STATUS.NOT_STARTED].bg
+  },
   neutral: {
     accent: "#5e6c84",
     bg: "#fafbfc"
@@ -63,8 +68,8 @@ export const KPI_TONE_VISUAL = {
     bg: "#f4f5f7"
   },
   dueRiskWarn: {
-    accent: "#ff991f",
-    bg: "#fffae6"
+    accent: OVERDUE_VISUAL.border,
+    bg: "#fff5f2"
   },
   dueRiskAlert: {
     accent: OVERDUE_VISUAL.fill,

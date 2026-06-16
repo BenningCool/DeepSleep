@@ -68,3 +68,7 @@ export function isBoardProgressMismatch(control) {
   return control.taskStatus === "done"
     && control.workspaceStatus !== PROGRESS_STATUS.COMPLETED;
 }
+
+export function controlTypeClass(controlType) {
+  return String(controlType || "task").toLowerCase();
+}

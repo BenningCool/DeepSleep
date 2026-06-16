@@ -1,16 +1,22 @@
+import { useMemo, useState } from "react";
 import { DASHBOARD_CARD_LABELS, DASHBOARD_KPI_LABELS, labelOfWorkspaceStatus } from "../../data/progressLabels";
 import { PROGRESS_STATUS } from "../../services/workspaceProgressService";
 import {
   buildDonutStyle,
-  computeControlTypeDistribution,
   computeDashboardKpis,
   computeWorkspaceStatusBreakdown,
+  CONTROL_TYPE_FILTER_TABS,
+  countControlsByType,
+  filterControlsByControlType,
   formatActivityTime,
+  formatSharePercent,
   getRecentActivity,
   WORKSPACE_STATUS_SEGMENTS
 } from "./progressDashboardUtils";
 import { countControlsWithPlanDue } from "./progressDueUtils";
 import { workspaceStatusClass } from "./progressVisualTokens";
+import { ControlNodeProgressCard } from "./ControlNodeProgressCard";
+import { ProgressOwnerLabel } from "./ProgressOwnerLabel";
 import { TeamMemberProgressCard } from "./TeamMemberProgressCard";
 import { formatWorkspaceStatusSummary } from "./WorkspaceStatusOverviewBar";
 
@@ -19,22 +25,19 @@ const KPI_STATUS_CONFIG = [
     id: PROGRESS_STATUS.NOT_STARTED,
     labelKey: "notStarted",
     tone: "status-not-started",
-    iconType: "not-started",
-    hint: "尚未启动测试"
+    iconType: "not-started"
   },
   {
     id: PROGRESS_STATUS.IN_PROGRESS,
     labelKey: "inProgress",
     tone: "status-in-progress",
-    iconType: "in-progress",
-    hint: "底稿测试中"
+    iconType: "in-progress"
   },
   {
     id: PROGRESS_STATUS.COMPLETED,
     labelKey: "completed",
     tone: "status-completed",
-    iconType: "completed",
-    hint: "底稿已完成"
+    iconType: "completed"
   }
 ];
 
@@ -85,33 +88,29 @@ function StatusKpiCard({
   iconType,
   label,
   value,
+  percent,
   tone,
-  hint,
-  active = false,
-  disabled = false,
   alert = false,
   badge = "",
   extraClassName = "",
-  onClick
+  muted = false
 }) {
   const numericValue = typeof value === "number" ? value : 0;
   const hasValue = numericValue > 0;
 
   return (
-    <button
-      type="button"
+    <div
       className={[
         "progress-dashboard-kpi",
+        "readonly",
         `tone-${tone}`,
         extraClassName,
         hasValue ? "has-value" : "is-idle",
         alert && hasValue ? "is-alert" : "",
         badge ? "has-badge" : "",
-        active ? "active" : "",
-        disabled ? "is-disabled" : ""
+        muted ? "is-muted" : ""
       ].filter(Boolean).join(" ")}
-      disabled={disabled}
-      onClick={disabled ? undefined : onClick}
+      aria-label={percent ? `${label} ${value}，占 ${percent}` : `${label} ${value}`}
     >
       {badge ? <span className="progress-kpi-badge">{badge}</span> : null}
       <span className={`progress-kpi-icon icon-${iconType}`} aria-hidden="true">
@@ -119,22 +118,10 @@ function StatusKpiCard({
       </span>
       <div className="progress-kpi-copy">
         <span className="progress-kpi-label">{label}</span>
-        {hint ? <small className="progress-kpi-hint">{hint}</small> : null}
       </div>
-      <strong className="progress-kpi-value">{value}</strong>
-    </button>
-  );
-}
-
-function DistributionBar({ label, completed, total, percent }) {
-  return (
-    <div className="progress-dist-row readonly">
-      <div className="progress-dist-head">
-        <span>{label}</span>
-        <strong>{completed}/{total} · {percent}%</strong>
-      </div>
-      <div className="progress-dist-track">
-        <span className="progress-dist-fill-completed" style={{ width: `${percent}%` }} />
+      <div className="progress-kpi-stat">
+        <strong className="progress-kpi-value">{value}</strong>
+        {percent ? <span className="progress-kpi-percent">{percent}</span> : null}
       </div>
     </div>
   );
@@ -147,60 +134,90 @@ export function ProgressDashboard({
   memberControls,
   taskMap,
   groupFilter = "",
-  workspaceStatusFilter = "",
-  overdueOnlyFilter = false,
-  onWorkspaceStatusFilter,
-  onOverdueFilter,
+  ownerFilter = "",
+  ownerFilterControls = [],
+  onOwnerFilterChange,
   onSelectControl
 }) {
+  const [statusOverviewType, setStatusOverviewType] = useState("ALL");
+
   const breakdown = computeWorkspaceStatusBreakdown(summaryControls);
+  const overviewControls = useMemo(
+    () => filterControlsByControlType(summaryControls, statusOverviewType),
+    [summaryControls, statusOverviewType]
+  );
+  const overviewBreakdown = useMemo(
+    () => computeWorkspaceStatusBreakdown(overviewControls),
+    [overviewControls]
+  );
+  const overviewTypeCounts = useMemo(
+    () => countControlsByType(summaryControls),
+    [summaryControls]
+  );
+
   const kpis = computeDashboardKpis(summaryControls, taskMap);
-  const typeDistribution = computeControlTypeDistribution(detailControls);
   const activity = getRecentActivity(detailControls);
-  const donutStyle = buildDonutStyle(breakdown);
+  const donutStyle = buildDonutStyle(overviewBreakdown);
   const hasPlanDue = countControlsWithPlanDue(summaryControls, taskMap) > 0;
   const overdueValue = hasPlanDue ? kpis.overdue : "—";
-  const overdueHint = hasPlanDue ? undefined : DASHBOARD_KPI_LABELS.overdueAwaitingData;
+  const totalControls = breakdown.total || 0;
+  const overviewTotal = overviewBreakdown.total || 0;
 
   return (
     <section className="progress-dashboard" aria-label="进度摘要仪表盘">
       <div className="progress-dashboard-kpi-row">
-        {KPI_STATUS_CONFIG.map((item) => (
-          <StatusKpiCard
-            key={item.id}
-            iconType={item.iconType}
-            label={DASHBOARD_KPI_LABELS[item.labelKey]}
-            value={breakdown[item.id] || 0}
-            tone={item.tone}
-            hint={item.hint}
-            alert={item.id === PROGRESS_STATUS.NOT_STARTED}
-            active={workspaceStatusFilter === item.id && !overdueOnlyFilter}
-            onClick={() => onWorkspaceStatusFilter(
-              workspaceStatusFilter === item.id ? "" : item.id
-            )}
-          />
-        ))}
+        {KPI_STATUS_CONFIG.map((item) => {
+          const count = breakdown[item.id] || 0;
+          return (
+            <StatusKpiCard
+              key={item.id}
+              iconType={item.iconType}
+              label={DASHBOARD_KPI_LABELS[item.labelKey]}
+              value={count}
+              percent={formatSharePercent(count, totalControls)}
+              tone={item.tone}
+              alert={item.id === PROGRESS_STATUS.NOT_STARTED}
+            />
+          );
+        })}
         <StatusKpiCard
           iconType="overdue"
           label={DASHBOARD_KPI_LABELS.overdue}
           value={overdueValue}
+          percent={hasPlanDue ? formatSharePercent(kpis.overdue, totalControls) : undefined}
           tone={hasPlanDue && kpis.overdue > 0 ? "due-risk-alert" : "status-overdue-idle"}
-          hint={overdueHint || (hasPlanDue && kpis.overdue > 0 ? "需立即跟进逾期控制点" : "监控计划完成日风险")}
           alert
           badge={hasPlanDue && kpis.overdue > 0 ? "需跟进" : ""}
           extraClassName={hasPlanDue ? "is-overdue-kpi" : ""}
-          active={overdueOnlyFilter}
-          disabled={!hasPlanDue}
-          onClick={() => onOverdueFilter?.()}
+          muted={!hasPlanDue}
         />
       </div>
 
       <div className="progress-dashboard-top-grid">
         <article className="progress-dashboard-card">
-          <header className="progress-dashboard-card-head">
+          <header className="progress-dashboard-card-head stacked">
             <div>
               <h3>{DASHBOARD_CARD_LABELS.statusOverview}</h3>
               <p className="panel-note">{DASHBOARD_CARD_LABELS.statusOverviewLead}</p>
+            </div>
+            <div
+              className="progress-type-tabs compact"
+              role="tablist"
+              aria-label="状态概述控制点类型"
+            >
+              {CONTROL_TYPE_FILTER_TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={statusOverviewType === tab.id}
+                  className={`filter-chip ${statusOverviewType === tab.id ? "active" : ""}`}
+                  onClick={() => setStatusOverviewType(tab.id)}
+                >
+                  {tab.label}
+                  <span className="tab-count">{overviewTypeCounts[tab.id] ?? 0}</span>
+                </button>
+              ))}
             </div>
           </header>
           <div className="progress-donut-wrap">
@@ -208,31 +225,31 @@ export function ProgressDashboard({
               className="progress-donut"
               style={donutStyle}
               role="img"
-              aria-label={formatWorkspaceStatusSummary(breakdown)}
+              aria-label={formatWorkspaceStatusSummary(overviewBreakdown)}
             >
               <div className="progress-donut-hole">
-                <strong>{breakdown.total}</strong>
+                <strong>{overviewBreakdown.total}</strong>
                 <span>{DASHBOARD_CARD_LABELS.controlTotal}</span>
               </div>
             </div>
             <ul className="progress-donut-legend">
-              {WORKSPACE_STATUS_SEGMENTS.map((segment) => (
-                <li key={segment.id}>
-                  <button
-                    type="button"
-                    className={`legend-chip status-${workspaceStatusClass(segment.id)} ${
-                      workspaceStatusFilter === segment.id && !overdueOnlyFilter ? "active" : ""
-                    }`}
-                    onClick={() => onWorkspaceStatusFilter(
-                      workspaceStatusFilter === segment.id ? "" : segment.id
-                    )}
-                  >
-                    <span className="legend-swatch" style={{ background: segment.color }} />
-                    {labelOfWorkspaceStatus(segment.id)}
-                    <strong>{breakdown[segment.id] || 0}</strong>
-                  </button>
-                </li>
-              ))}
+              {WORKSPACE_STATUS_SEGMENTS.map((segment) => {
+                const count = overviewBreakdown[segment.id] || 0;
+                return (
+                  <li key={segment.id}>
+                    <div
+                      className={`legend-chip readonly status-${workspaceStatusClass(segment.id)}`}
+                    >
+                      <span className="legend-swatch" style={{ background: segment.color }} />
+                      {labelOfWorkspaceStatus(segment.id)}
+                      <span className="legend-stat">
+                        <strong>{count}</strong>
+                        <span className="legend-percent">{formatSharePercent(count, overviewTotal)}</span>
+                      </span>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </article>
@@ -251,11 +268,12 @@ export function ProgressDashboard({
                   <button type="button" className="progress-activity-item" onClick={() => onSelectControl(item.id)}>
                     <div>
                       <strong>{item.title}</strong>
-                      <p>
+                      <p className="progress-activity-meta">
                         节点 {item.nodeLabel}
                         {item.tod ? ` · TOD ${item.tod.completedNodes}/${item.tod.totalNodes}` : ""}
                         {item.toe ? ` · TOE ${item.toe.completedNodes}/${item.toe.totalNodes}` : ""}
-                        {" · "}{item.owner}
+                        {" · "}
+                        <ProgressOwnerLabel owner={item.owner} compact inline />
                       </p>
                     </div>
                     <span>{formatActivityTime(item.updatedAt)}</span>
@@ -272,27 +290,19 @@ export function ProgressDashboard({
       </div>
 
       <div className="progress-dashboard-grid progress-dashboard-grid-compact">
-        <article className="progress-dashboard-card">
-          <header className="progress-dashboard-card-head">
-            <h3>{DASHBOARD_CARD_LABELS.controlType}</h3>
-          </header>
-          <div className="progress-dist-list">
-            {typeDistribution.map((item) => (
-              <DistributionBar
-                key={item.id}
-                label={item.id}
-                completed={item.completed}
-                total={item.total}
-                percent={item.percent}
-              />
-            ))}
-          </div>
-        </article>
-
         <TeamMemberProgressCard
           project={project}
           controls={memberControls}
           groupFilter={groupFilter}
+        />
+
+        <ControlNodeProgressCard
+          controls={detailControls}
+          project={project}
+          groupFilter={groupFilter}
+          ownerFilterControls={ownerFilterControls}
+          ownerFilter={ownerFilter}
+          onOwnerFilterChange={onOwnerFilterChange}
         />
       </div>
     </section>
