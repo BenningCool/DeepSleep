@@ -10,7 +10,6 @@ import {
   labelOfSpecialistLeadRole,
   labelOfSpecialistTeam
 } from "./specialistConstants";
-import { ProjectScopeSection } from "./ProjectScopeSection";
 import {
   getProject,
   updateEditableProject
@@ -30,11 +29,11 @@ function LockedItem({ label, value }) {
 export function ProjectDetailPage({
   projectId,
   refreshToken = 0,
-  scopeTaskCount = 0,
+  controlPointCount = 0,
+  onOpenWorkspace,
   onOpenBoard,
   onOpenMembers,
   onOpenProgress,
-  onScopeGenerated,
   onBack,
   onDelete,
   onToast,
@@ -112,7 +111,7 @@ export function ProjectDetailPage({
         <div className="header-actions">
           <button className="button" type="button" onClick={onBack}>项目列表</button>
           <button className="button" type="button" onClick={onOpenMembers}>成员管理</button>
-          <button className="button primary" type="button" onClick={onOpenBoard}>查看看板</button>
+          <button className="button primary" type="button" onClick={onOpenWorkspace}>前往工作台</button>
         </div>
       </header>
 
@@ -180,18 +179,28 @@ export function ProjectDetailPage({
         </section>
 
         <section className="detail-panel scope-panel full">
-          <ProjectScopeSection
-            project={project}
-            existingTaskCount={scopeTaskCount}
-            onGenerate={onScopeGenerated}
-            onToast={onToast}
-          />
-          {project.scopeStatus === "defined" ? (
-            <div className="scope-defined-links">
-              <button className="button" type="button" onClick={onOpenBoard}>查看看板</button>
-              <button className="button primary" type="button" onClick={onOpenProgress}>查看进度看板</button>
+          <div className="panel-toolbar">
+            <div>
+              <h3>测试点清单</h3>
+              <p className="panel-note">
+                控制点与测试点在工作台维护。创建项目后，请前往工作台新建测试点。
+              </p>
             </div>
-          ) : null}
+            <button className="button primary" type="button" onClick={onOpenWorkspace}>
+              前往工作台
+            </button>
+          </div>
+
+          <p className="panel-note">
+            {controlPointCount
+              ? `当前项目共 ${controlPointCount} 个控制点。`
+              : "尚未添加控制点，请在工作台点击「新建测试点」开始维护清单。"}
+          </p>
+
+          <div className="scope-defined-links">
+            <button className="button" type="button" onClick={onOpenBoard}>查看看板</button>
+            <button className="button primary" type="button" onClick={onOpenProgress}>查看进度看板</button>
+          </div>
         </section>
 
         <section className="detail-panel full members-summary">
@@ -251,7 +260,7 @@ export function ProjectDetailPage({
         <section className="detail-panel full danger-panel">
           <h3>删除项目</h3>
           <p className="panel-note">
-            删除后不可恢复，项目成员、Scope 与看板任务将一并移除。
+            删除后不可恢复，项目成员、控制点与看板任务将一并移除。
           </p>
           <button className="button danger" type="button" onClick={onDelete}>
             删除此项目

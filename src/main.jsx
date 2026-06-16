@@ -3,7 +3,6 @@ import { createRoot } from "react-dom/client";
 import "./styles.css";
 import { Board } from "./components/Board";
 import { BoardHeader } from "./components/BoardHeader";
-import { ScopeGateState } from "./components/ScopeGateState";
 import { Sidebar } from "./components/Sidebar";
 import { TaskDrawer } from "./components/TaskDrawer";
 import { Topbar } from "./components/Topbar";
@@ -22,7 +21,6 @@ import {
   getProject,
   loadCurrentProjectId,
   loadProjects,
-  markScopeDefined,
   saveCurrentProjectId
 } from "./modules/project/projectStore";
 import { migrateTasks } from "./utils/taskStatusMigration";
@@ -83,8 +81,6 @@ function App() {
     () => getProject(currentProjectId),
     [currentProjectId, projects, detailTick]
   );
-
-  const scopePending = currentProject?.scopeStatus === "pending";
 
   const projectTasks = useMemo(() => {
     if (!currentProjectId) return [];
@@ -159,23 +155,6 @@ function App() {
     window.history.replaceState({}, "", cleanUrl);
   }, []);
 
-  const scopeTaskCount = useMemo(
-    () => projectTasks.filter((task) => task.scopeGenerated).length,
-    [projectTasks]
-  );
-
-  function handleScopeGenerated(generatedTasks) {
-    setTasks((current) => {
-      const preserved = current.filter(
-        (task) => task.projectId !== currentProjectId || !task.scopeGenerated
-      );
-      return [...generatedTasks, ...preserved];
-    });
-    markScopeDefined(currentProjectId);
-    refreshProjects();
-    setDetailTick((value) => value + 1);
-  }
-
   function navigateTo(view) {
     if (view !== "workspace" && view !== "board") {
       setFocusControlId("");
@@ -244,7 +223,7 @@ function App() {
 
   function handleProjectCreated(project) {
     refreshProjects();
-    openProject(project.id, "detail");
+    openProject(project.id, "workspace");
   }
 
   function updateFilter(name, value) {
@@ -252,7 +231,6 @@ function App() {
   }
 
   function openTask(task) {
-    if (scopePending) return;
     const nextTask = task || {
       ...emptyTask,
       id: "",
@@ -335,7 +313,6 @@ function App() {
   }
 
   function moveTask(taskId, nextStatus) {
-    if (scopePending) return;
     const target = tasks.find((task) => task.id === taskId);
     if (!target || target.status === nextStatus) return;
 
@@ -353,7 +330,7 @@ function App() {
 
   function handleDeleteProject(projectId, projectName) {
     const confirmed = window.confirm(
-      `确定要删除项目「${projectName}」吗？\n\n此操作不可恢复。项目成员、Scope 与关联看板任务将一并移除。`
+      `确定要删除项目「${projectName}」吗？\n\n此操作不可恢复。项目成员、控制点与关联看板任务将一并移除。`
     );
     if (!confirmed) return;
 
@@ -410,12 +387,11 @@ function App() {
         <ProjectDetailPage
           projectId={currentProjectId}
           refreshToken={detailTick}
-          scopeTaskCount={scopeTaskCount}
-          startTaskId={Number(nextTaskId(tasks).replace("DS-", ""))}
+          controlPointCount={projectTasks.length}
+          onOpenWorkspace={goToWorkspace}
           onOpenBoard={() => setActiveView("board")}
           onOpenProgress={() => setActiveView("progress")}
           onOpenMembers={() => setActiveView("members")}
-          onScopeGenerated={handleScopeGenerated}
           onBack={goHome}
           onDelete={() => handleDeleteProject(currentProjectId, currentProject.name)}
           onToast={setToast}
@@ -438,15 +414,6 @@ function App() {
     }
 
     if (activeView === "workspace") {
-      if (scopePending) {
-        return (
-          <ScopeGateState
-            title="工作台等待 Scope 明确"
-            onGoScope={() => setActiveView("detail")}
-          />
-        );
-      }
-
       return (
         <WorkspacePage
           project={currentProject}
@@ -472,15 +439,6 @@ function App() {
     }
 
     if (activeView === "board") {
-      if (scopePending) {
-        return (
-          <ScopeGateState
-            title="看板等待 Scope 明确"
-            onGoScope={() => setActiveView("detail")}
-          />
-        );
-      }
-
       return (
         <>
           <BoardHeader
@@ -500,15 +458,6 @@ function App() {
     }
 
     if (activeView === "progress") {
-      if (scopePending) {
-        return (
-          <ScopeGateState
-            title="进度看板等待 Scope 明确"
-            onGoScope={() => setActiveView("detail")}
-          />
-        );
-      }
-
       return (
         <ProgressBoardPage
           project={currentProject}
@@ -544,7 +493,6 @@ function App() {
         <Topbar
           activeView={activeView}
           project={currentProject}
-          scopePending={scopePending && (activeView === "board" || activeView === "workspace" || activeView === "progress")}
           onNewTask={() => openTask()}
         />
         <div className="content-body">

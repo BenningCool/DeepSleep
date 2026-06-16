@@ -13,7 +13,8 @@ export function migrateProject(project) {
   return {
     ...project,
     clientName: project.clientName || "",
-    specialistTeams: Array.isArray(project.specialistTeams) ? project.specialistTeams : []
+    specialistTeams: Array.isArray(project.specialistTeams) ? project.specialistTeams : [],
+    scopeStatus: project.scopeStatus === "pending" ? "defined" : (project.scopeStatus || "defined")
   };
 }
 
@@ -168,7 +169,7 @@ export function createProject(form) {
     industry: form.industry,
     startDate: form.startDate,
     reportDate: form.reportDate || "",
-    scopeStatus: "pending",
+    scopeStatus: "defined",
     members: buildMembersFromForm(form),
     specialistTeams: buildSpecialistTeamsFromForm(form),
     createdAt: new Date().toISOString()

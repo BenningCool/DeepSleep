@@ -381,7 +381,7 @@ export function ProgressBoardPage({
             )
           ) : (
             <div className="empty-state compact">
-              <p>暂无控制点，请先生成 Scope 或调整筛选条件。</p>
+              <p>暂无控制点，请在工作台新建测试点或调整筛选条件。</p>
             </div>
           )}
         </section>

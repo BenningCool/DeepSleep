@@ -2,6 +2,15 @@ import { labelOfWorkspaceStatus } from "../../data/progressLabels";
 import { PROGRESS_STATUS } from "../../services/workspaceProgressService";
 import { WORKSPACE_STATUS_SEGMENTS } from "./progressVisualTokens";
 
+const PROGRESS_BAR_SEGMENTS = WORKSPACE_STATUS_SEGMENTS.filter(
+  (segment) => segment.id !== PROGRESS_STATUS.NOT_STARTED
+);
+
+function hasProgressFill(breakdown) {
+  return (breakdown[PROGRESS_STATUS.IN_PROGRESS] || 0)
+    + (breakdown[PROGRESS_STATUS.COMPLETED] || 0) > 0;
+}
+
 export function getBreakdownCompletionPercent(breakdown) {
   const total = breakdown?.total || 0;
   if (!total) return 0;
@@ -28,7 +37,7 @@ export function WorkspaceStatusOverviewBar({
 }) {
   const { total } = breakdown;
 
-  if (pending || !total) {
+  if (pending || !total || !hasProgressFill(breakdown)) {
     return (
       <div className={`project-card-progress-track pending ${className}`.trim()}>
         <span style={{ width: "0%" }} />
@@ -42,7 +51,7 @@ export function WorkspaceStatusOverviewBar({
       role="img"
       aria-label={formatWorkspaceStatusSummary(breakdown)}
     >
-      {WORKSPACE_STATUS_SEGMENTS.map((segment) => {
+      {PROGRESS_BAR_SEGMENTS.map((segment) => {
         const count = breakdown[segment.id] || 0;
         if (!count) return null;
         return (

@@ -1705,7 +1705,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
             }) : (
               <div className="empty-state compact">
                 <h3>暂无可记录的测试点</h3>
-                <p>请先在 Scope 或看板中生成当前项目任务。</p>
+                <p>点击「新建测试点」添加控制点，或调整左侧筛选条件。</p>
               </div>
             )}
           </div>

@@ -14,15 +14,6 @@ import { getProjectWorkspaceStatusOverview } from "./projectProgressOverview";
 import { PROJECT_SORT_OPTIONS } from "./specialistConstants";
 
 function ProjectCardProgress({ project, tasks }) {
-  if (project.scopeStatus === "pending") {
-    return (
-      <div className="project-card-progress" aria-label="状态概述">
-        <WorkspaceStatusOverviewBar breakdown={{ total: 0 }} pending />
-        <p className="project-card-progress-meta muted">待 Scope</p>
-      </div>
-    );
-  }
-
   const breakdown = getProjectWorkspaceStatusOverview(project.id, tasks);
   const { total } = breakdown;
 
@@ -48,6 +39,8 @@ function ProjectCardProgress({ project, tasks }) {
 }
 
 function ProjectCard({ project, tasks, active, onOpen }) {
+  const controlCount = tasks.filter((task) => task.projectId === project.id).length;
+
   return (
     <button
       className={`project-card ${active ? "active" : ""}`}
@@ -70,8 +63,8 @@ function ProjectCard({ project, tasks, active, onOpen }) {
       ) : null}
       <ProjectCardProgress project={project} tasks={tasks} />
       <div className="project-card-footer">
-        <span className={`scope-badge ${project.scopeStatus}`}>
-          Scope {project.scopeStatus === "pending" ? "Pending" : "Defined"}
+        <span className="scope-badge defined">
+          {controlCount ? `${controlCount} 控制点` : "暂无控制点"}
         </span>
         <span>{countActiveMembers(project)} members</span>
       </div>
@@ -101,7 +94,7 @@ export function ProjectsHomePage({
           <p className="page-eyebrow">Engagement Portfolio</p>
           <h2>项目列表</h2>
           <p className="page-lead">
-            像 JIRA 一样快速检索多项目，但更轻量：聚焦客户、行业、成员与后续 Scope 协同。
+            像 JIRA 一样快速检索多项目，但更轻量：聚焦客户、行业、成员与控制点进度。
           </p>
         </div>
         <button className="button primary" type="button" onClick={onCreate}>新建项目</button>

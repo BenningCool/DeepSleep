@@ -13,7 +13,6 @@ const VIEW_LABELS = {
 export function Topbar({
   activeView = "home",
   project,
-  scopePending = false,
   onNewTask
 }) {
   const viewLabel = VIEW_LABELS[activeView] || "DeepSleep";
@@ -38,11 +37,8 @@ export function Topbar({
         <span>{viewLabel}</span>
       </div>
       <div className="actions">
-        {activeView === "board" && !scopePending ? (
+        {activeView === "board" ? (
           <button className="button primary" type="button" onClick={onNewTask}>新建任务</button>
-        ) : null}
-        {scopePending && activeView === "board" ? (
-          <span className="topbar-note">Scope Pending · 看板暂不可用</span>
         ) : null}
       </div>
     </header>
