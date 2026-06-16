@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   EVIDENCE_STATUS,
+  MATERIAL_CATEGORY,
+  NODE_STATUS,
   PROGRESS_STATUS,
   REVIEW_STATUS,
   addWorkspaceMaterial,
@@ -35,6 +37,12 @@ const REVIEW_LABELS = {
   [REVIEW_STATUS.SIGNED_OFF]: "已签核"
 };
 
+const MATERIAL_LABELS = {
+  [MATERIAL_CATEGORY.SPP]: "SPP",
+  [MATERIAL_CATEGORY.MEETING_MINUTES]: "会议纪要",
+  [MATERIAL_CATEGORY.EVIDENCE]: "测试资料"
+};
+
 const emptyDetail = {
   testContent: {
     objective: "",
@@ -42,7 +50,13 @@ const emptyDetail = {
     sampleInfo: "",
     result: ""
   },
+  nodeResponses: {},
   materials: [],
+  phases: [],
+  completedNodes: 0,
+  totalNodes: 0,
+  phaseProgress: {},
+  progressPercent: 0,
   reviewStatus: REVIEW_STATUS.NOT_SUBMITTED,
   reviewComment: ""
 };
@@ -61,6 +75,25 @@ function statusClass(status) {
   return String(status || "").replaceAll("_", "-");
 }
 
+function materialLabel(category) {
+  return MATERIAL_LABELS[category] || "材料";
+}
+
+function uploadLabel(node) {
+  if (node.type === "upload_spp") return "上传 SPP";
+  if (node.type === "upload_minutes") return "上传纪要";
+  return "上传资料";
+}
+
+function syncLegacyTestContent(detail) {
+  return {
+    objective: detail.nodeResponses["tod-objective"] || detail.testContent.objective || "",
+    procedure: detail.nodeResponses["toe-procedure"] || detail.testContent.procedure || "",
+    sampleInfo: detail.nodeResponses["toe-sample"] || detail.testContent.sampleInfo || "",
+    result: detail.nodeResponses["toe-result"] || detail.testContent.result || ""
+  };
+}
+
 function WorkspaceStat({ value, label }) {
   return (
     <div className="workspace-stat">
@@ -70,36 +103,52 @@ function WorkspaceStat({ value, label }) {
   );
 }
 
-function MaterialList({ title, items, onRemove }) {
+function ProgressMeter({ completed, total, label }) {
+  const percent = total ? Math.round((completed / total) * 100) : 0;
+
   return (
-    <section className="workspace-material-section">
-      <h4>{title}</h4>
-      {items.length ? (
-        <ul className="workspace-material-list">
-          {items.map((item) => (
-            <li key={item.id}>
-              <div>
-                <strong>{item.name}</strong>
-                <span>
-                  {item.uploadedBy} · {formatDateTime(item.uploadedAt)}
-                  {item.size ? ` · ${Math.round(item.size / 1024)} KB` : ""}
-                </span>
-              </div>
-              <button className="button subtle" type="button" onClick={() => onRemove(item.id)}>
-                移除
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="workspace-empty-line">暂无材料</p>
-      )}
-    </section>
+    <div className="workspace-meter">
+      <div className="workspace-meter-head">
+        <span>{label}</span>
+        <strong>{completed}/{total}</strong>
+      </div>
+      <div className="workspace-progress-track">
+        <span style={{ width: `${percent}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function MaterialList({ items, onRemove }) {
+  if (!items.length) {
+    return <p className="workspace-empty-line">暂无材料</p>;
+  }
+
+  return (
+    <ul className="workspace-material-list compact">
+      {items.map((item) => (
+        <li key={item.id}>
+          <div>
+            <strong>{item.name}</strong>
+            <span>
+              {materialLabel(item.category)} · {item.uploadedBy} · {formatDateTime(item.uploadedAt)}
+              {item.size ? ` · ${Math.round(item.size / 1024)} KB` : ""}
+            </span>
+          </div>
+          <button className="button subtle" type="button" onClick={() => onRemove(item.id)}>
+            移除
+          </button>
+        </li>
+      ))}
+    </ul>
   );
 }
 
 export function WorkspacePage({ project, tasks, onToast }) {
   const [ownerFilter, setOwnerFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [actionOnly, setActionOnly] = useState(false);
   const [selectedId, setSelectedId] = useState("");
   const [refreshToken, setRefreshToken] = useState(0);
   const [detail, setDetail] = useState(emptyDetail);
@@ -114,19 +163,35 @@ export function WorkspacePage({ project, tasks, onToast }) {
   ), [snapshot.controls]);
 
   const visibleControls = useMemo(() => (
-    snapshot.controls.filter((item) => !ownerFilter || item.owner === ownerFilter)
-  ), [snapshot.controls, ownerFilter]);
+    snapshot.controls.filter((item) => {
+      const matchesOwner = !ownerFilter || item.owner === ownerFilter;
+      const matchesType = !typeFilter || item.controlType === typeFilter;
+      const matchesStatus = !statusFilter || item.progressStatus === statusFilter;
+      const matchesAction = !actionOnly || item.progressStatus !== PROGRESS_STATUS.COMPLETED;
+      return matchesOwner && matchesType && matchesStatus && matchesAction;
+    })
+  ), [actionOnly, ownerFilter, snapshot.controls, statusFilter, typeFilter]);
 
   const selectedControl = useMemo(() => (
     snapshot.controls.find((item) => item.id === selectedId) || visibleControls[0] || null
   ), [snapshot.controls, selectedId, visibleControls]);
 
-  const stats = useMemo(() => ({
-    total: snapshot.controls.length,
-    blocked: snapshot.controls.filter((item) => item.progressStatus === PROGRESS_STATUS.BLOCKED).length,
-    pendingReview: snapshot.controls.filter((item) => item.reviewStatus === REVIEW_STATUS.PENDING_REVIEW).length,
-    completed: snapshot.controls.filter((item) => item.progressStatus === PROGRESS_STATUS.COMPLETED).length
-  }), [snapshot.controls]);
+  const selectedTask = useMemo(() => (
+    tasks.find((task) => task.id === selectedControl?.id) || null
+  ), [selectedControl?.id, tasks]);
+
+  const stats = useMemo(() => {
+    const completedNodes = snapshot.controls.reduce((sum, item) => sum + (item.completedNodes || 0), 0);
+    const totalNodes = snapshot.controls.reduce((sum, item) => sum + (item.totalNodes || 0), 0);
+
+    return {
+      total: snapshot.controls.length,
+      blocked: snapshot.controls.filter((item) => item.progressStatus === PROGRESS_STATUS.BLOCKED).length,
+      pendingReview: snapshot.controls.filter((item) => item.progressStatus === PROGRESS_STATUS.PENDING_REVIEW).length,
+      completed: snapshot.controls.filter((item) => item.progressStatus === PROGRESS_STATUS.COMPLETED).length,
+      nodeProgress: `${completedNodes}/${totalNodes}`
+    };
+  }, [snapshot.controls]);
 
   useEffect(() => {
     if (!selectedControl) {
@@ -138,19 +203,19 @@ export function WorkspacePage({ project, tasks, onToast }) {
     if (selectedId !== selectedControl.id) {
       setSelectedId(selectedControl.id);
     }
-    setDetail(getControlProgressDetail(selectedControl.id));
-  }, [selectedControl, selectedId, refreshToken]);
+    setDetail(getControlProgressDetail(selectedControl.id, selectedTask, tasks));
+  }, [selectedControl, selectedId, selectedTask, tasks, refreshToken]);
 
   function refresh() {
     setRefreshToken((value) => value + 1);
   }
 
-  function updateTestContent(name, value) {
+  function updateNodeResponse(nodeId, value) {
     setDetail((current) => ({
       ...current,
-      testContent: {
-        ...current.testContent,
-        [name]: value
+      nodeResponses: {
+        ...current.nodeResponses,
+        [nodeId]: value
       }
     }));
   }
@@ -162,20 +227,23 @@ export function WorkspacePage({ project, tasks, onToast }) {
   function saveDetail() {
     if (!selectedControl) return;
     upsertControlProgress(selectedControl.id, {
-      testContent: detail.testContent,
+      nodeResponses: detail.nodeResponses,
+      testContent: syncLegacyTestContent(detail),
       reviewStatus: detail.reviewStatus,
       reviewComment: detail.reviewComment
     });
     refresh();
-    onToast("测试记录已保存，进度接口已更新。");
+    onToast("测试点子流程已保存，模块 3 进度接口已更新。");
   }
 
-  function uploadMaterials(event, category) {
+  function uploadMaterials(event, node) {
     if (!selectedControl) return;
     const files = [...(event.target.files || [])];
     files.forEach((file) => {
       addWorkspaceMaterial(selectedControl.id, {
-        category,
+        category: node.category || MATERIAL_CATEGORY.EVIDENCE,
+        phaseId: node.phaseId,
+        nodeId: node.id,
         name: file.name,
         fileType: file.type,
         size: file.size,
@@ -185,7 +253,7 @@ export function WorkspacePage({ project, tasks, onToast }) {
     event.target.value = "";
     refresh();
     if (files.length) {
-      onToast(`已记录 ${files.length} 个${category === "meeting_minutes" ? "会议纪要" : "测试资料"}。`);
+      onToast(`已记录 ${files.length} 个${materialLabel(node.category)}。`);
     }
   }
 
@@ -196,22 +264,28 @@ export function WorkspacePage({ project, tasks, onToast }) {
     onToast("材料记录已移除。");
   }
 
-  const meetingMinutes = detail.materials.filter((item) => item.category === "meeting_minutes");
-  const evidenceFiles = detail.materials.filter((item) => item.category === "evidence");
+  function materialsForNode(node) {
+    return detail.materials.filter((item) => (
+      item.phaseId === node.phaseId
+      && item.category === node.category
+      && (!item.nodeId || item.nodeId === node.id)
+    ));
+  }
+
+  function textValueForNode(node) {
+    return detail.nodeResponses[node.id] ?? node.value ?? "";
+  }
 
   return (
     <section className="workspace-page">
       <header className="page-header">
         <div>
-          <p className="page-eyebrow">Workspace · 测试执行工作台</p>
+          <p className="page-eyebrow">Workspace · 测试点执行工作台</p>
           <h2>{project.clientName || project.name}</h2>
-          <p className="page-lead">
-            记录测试内容、会议纪要与测试资料；模块 3 通过共享进度接口读取这里沉淀的材料。
-          </p>
         </div>
         <div className="workspace-stats">
-          <WorkspaceStat value={stats.total} label="测试项" />
-          <WorkspaceStat value={stats.blocked} label="阻塞" />
+          <WorkspaceStat value={stats.total} label="测试点" />
+          <WorkspaceStat value={stats.nodeProgress} label="节点进度" />
           <WorkspaceStat value={stats.pendingReview} label="待复核" />
           <WorkspaceStat value={stats.completed} label="已完成" />
         </div>
@@ -221,20 +295,51 @@ export function WorkspacePage({ project, tasks, onToast }) {
         <aside className="workspace-list-panel">
           <div className="panel-toolbar">
             <div>
-              <h3>任务 / 控制清单</h3>
-              <p className="panel-note">数据来自当前项目看板与 Scope 初始化任务</p>
+              <h3>测试点清单</h3>
+              <p className="panel-note">一张卡片代表一个 GITC / ITAC 测试点</p>
             </div>
           </div>
 
-          <label className="field">
-            <span className="label">负责人筛选</span>
-            <select value={ownerFilter} onChange={(event) => setOwnerFilter(event.target.value)}>
-              <option value="">全部负责人</option>
-              {owners.map((owner) => (
-                <option key={owner} value={owner}>{owner}</option>
-              ))}
-            </select>
-          </label>
+          <div className="workspace-filter-grid">
+            <label className="field">
+              <span className="label">负责人</span>
+              <select value={ownerFilter} onChange={(event) => setOwnerFilter(event.target.value)}>
+                <option value="">全部</option>
+                {owners.map((owner) => (
+                  <option key={owner} value={owner}>{owner}</option>
+                ))}
+              </select>
+            </label>
+
+            <label className="field">
+              <span className="label">类型</span>
+              <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
+                <option value="">全部</option>
+                <option value="GITC">GITC</option>
+                <option value="ITAC">ITAC</option>
+                <option value="TASK">TASK</option>
+              </select>
+            </label>
+
+            <label className="field full">
+              <span className="label">进度状态</span>
+              <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+                <option value="">全部状态</option>
+                {Object.entries(PROGRESS_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </label>
+
+            <label className="workspace-check full">
+              <input
+                type="checkbox"
+                checked={actionOnly}
+                onChange={(event) => setActionOnly(event.target.checked)}
+              />
+              <span>仅看未完成 / 待处理</span>
+            </label>
+          </div>
 
           <div className="workspace-control-list">
             {visibleControls.length ? visibleControls.map((control) => (
@@ -253,18 +358,22 @@ export function WorkspacePage({ project, tasks, onToast }) {
                   <span className={`progress-pill ${statusClass(control.progressStatus)}`}>
                     {PROGRESS_LABELS[control.progressStatus]}
                   </span>
-                  <span>{control.progressPercent}%</span>
+                  <span>{control.completedNodes || 0}/{control.totalNodes || 0}</span>
                 </div>
                 <div className="workspace-progress-track">
                   <span style={{ width: `${control.progressPercent}%` }} />
                 </div>
+                <div className="workspace-phase-mini">
+                  <span>TOD {control.phaseProgress?.tod?.completedNodes || 0}/{control.phaseProgress?.tod?.totalNodes || 0}</span>
+                  <span>TOE {control.phaseProgress?.toe?.completedNodes || 0}/{control.phaseProgress?.toe?.totalNodes || 0}</span>
+                </div>
                 <small>
-                  纪要 {control.meetingMinutesCount} · 资料 {control.evidenceCount} · {EVIDENCE_LABELS[control.evidenceStatus]}
+                  SPP {control.sppCount || 0} · 纪要 {control.meetingMinutesCount || 0} · 资料 {control.evidenceCount || 0} · {EVIDENCE_LABELS[control.evidenceStatus]}
                 </small>
               </button>
             )) : (
               <div className="empty-state compact">
-                <h3>暂无可记录的测试项</h3>
+                <h3>暂无可记录的测试点</h3>
                 <p>请先在 Scope 或看板中生成当前项目任务。</p>
               </div>
             )}
@@ -297,47 +406,23 @@ export function WorkspacePage({ project, tasks, onToast }) {
                 </div>
               ) : null}
 
-              <div className="workspace-form-grid">
-                <label className="field full">
-                  <span className="label">测试目标 Objective</span>
-                  <textarea
-                    rows="3"
-                    value={detail.testContent.objective}
-                    onChange={(event) => updateTestContent("objective", event.target.value)}
-                    placeholder="例如：验证访问管理控制在审计期间持续有效运行。"
+              <div className="workspace-progress-summary">
+                <ProgressMeter
+                  label="总进度"
+                  completed={detail.completedNodes || 0}
+                  total={detail.totalNodes || 0}
+                />
+                {(detail.phases || []).map((phase) => (
+                  <ProgressMeter
+                    key={phase.id}
+                    label={phase.label}
+                    completed={phase.completedNodes}
+                    total={phase.totalNodes}
                   />
-                </label>
+                ))}
+              </div>
 
-                <label className="field full">
-                  <span className="label">测试程序 Procedure</span>
-                  <textarea
-                    rows="4"
-                    value={detail.testContent.procedure}
-                    onChange={(event) => updateTestContent("procedure", event.target.value)}
-                    placeholder="记录访谈、抽样、检查、重新执行等测试步骤。"
-                  />
-                </label>
-
-                <label className="field">
-                  <span className="label">样本信息 Sample</span>
-                  <textarea
-                    rows="3"
-                    value={detail.testContent.sampleInfo}
-                    onChange={(event) => updateTestContent("sampleInfo", event.target.value)}
-                    placeholder="样本量、期间、抽样口径。"
-                  />
-                </label>
-
-                <label className="field">
-                  <span className="label">测试结论 Result</span>
-                  <textarea
-                    rows="3"
-                    value={detail.testContent.result}
-                    onChange={(event) => updateTestContent("result", event.target.value)}
-                    placeholder="No exception noted / 发现与待补充事项。"
-                  />
-                </label>
-
+              <div className="workspace-review-row">
                 <label className="field">
                   <span className="label">复核状态 Review</span>
                   <select
@@ -361,37 +446,85 @@ export function WorkspacePage({ project, tasks, onToast }) {
                 </label>
               </div>
 
-              <div className="workspace-upload-row">
-                <label className="button">
-                  上传会议纪要
-                  <input
-                    type="file"
-                    multiple
-                    onChange={(event) => uploadMaterials(event, "meeting_minutes")}
-                  />
-                </label>
-                <label className="button">
-                  上传测试资料
-                  <input
-                    type="file"
-                    multiple
-                    onChange={(event) => uploadMaterials(event, "evidence")}
-                  />
-                </label>
-                <button className="button primary" type="button" onClick={saveDetail}>
-                  保存测试记录
-                </button>
+              <div className="workspace-phase-list">
+                {(detail.phases || []).map((phase) => (
+                  <section key={phase.id} className="workspace-phase-panel">
+                    <div className="workspace-phase-head">
+                      <div>
+                        <h4>{phase.label}</h4>
+                        <p>{phase.description}</p>
+                      </div>
+                      <strong>{phase.completedNodes}/{phase.totalNodes}</strong>
+                    </div>
+
+                    <div className="workspace-node-list">
+                      {phase.nodes.map((node) => {
+                        const textValue = textValueForNode(node);
+                        const textComplete = node.type === "text" && textValue.trim();
+                        const nodeStatus = textComplete ? NODE_STATUS.COMPLETED : node.status;
+                        const nodeMaterials = node.type.startsWith("upload") ? materialsForNode(node) : [];
+
+                        return (
+                          <div key={node.id} className={`workspace-node ${nodeStatus}`}>
+                            <div className="workspace-node-main">
+                              <span className={`node-status ${nodeStatus}`}>
+                                {nodeStatus === NODE_STATUS.COMPLETED ? "Done" : "Pending"}
+                              </span>
+                              <div>
+                                <strong>{node.label}</strong>
+                                <span>{node.type}</span>
+                              </div>
+                            </div>
+
+                            {node.type === "text" ? (
+                              <textarea
+                                rows="3"
+                                value={textValue}
+                                onChange={(event) => updateNodeResponse(node.id, event.target.value)}
+                                placeholder={node.placeholder}
+                              />
+                            ) : null}
+
+                            {node.type.startsWith("upload") ? (
+                              <div className="workspace-node-upload">
+                                <label className="button">
+                                  {uploadLabel(node)}
+                                  <input
+                                    type="file"
+                                    multiple
+                                    onChange={(event) => uploadMaterials(event, node)}
+                                  />
+                                </label>
+                                <MaterialList items={nodeMaterials} onRemove={removeMaterial} />
+                              </div>
+                            ) : null}
+
+                            {node.type === "review" ? (
+                              <p className="workspace-node-note">
+                                当前复核状态：{REVIEW_LABELS[detail.reviewStatus]}。
+                                {node.threshold === REVIEW_STATUS.SIGNED_OFF
+                                  ? "该节点需要最终签核。"
+                                  : "提交复核后该节点完成。"}
+                              </p>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </section>
+                ))}
               </div>
 
-              <div className="workspace-material-grid">
-                <MaterialList title="会议纪要" items={meetingMinutes} onRemove={removeMaterial} />
-                <MaterialList title="测试资料" items={evidenceFiles} onRemove={removeMaterial} />
+              <div className="workspace-upload-row">
+                <button className="button primary" type="button" onClick={saveDetail}>
+                  保存测试点子流程
+                </button>
               </div>
             </>
           ) : (
             <div className="empty-state large">
-              <h3>暂无任务</h3>
-              <p>当前项目还没有可记录的测试项。</p>
+              <h3>暂无测试点</h3>
+              <p>当前项目还没有可记录的测试点。</p>
             </div>
           )}
         </section>

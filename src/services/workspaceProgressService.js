@@ -25,12 +25,114 @@ export const REVIEW_STATUS = {
   SIGNED_OFF: "signed_off"
 };
 
+export const NODE_STATUS = {
+  PENDING: "pending",
+  COMPLETED: "completed"
+};
+
+export const MATERIAL_CATEGORY = {
+  SPP: "spp",
+  MEETING_MINUTES: "meeting_minutes",
+  EVIDENCE: "evidence"
+};
+
 const DEFAULT_TEST_CONTENT = {
   objective: "",
   procedure: "",
   sampleInfo: "",
   result: ""
 };
+
+export const WORKSPACE_PHASES = [
+  {
+    id: "tod",
+    label: "TOD",
+    description: "设计有效性测试：理解流程、确认控制设计、沉淀访谈与设计证据。",
+    nodes: [
+      {
+        id: "tod-minutes",
+        label: "上传 TOD 会议纪要",
+        type: "upload_minutes",
+        required: true,
+        category: MATERIAL_CATEGORY.MEETING_MINUTES
+      },
+      {
+        id: "tod-objective",
+        label: "TOD 测试目标",
+        type: "text",
+        required: true,
+        placeholder: "说明本测试点的设计有效性测试目标。",
+        legacyField: "objective"
+      },
+      {
+        id: "tod-process",
+        label: "流程理解与控制描述",
+        type: "text",
+        required: true,
+        placeholder: "记录流程理解、控制频率、控制人和关键系统。"
+      },
+      {
+        id: "tod-spp",
+        label: "TOD支持性材料",
+        type: "upload_spp",
+        required: true,
+        category: MATERIAL_CATEGORY.SPP
+      }
+    ]
+  },
+  {
+    id: "toe",
+    label: "TOE",
+    description: "运行有效性测试：完成样本、执行测试、记录结论。",
+    nodes: [
+      {
+        id: "toe-sample",
+        label: "样本信息",
+        type: "text",
+        required: true,
+        placeholder: "记录样本量、期间、抽样口径。",
+        legacyField: "sampleInfo"
+      },
+      {
+        id: "toe-procedure",
+        label: "TOE 测试程序",
+        type: "text",
+        required: true,
+        placeholder: "记录检查、重新执行、穿行或核对步骤。",
+        legacyField: "procedure"
+      },
+      {
+        id: "toe-execution",
+        label: "执行过程记录",
+        type: "text",
+        required: true,
+        placeholder: "记录样本逐项执行过程和关键判断。"
+      },
+      {
+        id: "toe-spp",
+        label: "上传TOE支持性材料",
+        type: "upload_spp",
+        required: true,
+        category: MATERIAL_CATEGORY.SPP
+      },
+      {
+        id: "toe-minutes",
+        label: "上传 TOE 会议纪要",
+        type: "upload_minutes",
+        required: true,
+        category: MATERIAL_CATEGORY.MEETING_MINUTES
+      },
+      {
+        id: "toe-result",
+        label: "TOE 测试结论",
+        type: "text",
+        required: true,
+        placeholder: "记录 TOE 结论。",
+        legacyField: "result"
+      }
+    ]
+  }
+];
 
 const PHASE_ORDER = {
   "scope-confirm": 0,
@@ -40,6 +142,13 @@ const PHASE_ORDER = {
   "control-test": 4,
   "deficiency-review": 5,
   "wrap-up": 6
+};
+
+const REVIEW_ORDER = {
+  [REVIEW_STATUS.NOT_SUBMITTED]: 0,
+  [REVIEW_STATUS.COMMENTED]: 1,
+  [REVIEW_STATUS.PENDING_REVIEW]: 2,
+  [REVIEW_STATUS.SIGNED_OFF]: 3
 };
 
 function clone(value) {
@@ -72,6 +181,21 @@ function saveStore(store) {
   storage.setItem(WORKSPACE_PROGRESS_STORAGE_KEY, JSON.stringify(store));
 }
 
+function normalizeMaterial(material = {}) {
+  return {
+    id: material.id || `mat_${Math.random().toString(36).slice(2, 9)}`,
+    category: material.category || MATERIAL_CATEGORY.EVIDENCE,
+    phaseId: material.phaseId || material.phase || "general",
+    nodeId: material.nodeId || "",
+    name: material.name || "未命名材料",
+    fileType: material.fileType || "",
+    size: material.size || 0,
+    uploadedBy: material.uploadedBy || "成员",
+    uploadedAt: material.uploadedAt || nowIso(),
+    status: material.status || "submitted"
+  };
+}
+
 function normalizeRecord(controlId, record = {}) {
   return {
     id: controlId,
@@ -79,25 +203,38 @@ function normalizeRecord(controlId, record = {}) {
       ...DEFAULT_TEST_CONTENT,
       ...(record.testContent || {})
     },
-    materials: Array.isArray(record.materials) ? record.materials : [],
+    nodeResponses: record.nodeResponses && typeof record.nodeResponses === "object"
+      ? record.nodeResponses
+      : {},
+    materials: Array.isArray(record.materials) ? record.materials.map(normalizeMaterial) : [],
     reviewStatus: record.reviewStatus || REVIEW_STATUS.NOT_SUBMITTED,
     reviewComment: record.reviewComment || "",
     updatedAt: record.updatedAt || nowIso()
   };
 }
 
-function hasTestContent(record) {
-  const content = record?.testContent || {};
-  return Boolean(
-    content.objective?.trim()
-    || content.procedure?.trim()
-    || content.sampleInfo?.trim()
-    || content.result?.trim()
-  );
+function textValueForNode(record, node) {
+  const value = record.nodeResponses?.[node.id];
+  if (typeof value === "string" && value.trim()) return value;
+
+  if (node.legacyField) {
+    return record.testContent?.[node.legacyField] || "";
+  }
+
+  return "";
 }
 
-function getMaterials(record, category) {
-  return (record?.materials || []).filter((item) => item.category === category);
+function hasTextForNode(record, node) {
+  return Boolean(textValueForNode(record, node).trim());
+}
+
+function getMaterials(record, category, phaseId, nodeId) {
+  return (record?.materials || []).filter((item) => {
+    if (category && item.category !== category) return false;
+    if (phaseId && item.phaseId !== phaseId) return false;
+    if (nodeId && item.nodeId && item.nodeId !== nodeId) return false;
+    return true;
+  });
 }
 
 function inferControlType(task = {}) {
@@ -146,55 +283,181 @@ function getDependencies(task, allTasks = []) {
   return getBlockingPredecessors(task, allTasks).map((candidate) => candidate.id);
 }
 
-function getEvidenceStatus(record) {
-  const evidenceCount = getMaterials(record, "evidence").length;
-  const meetingCount = getMaterials(record, "meeting_minutes").length;
+function reviewReached(current, threshold) {
+  return (REVIEW_ORDER[current] || 0) >= (REVIEW_ORDER[threshold] || 0);
+}
+
+function getNodeStatus(record, phase, node) {
+  if (node.type === "text") {
+    return hasTextForNode(record, node) ? NODE_STATUS.COMPLETED : NODE_STATUS.PENDING;
+  }
+
+  if (node.type?.startsWith("upload")) {
+    return getMaterials(record, node.category, phase.id, node.id).length
+      ? NODE_STATUS.COMPLETED
+      : NODE_STATUS.PENDING;
+  }
+
+  if (node.type === "review") {
+    return reviewReached(record.reviewStatus, node.threshold)
+      ? NODE_STATUS.COMPLETED
+      : NODE_STATUS.PENDING;
+  }
+
+  return NODE_STATUS.PENDING;
+}
+
+function buildPhaseProgress(record) {
+  let completedNodes = 0;
+  let totalNodes = 0;
+  let completedExecutionNodes = 0;
+  let totalExecutionNodes = 0;
+
+  const phases = WORKSPACE_PHASES.map((phase) => {
+    let phaseCompleted = 0;
+    let phaseTotal = 0;
+    let phaseExecutionCompleted = 0;
+    let phaseExecutionTotal = 0;
+
+    const nodes = phase.nodes.map((node) => {
+      const status = getNodeStatus(record, phase, node);
+      const completed = status === NODE_STATUS.COMPLETED;
+      const required = node.required !== false;
+      const executionNode = required && !node.signoff;
+      const materials = node.type?.startsWith("upload")
+        ? getMaterials(record, node.category, phase.id, node.id)
+        : [];
+
+      if (required) {
+        phaseTotal += 1;
+        totalNodes += 1;
+      }
+      if (required && completed) {
+        phaseCompleted += 1;
+        completedNodes += 1;
+      }
+      if (executionNode) {
+        phaseExecutionTotal += 1;
+        totalExecutionNodes += 1;
+      }
+      if (executionNode && completed) {
+        phaseExecutionCompleted += 1;
+        completedExecutionNodes += 1;
+      }
+
+      return {
+        ...node,
+        phaseId: phase.id,
+        status,
+        value: node.type === "text" ? textValueForNode(record, node) : "",
+        materialCount: materials.length
+      };
+    });
+
+    return {
+      id: phase.id,
+      label: phase.label,
+      description: phase.description,
+      completedNodes: phaseCompleted,
+      totalNodes: phaseTotal,
+      completedExecutionNodes: phaseExecutionCompleted,
+      totalExecutionNodes: phaseExecutionTotal,
+      nodes
+    };
+  });
+
+  return {
+    phases,
+    completedNodes,
+    totalNodes,
+    completedExecutionNodes,
+    totalExecutionNodes,
+    progressPercent: totalNodes ? Math.round((completedNodes / totalNodes) * 100) : 0,
+    executionComplete: totalExecutionNodes > 0 && completedExecutionNodes === totalExecutionNodes,
+    allRequiredComplete: totalNodes > 0 && completedNodes === totalNodes
+  };
+}
+
+function getEvidenceStatus(record, progress) {
+  const evidenceCount = getMaterials(record, MATERIAL_CATEGORY.EVIDENCE).length;
+  const sppCount = getMaterials(record, MATERIAL_CATEGORY.SPP).length;
+  const meetingCount = getMaterials(record, MATERIAL_CATEGORY.MEETING_MINUTES).length;
 
   if (record.reviewStatus === REVIEW_STATUS.SIGNED_OFF) return EVIDENCE_STATUS.APPROVED;
   if (record.reviewStatus === REVIEW_STATUS.COMMENTED) return EVIDENCE_STATUS.REJECTED;
-  if (evidenceCount > 0) return EVIDENCE_STATUS.UPLOADED;
-  if (meetingCount > 0 || hasTestContent(record)) return EVIDENCE_STATUS.PARTIAL_UPLOADED;
+  if (evidenceCount > 0 && sppCount > 0) return EVIDENCE_STATUS.UPLOADED;
+  if (evidenceCount > 0 || sppCount > 0 || meetingCount > 0 || progress.completedNodes > 0) {
+    return EVIDENCE_STATUS.PARTIAL_UPLOADED;
+  }
   return EVIDENCE_STATUS.NONE;
 }
 
-function getProgressPercent(record) {
-  let percent = 0;
+function deriveStatusFromProgress(record, task, allTasks = [], progress = buildPhaseProgress(record)) {
+  const blockers = task ? getBlockingPredecessors(task, allTasks) : [];
 
-  if (record.testContent?.objective?.trim() || record.testContent?.procedure?.trim()) {
-    percent = 25;
-  } else if (hasTestContent(record)) {
-    percent = 15;
+  if (blockers.length) return PROGRESS_STATUS.BLOCKED;
+  if (record.reviewStatus === REVIEW_STATUS.COMMENTED) return PROGRESS_STATUS.NEEDS_REWORK;
+  if (record.reviewStatus === REVIEW_STATUS.SIGNED_OFF && progress.allRequiredComplete) {
+    return PROGRESS_STATUS.COMPLETED;
   }
+  if (record.reviewStatus === REVIEW_STATUS.PENDING_REVIEW || progress.executionComplete) {
+    return PROGRESS_STATUS.PENDING_REVIEW;
+  }
+  if (progress.completedNodes === 0) return PROGRESS_STATUS.NOT_STARTED;
+  return PROGRESS_STATUS.IN_PROGRESS;
+}
 
-  if (getMaterials(record, "meeting_minutes").length) percent = Math.max(percent, 40);
-  if (getMaterials(record, "evidence").length) percent = Math.max(percent, 60);
-  if (record.reviewStatus === REVIEW_STATUS.PENDING_REVIEW) percent = Math.max(percent, 75);
-  if (record.reviewStatus === REVIEW_STATUS.COMMENTED) percent = Math.max(percent, 70);
-  if (record.reviewStatus === REVIEW_STATUS.SIGNED_OFF) percent = 100;
-
-  return percent;
+function phaseProgressMap(phases) {
+  return phases.reduce((result, phase) => ({
+    ...result,
+    [phase.id]: {
+      completedNodes: phase.completedNodes,
+      totalNodes: phase.totalNodes
+    }
+  }), {});
 }
 
 export function deriveProgressStatus(record, task, allTasks = []) {
   const normalized = normalizeRecord(task?.id || record?.id || "", record);
-  const blockers = task ? getBlockingPredecessors(task, allTasks) : [];
+  return deriveStatusFromProgress(
+    normalized,
+    task,
+    allTasks,
+    buildPhaseProgress(normalized)
+  );
+}
 
-  if (blockers.length) return PROGRESS_STATUS.BLOCKED;
-  if (normalized.reviewStatus === REVIEW_STATUS.SIGNED_OFF) return PROGRESS_STATUS.COMPLETED;
-  if (normalized.reviewStatus === REVIEW_STATUS.COMMENTED) return PROGRESS_STATUS.NEEDS_REWORK;
-  if (normalized.reviewStatus === REVIEW_STATUS.PENDING_REVIEW) return PROGRESS_STATUS.PENDING_REVIEW;
-  if (getMaterials(normalized, "evidence").length) return PROGRESS_STATUS.EVIDENCE_SUBMITTED;
-  if (hasTestContent(normalized) || getMaterials(normalized, "meeting_minutes").length) {
-    return PROGRESS_STATUS.IN_PROGRESS;
-  }
-  return PROGRESS_STATUS.NOT_STARTED;
+function buildDetail(controlId, record, task = null, allTasks = []) {
+  const normalized = normalizeRecord(controlId, record);
+  const progress = buildPhaseProgress(normalized);
+  const blockers = task ? getBlockingPredecessors(task, allTasks).map((candidate) => candidate.id) : [];
+  const progressStatus = deriveStatusFromProgress(normalized, task, allTasks, progress);
+
+  return {
+    id: controlId,
+    title: task?.title || "",
+    controlType: task ? inferControlType(task) : "",
+    testContent: normalized.testContent,
+    nodeResponses: normalized.nodeResponses,
+    materials: normalized.materials,
+    phases: progress.phases,
+    completedNodes: progress.completedNodes,
+    totalNodes: progress.totalNodes,
+    phaseProgress: phaseProgressMap(progress.phases),
+    progressPercent: progress.progressPercent,
+    progressStatus,
+    reviewStatus: normalized.reviewStatus,
+    reviewComment: normalized.reviewComment,
+    blockers,
+    updatedAt: normalized.updatedAt
+  };
 }
 
 function buildSnapshotItem(task, record, allTasks) {
-  const normalized = normalizeRecord(task.id, record);
-  const blockers = getBlockingPredecessors(task, allTasks).map((candidate) => candidate.id);
-  const meetingMinutesCount = getMaterials(normalized, "meeting_minutes").length;
-  const evidenceCount = getMaterials(normalized, "evidence").length;
+  const detail = buildDetail(task.id, record, task, allTasks);
+  const evidenceCount = getMaterials(detail, MATERIAL_CATEGORY.EVIDENCE).length;
+  const meetingMinutesCount = getMaterials(detail, MATERIAL_CATEGORY.MEETING_MINUTES).length;
+  const sppCount = getMaterials(detail, MATERIAL_CATEGORY.SPP).length;
 
   return {
     id: task.id,
@@ -203,15 +466,19 @@ function buildSnapshotItem(task, record, allTasks) {
     owner: task.owner || "未分配",
     auditPhase: task.auditPhase || "",
     taskStatus: task.status || "todo",
-    progressStatus: deriveProgressStatus(normalized, task, allTasks),
-    progressPercent: getProgressPercent(normalized),
-    evidenceStatus: getEvidenceStatus(normalized),
+    progressStatus: detail.progressStatus,
+    progressPercent: detail.progressPercent,
+    completedNodes: detail.completedNodes,
+    totalNodes: detail.totalNodes,
+    phaseProgress: detail.phaseProgress,
+    evidenceStatus: getEvidenceStatus(detail, detail),
     evidenceCount,
     meetingMinutesCount,
-    reviewStatus: normalized.reviewStatus,
-    blockers,
+    sppCount,
+    reviewStatus: detail.reviewStatus,
+    blockers: detail.blockers,
     dependencies: getDependencies(task, allTasks),
-    updatedAt: normalized.updatedAt
+    updatedAt: detail.updatedAt
   };
 }
 
@@ -230,9 +497,9 @@ export function getControlProgressSnapshot(projectId, tasks = []) {
   };
 }
 
-export function getControlProgressDetail(controlId) {
+export function getControlProgressDetail(controlId, task = null, allTasks = []) {
   const records = loadStore().records || {};
-  return normalizeRecord(controlId, records[controlId]);
+  return buildDetail(controlId, records[controlId], task, allTasks);
 }
 
 export function upsertControlProgress(controlId, patch) {
@@ -246,6 +513,10 @@ export function upsertControlProgress(controlId, patch) {
     testContent: {
       ...current.testContent,
       ...(patch.testContent || {})
+    },
+    nodeResponses: {
+      ...current.nodeResponses,
+      ...(patch.nodeResponses || {})
     },
     materials: patch.materials || current.materials,
     updatedAt
@@ -263,19 +534,22 @@ export function upsertControlProgress(controlId, patch) {
   return clone(nextRecord);
 }
 
+export function updateWorkspaceNodeResponse(controlId, nodeId, value) {
+  const current = getControlProgressDetail(controlId);
+  return upsertControlProgress(controlId, {
+    nodeResponses: {
+      ...current.nodeResponses,
+      [nodeId]: value
+    }
+  });
+}
+
 export function addWorkspaceMaterial(controlId, material) {
   const current = getControlProgressDetail(controlId);
-  const uploadedAt = nowIso();
-  const nextMaterial = {
-    id: material.id || `mat_${Math.random().toString(36).slice(2, 9)}`,
-    category: material.category || "evidence",
-    name: material.name || "未命名材料",
-    fileType: material.fileType || "",
-    size: material.size || 0,
-    uploadedBy: material.uploadedBy || "成员",
-    uploadedAt,
-    status: material.status || "submitted"
-  };
+  const nextMaterial = normalizeMaterial({
+    ...material,
+    uploadedAt: nowIso()
+  });
 
   return upsertControlProgress(controlId, {
     materials: [nextMaterial, ...current.materials]

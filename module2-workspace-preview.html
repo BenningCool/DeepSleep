@@ -1,0 +1,2276 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DeepSleep 模块 2 工作台预览</title>
+  <style>
+    :root {
+      --blue: #2451a6;
+      --blue-deep: #153a7a;
+      --blue-soft: #eaf1ff;
+      --amber: #f59e0b;
+      --amber-soft: #fff4d6;
+      --green: #16803c;
+      --green-soft: #e8f7ee;
+      --red: #c9352b;
+      --red-soft: #fff0ee;
+      --purple: #6841c6;
+      --purple-soft: #f0ebff;
+      --ink: #172033;
+      --muted: #627086;
+      --subtle: #7a8597;
+      --line: #dce2ec;
+      --line-strong: #c8d1df;
+      --surface: #ffffff;
+      --surface-soft: #f7f9fc;
+      --bg: #eef2f7;
+      --radius: 8px;
+      --shadow: 0 14px 40px rgba(21, 58, 122, 0.12);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .login-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(320px, 0.9fr) minmax(420px, 1.1fr);
+      background: var(--surface);
+    }
+
+    .login-brand {
+      display: grid;
+      align-content: center;
+      gap: 28px;
+      padding: 48px;
+      color: #fff;
+      background: var(--blue);
+    }
+
+    .brand-lockup {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background: #f7be38;
+      color: #14223a;
+      font-weight: 900;
+    }
+
+    .brand-lockup h1,
+    .brand-lockup p,
+    .login-copy h2,
+    .login-copy p {
+      margin: 0;
+    }
+
+    .brand-lockup h1 {
+      font-size: 24px;
+      line-height: 1.1;
+    }
+
+    .brand-lockup p {
+      margin-top: 3px;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 13px;
+    }
+
+    .login-copy {
+      display: grid;
+      gap: 14px;
+      max-width: 520px;
+    }
+
+    .login-copy h2 {
+      font-size: 42px;
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .login-copy p {
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 16px;
+      line-height: 1.75;
+    }
+
+    .login-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      max-width: 520px;
+    }
+
+    .login-metrics div {
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .login-metrics strong {
+      display: block;
+      font-size: 22px;
+    }
+
+    .login-metrics span {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 12px;
+    }
+
+    .login-panel {
+      display: grid;
+      place-items: center;
+      padding: 40px;
+    }
+
+    .login-card {
+      width: min(420px, 100%);
+      padding: 30px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .login-card h2 {
+      margin: 0 0 8px;
+      font-size: 26px;
+    }
+
+    .login-card p {
+      margin: 0 0 22px;
+      color: var(--subtle);
+      line-height: 1.6;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+      margin-bottom: 14px;
+    }
+
+    .label {
+      color: #34425a;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 40px;
+      padding: 10px 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--ink);
+      outline: none;
+    }
+
+    textarea {
+      min-height: 84px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #7da2fa;
+      box-shadow: 0 0 0 3px rgba(36, 81, 166, 0.14);
+    }
+
+    .button {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 38px;
+      padding: 0 14px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--ink);
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .button.primary {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .button.success {
+      border-color: var(--green);
+      background: var(--green);
+      color: #fff;
+    }
+
+    .button.subtle {
+      background: var(--surface-soft);
+      color: var(--muted);
+    }
+
+    .button.full {
+      width: 100%;
+    }
+
+    .login-error {
+      min-height: 18px;
+      margin: 10px 0 0;
+      color: var(--red);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 256px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 22px;
+      padding: 24px 18px;
+      color: #fff;
+      background: var(--blue);
+    }
+
+    .project {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding-bottom: 22px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .project h1,
+    .project p {
+      margin: 0;
+    }
+
+    .project h1 {
+      font-size: 18px;
+    }
+
+    .project p {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 12px;
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav button,
+    .sidebar-link {
+      width: 100%;
+      min-height: 42px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      border: 0;
+      border-radius: var(--radius);
+      background: transparent;
+      color: rgba(255, 255, 255, 0.78);
+      font-weight: 800;
+      text-align: left;
+    }
+
+    .nav button {
+      padding: 0 10px;
+    }
+
+    .nav button.active {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+    }
+
+    .nav-icon {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .sidebar-footer {
+      color: rgba(255, 255, 255, 0.58);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .content {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 18px 28px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .breadcrumbs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .breadcrumbs strong {
+      color: var(--ink);
+    }
+
+    .user-chip {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .avatar {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--blue-soft);
+      color: var(--blue);
+      font-weight: 900;
+    }
+
+    .workspace-page {
+      overflow: auto;
+      padding: 24px 28px 32px;
+    }
+
+    .page-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 20px;
+      align-items: start;
+      margin-bottom: 20px;
+    }
+
+    .page-eyebrow {
+      margin: 0 0 6px;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .page-header h2 {
+      margin: 0;
+      font-size: 30px;
+      letter-spacing: 0;
+    }
+
+    .page-lead {
+      max-width: 680px;
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .workspace-stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(92px, 1fr));
+      gap: 10px;
+    }
+
+    .workspace-stat {
+      min-width: 92px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      text-align: center;
+    }
+
+    .workspace-stat strong {
+      display: block;
+      font-size: 20px;
+    }
+
+    .workspace-stat span {
+      color: var(--subtle);
+      font-size: 12px;
+    }
+
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: minmax(340px, 420px) minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      min-width: 0;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+    }
+
+    .list-panel {
+      position: sticky;
+      top: 18px;
+    }
+
+    .panel-toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .panel-toolbar h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .panel-note {
+      margin: 3px 0 0;
+      color: var(--subtle);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .filter-grid .full {
+      grid-column: 1 / -1;
+    }
+
+    .workspace-check {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      color: var(--subtle);
+      font-size: 13px;
+    }
+
+    .workspace-check input {
+      width: 16px;
+      min-height: 16px;
+      accent-color: var(--blue);
+    }
+
+    .control-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .control-card {
+      display: grid;
+      gap: 8px;
+      width: 100%;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-soft);
+      color: var(--ink);
+      text-align: left;
+    }
+
+    .control-card.active,
+    .control-card:hover {
+      border-color: #85a8ff;
+      background: #f7faff;
+    }
+
+    .control-card strong {
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .control-card span,
+    .control-card small {
+      color: var(--subtle);
+      font-size: 12px;
+    }
+
+    .card-row,
+    .progress-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .tag,
+    .status-pill,
+    .node-status {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      min-height: 22px;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .tag.gitc {
+      background: var(--blue-soft);
+      color: #0747a6;
+    }
+
+    .tag.itac {
+      background: var(--purple-soft);
+      color: var(--purple);
+    }
+
+    .tag.task {
+      background: #f1f2f4;
+      color: var(--muted);
+    }
+
+    .status-pill.not-started {
+      background: #f1f2f4;
+      color: var(--muted);
+    }
+
+    .status-pill.in-progress {
+      background: var(--blue-soft);
+      color: #0747a6;
+    }
+
+    .status-pill.completed {
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .progress-track {
+      height: 6px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e8ecf3;
+    }
+
+    .progress-track span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--blue);
+    }
+
+    .phase-mini {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .phase-mini span {
+      padding: 6px 8px;
+      border-radius: 6px;
+      background: var(--surface);
+      text-align: center;
+    }
+
+    .detail-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .detail-head h3 {
+      margin: 8px 0 6px;
+      font-size: 22px;
+      line-height: 1.3;
+    }
+
+    .detail-head p {
+      margin: 0;
+      color: var(--subtle);
+      font-size: 13px;
+    }
+
+    .blocker {
+      margin-bottom: 16px;
+      padding: 12px;
+      border: 1px solid #ffcfc7;
+      border-radius: var(--radius);
+      background: var(--red-soft);
+      color: var(--red);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .progress-summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(130px, 0.8fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .meter {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-soft);
+    }
+
+    .meter-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--subtle);
+      font-size: 12px;
+    }
+
+    .meter-head strong {
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .review-row {
+      display: grid;
+      grid-template-columns: minmax(220px, 320px);
+      gap: 14px;
+      align-items: end;
+      margin-bottom: 16px;
+    }
+
+    .milestone-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .milestone-button {
+      min-height: 46px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: #f1f2f4;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .milestone-button.active {
+      border-color: #8fd4a8;
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .detail-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding-top: 16px;
+      margin-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .phase-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .phase-tabs button {
+      min-height: 34px;
+      padding: 0 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .phase-tabs button.active {
+      border-color: var(--blue);
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+
+    .phase-panel {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .phase-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface-soft);
+    }
+
+    .phase-head h4,
+    .phase-head p {
+      margin: 0;
+    }
+
+    .phase-head h4 {
+      margin-bottom: 4px;
+      font-size: 15px;
+    }
+
+    .phase-head p {
+      color: var(--subtle);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .phase-head strong {
+      flex: 0 0 auto;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: var(--surface);
+      font-size: 13px;
+    }
+
+    .node-list {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+    }
+
+    .node {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-soft);
+    }
+
+    .node.completed {
+      border-color: #b7e3c6;
+      background: #f6fcf8;
+    }
+
+    .node-main {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+    }
+
+    .node-main strong {
+      display: block;
+      font-size: 13px;
+    }
+
+    .node-main span:not(.node-status) {
+      display: block;
+      color: var(--subtle);
+      font-size: 11px;
+    }
+
+    .node-status {
+      background: #f1f2f4;
+      color: var(--muted);
+    }
+
+    .node-status.completed {
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .text-box {
+      position: relative;
+      display: grid;
+      gap: 8px;
+    }
+
+    .text-box-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      min-height: 26px;
+    }
+
+    .text-menu-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .text-menu-button {
+      display: inline-grid;
+      place-items: center;
+      width: 28px;
+      height: 26px;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--muted);
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .comment-dot {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px var(--surface);
+      cursor: pointer;
+    }
+
+    .comment-dot.open {
+      background: var(--red);
+    }
+
+    .comment-dot.replied {
+      background: var(--amber);
+    }
+
+    .comment-dot.accepted {
+      background: var(--green);
+    }
+
+    .text-menu {
+      position: absolute;
+      top: 32px;
+      right: 0;
+      z-index: 3;
+      min-width: 150px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: 0 14px 34px rgba(23, 32, 51, 0.14);
+    }
+
+    .text-menu button {
+      width: 100%;
+      min-height: 34px;
+      padding: 0 10px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--ink);
+      font-weight: 800;
+      text-align: left;
+    }
+
+    .text-menu button:hover {
+      background: var(--surface-soft);
+    }
+
+    .review-thread {
+      position: absolute;
+      top: 32px;
+      right: 0;
+      z-index: 4;
+      width: min(360px, 100%);
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-left-width: 4px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: 0 14px 34px rgba(23, 32, 51, 0.16);
+    }
+
+    .review-thread.open {
+      border-left-color: var(--red);
+    }
+
+    .review-thread.replied {
+      border-left-color: var(--amber);
+    }
+
+    .review-thread.accepted {
+      border-left-color: var(--green);
+    }
+
+    .review-thread-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .review-state {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .review-state.open {
+      background: var(--red-soft);
+      color: var(--red);
+    }
+
+    .review-state.replied {
+      background: var(--amber-soft);
+      color: #7a4a00;
+    }
+
+    .review-state.accepted {
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .review-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .node-upload {
+      display: grid;
+      gap: 10px;
+    }
+
+    .node-upload input[type="file"] {
+      display: none;
+    }
+
+    .material-list {
+      display: grid;
+      gap: 6px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .material-list li {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .material-list strong {
+      display: block;
+      font-size: 13px;
+      word-break: break-all;
+    }
+
+    .material-list span,
+    .empty-line,
+    .node-note {
+      color: var(--subtle);
+      font-size: 12px;
+    }
+
+    .empty-line,
+    .node-note {
+      margin: 0;
+      line-height: 1.55;
+    }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 5;
+      transform: translateY(18px);
+      opacity: 0;
+      pointer-events: none;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      background: #111827;
+      color: #fff;
+      font-size: 13px;
+      transition: 0.18s ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 1060px) {
+      .login-shell,
+      .app,
+      .workspace-grid,
+      .page-header,
+      .progress-summary,
+      .review-row {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+      }
+
+      .nav {
+        display: flex;
+        overflow-x: auto;
+      }
+
+      .nav button {
+        min-width: 130px;
+      }
+
+      .list-panel {
+        position: static;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .workspace-page,
+      .topbar,
+      .login-panel,
+      .login-brand {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .workspace-stats,
+      .filter-grid,
+      .login-metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .detail-head,
+      .phase-head {
+        display: grid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="login-shell" id="loginView">
+    <aside class="login-brand">
+      <div class="brand-lockup">
+        <div class="brand-mark">DS</div>
+        <div>
+          <h1>DeepSleep</h1>
+          <p>Engagement Platform</p>
+        </div>
+      </div>
+      <div class="login-copy">
+        <h2>测试点执行工作台</h2>
+        <p>以 ITAC / GITC 测试点为核心，TOD / TOE 子节点自动汇总进度。模块 3 只读取这里产生的事实数据。</p>
+      </div>
+      <div class="login-metrics">
+        <div>
+          <strong>4</strong>
+          <span>测试点</span>
+        </div>
+        <div>
+          <strong>80</strong>
+          <span>节点总数</span>
+        </div>
+        <div>
+          <strong>3</strong>
+          <span>材料类型</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="login-panel">
+      <form class="login-card" id="loginForm">
+        <h2>登录工作台</h2>
+        <p>本地预览模式，不连接后端账户。</p>
+        <label class="field">
+          <span class="label">邮箱</span>
+          <input id="loginEmail" type="email" value="alice@kpmg.com" autocomplete="username" />
+        </label>
+        <label class="field">
+          <span class="label">密码</span>
+          <input id="loginPassword" type="password" value="demo123" autocomplete="current-password" />
+        </label>
+        <button class="button primary full" type="submit">进入模块 2</button>
+        <div class="login-error" id="loginError"></div>
+      </form>
+    </main>
+  </section>
+
+  <section class="app hidden" id="appView">
+    <aside class="sidebar" aria-label="项目导航">
+      <section class="project">
+        <div class="brand-mark">DS</div>
+        <div>
+          <h1>DeepSleep</h1>
+          <p>星河零售集团</p>
+          <p>FY26 IT Audit</p>
+        </div>
+      </section>
+      <nav class="nav" aria-label="主导航">
+        <button type="button"><span class="nav-icon">O</span><span>项目概览</span></button>
+        <button type="button"><span class="nav-icon">M</span><span>成员管理</span></button>
+        <button class="active" type="button"><span class="nav-icon">W</span><span>工作台</span></button>
+        <button type="button"><span class="nav-icon">K</span><span>看板</span></button>
+      </nav>
+      <button class="sidebar-link" type="button">返回全部项目</button>
+      <div class="sidebar-footer">静态 HTML 预览 · 数据保存在当前浏览器</div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div class="breadcrumbs">
+          <span>DeepSleep</span>
+          <span>/</span>
+          <strong>星河零售集团</strong>
+          <span>/</span>
+          <span>FY26 IT Audit</span>
+          <span>/</span>
+          <span>工作台</span>
+        </div>
+        <div class="user-chip">
+          <div class="avatar" id="avatar">A</div>
+          <div>
+            <strong id="currentUser">alice@kpmg.com</strong>
+            <div class="empty-line">In-charge</div>
+          </div>
+        </div>
+      </header>
+
+      <section class="workspace-page">
+        <header class="page-header">
+          <div>
+            <p class="page-eyebrow">Workspace · 测试点执行工作台</p>
+            <h2>星河零售集团</h2>
+          </div>
+          <div class="workspace-stats" id="stats"></div>
+        </header>
+
+        <div class="workspace-grid">
+          <aside class="panel list-panel">
+            <div class="panel-toolbar">
+              <div>
+                <h3>测试点清单</h3>
+                <p class="panel-note">一张卡片代表一个 GITC / ITAC 测试点</p>
+              </div>
+            </div>
+            <div class="filter-grid">
+              <label class="field">
+                <span class="label">负责人</span>
+                <select id="ownerFilter"></select>
+              </label>
+              <label class="field">
+                <span class="label">类型</span>
+                <select id="typeFilter">
+                  <option value="">全部</option>
+                  <option value="GITC">GITC</option>
+                  <option value="ITAC">ITAC</option>
+                  <option value="TASK">TASK</option>
+                </select>
+              </label>
+              <label class="field full">
+                <span class="label">进度状态</span>
+                <select id="statusFilter"></select>
+              </label>
+              <label class="workspace-check full">
+                <input id="actionOnly" type="checkbox" />
+                <span>仅看未完成 / 待处理</span>
+              </label>
+            </div>
+            <div class="control-list" id="controlList"></div>
+          </aside>
+
+          <section class="panel" id="detailPanel"></section>
+        </div>
+      </section>
+    </main>
+  </section>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = "module2-workspace-html-preview-v11";
+
+    const PROGRESS_STATUS = {
+      NOT_STARTED: "not_started",
+      IN_PROGRESS: "in_progress",
+      COMPLETED: "completed"
+    };
+
+    const REVIEW_STATUS = {
+      NOT_SUBMITTED: "not_submitted",
+      PENDING_REVIEW: "pending_review",
+      COMMENTED: "commented",
+      SIGNED_OFF: "signed_off"
+    };
+
+    const NODE_STATUS = {
+      PENDING: "pending",
+      COMPLETED: "completed"
+    };
+
+    const MATERIAL_CATEGORY = {
+      SPP: "spp",
+      MEETING_MINUTES: "meeting_minutes",
+      EVIDENCE: "evidence"
+    };
+
+    const PROGRESS_LABELS = {
+      [PROGRESS_STATUS.NOT_STARTED]: "未开始",
+      [PROGRESS_STATUS.IN_PROGRESS]: "测试中",
+      [PROGRESS_STATUS.COMPLETED]: "已完成"
+    };
+
+    const REVIEW_LABELS = {
+      [REVIEW_STATUS.NOT_SUBMITTED]: "未提交",
+      [REVIEW_STATUS.PENDING_REVIEW]: "待复核",
+      [REVIEW_STATUS.COMMENTED]: "有复核意见",
+      [REVIEW_STATUS.SIGNED_OFF]: "已签核"
+    };
+
+    const MATERIAL_LABELS = {
+      [MATERIAL_CATEGORY.SPP]: "SPP",
+      [MATERIAL_CATEGORY.MEETING_MINUTES]: "会议纪要",
+      [MATERIAL_CATEGORY.EVIDENCE]: "测试资料"
+    };
+
+    const phases = [
+      {
+        id: "tod",
+        label: "TOD",
+        description: "设计有效性测试：理解流程、确认控制设计、沉淀访谈与设计证据。",
+        nodes: [
+          { id: "tod-minutes", label: "上传 TOD 会议纪要", type: "upload_minutes", required: true, category: MATERIAL_CATEGORY.MEETING_MINUTES },
+          { id: "tod-objective", label: "TOD 测试目标", type: "text", required: true, placeholder: "说明本测试点的设计有效性测试目标。" },
+          { id: "tod-process", label: "流程理解与控制描述", type: "text", required: true, placeholder: "记录流程理解、控制频率、控制人和关键系统。" },
+          { id: "tod-spp", label: "TOD支持性材料", type: "upload_spp", required: true, category: MATERIAL_CATEGORY.SPP }
+        ]
+      },
+      {
+        id: "toe",
+        label: "TOE",
+        description: "运行有效性测试：完成样本、执行测试、记录结论。",
+        nodes: [
+          { id: "toe-sample", label: "样本信息", type: "text", required: true, placeholder: "记录样本量、期间、抽样口径。" },
+          { id: "toe-procedure", label: "TOE 测试程序", type: "text", required: true, placeholder: "记录检查、重新执行、穿行或核对步骤。" },
+          { id: "toe-execution", label: "执行过程记录", type: "text", required: true, placeholder: "记录样本逐项执行过程和关键判断。" },
+          { id: "toe-spp", label: "上传TOE支持性材料", type: "upload_spp", required: true, category: MATERIAL_CATEGORY.SPP },
+          { id: "toe-minutes", label: "上传 TOE 会议纪要", type: "upload_minutes", required: true, category: MATERIAL_CATEGORY.MEETING_MINUTES },
+          { id: "toe-result", label: "TOE 测试结论", type: "text", required: true, placeholder: "记录 TOE 结论。" }
+        ]
+      }
+    ];
+
+    const reviewOrder = {
+      [REVIEW_STATUS.NOT_SUBMITTED]: 0,
+      [REVIEW_STATUS.COMMENTED]: 1,
+      [REVIEW_STATUS.PENDING_REVIEW]: 2,
+      [REVIEW_STATUS.SIGNED_OFF]: 3
+    };
+
+    const demoControls = [
+      {
+        id: "GITC-001",
+        title: "GITC 访问管理控制测试",
+        controlType: "GITC",
+        owner: "alice@kpmg.com",
+        auditPhase: "control-design",
+        taskStatus: "done",
+        blockers: [],
+        nodeResponses: {
+          "tod-objective": "验证访问管理控制设计有效。",
+          "tod-process": "梳理入职、转岗、离职及季度权限复核流程。",
+          "toe-sample": "Q1 样本 15 个。",
+          "toe-procedure": "检查审批记录、复核清单和离职回收记录。",
+          "toe-execution": "已逐项检查样本审批、复核和系统日志。",
+          "toe-result": "No exception noted."
+        },
+        materials: [
+          material("spp", "tod", "tod-spp", "访问管理 TOD 支持性材料.xlsx", "alice@kpmg.com", 421000),
+          material("meeting_minutes", "tod", "tod-minutes", "访问管理访谈纪要.docx", "alice@kpmg.com", 88000),
+          material("spp", "toe", "toe-spp", "访问管理 TOE 支持性材料.xlsx", "alice@kpmg.com", 438000),
+          material("meeting_minutes", "toe", "toe-minutes", "访问管理 TOE 纪要.docx", "alice@kpmg.com", 91000)
+        ],
+        milestones: {
+          planning: true,
+          review: true
+        },
+        milestoneActors: {
+          planning: "AL",
+          review: "MG"
+        },
+        extraTextFields: {},
+        fieldReviews: {
+          "toe-procedure": {
+            id: "rev_gitc_toe_procedure",
+            text: "请补充权限复核样本的抽样口径。",
+            reply: "已补充样本范围和期间说明。",
+            status: "accepted",
+            createdBy: "manager@kpmg.com",
+            createdAt: new Date().toISOString(),
+            repliedBy: "alice@kpmg.com",
+            repliedAt: new Date().toISOString()
+          }
+        },
+        reviewStatus: REVIEW_STATUS.SIGNED_OFF,
+        reviewComment: "等待 Manager 复核 TOE 样本。",
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: "ITAC-001",
+        title: "ITAC 三单匹配自动控制测试",
+        controlType: "ITAC",
+        owner: "alice@kpmg.com",
+        auditPhase: "control-test",
+        taskStatus: "review",
+        blockers: [],
+        nodeResponses: {
+          "tod-objective": "验证三单匹配自动控制设计有效。",
+          "tod-process": "理解 PO、GR、Invoice 匹配流程和容差设置。",
+          "toe-sample": "Q1 采购样本 25 个。",
+          "toe-procedure": "抽取样本，检查系统匹配日志并重新执行关键计算。"
+        },
+        materials: [
+          material("spp", "tod", "tod-spp", "三单匹配 TOD 支持性材料.xlsx", "alice@kpmg.com", 366000),
+          material("meeting_minutes", "tod", "tod-minutes", "采购流程访谈纪要.docx", "alice@kpmg.com", 76000)
+        ],
+        milestones: {
+          planning: true,
+          review: false
+        },
+        milestoneActors: {
+          planning: "AL",
+          review: ""
+        },
+        extraTextFields: {},
+        fieldReviews: {
+          "tod-process": {
+            id: "rev_itac_tod_process",
+            text: "请补充三单匹配容差参数的系统配置来源。",
+            reply: "",
+            status: "open",
+            createdBy: "manager@kpmg.com",
+            createdAt: new Date().toISOString()
+          }
+        },
+        reviewStatus: REVIEW_STATUS.NOT_SUBMITTED,
+        reviewComment: "",
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: "ITAC-002",
+        title: "ITAC 销售价格主数据变更测试",
+        controlType: "ITAC",
+        owner: "bob@kpmg.com",
+        auditPhase: "control-test",
+        taskStatus: "development",
+        blockers: [],
+        nodeResponses: {
+          "tod-objective": "验证价格主数据变更审批控制设计。",
+          "tod-process": "理解价格申请、审批、配置和上线流程。"
+        },
+        materials: [],
+        milestones: {
+          planning: false,
+          review: false
+        },
+        milestoneActors: {
+          planning: "",
+          review: ""
+        },
+        extraTextFields: {},
+        fieldReviews: {},
+        reviewStatus: REVIEW_STATUS.NOT_SUBMITTED,
+        reviewComment: "",
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: "GITC-002",
+        title: "GITC 变更管理控制测试",
+        controlType: "GITC",
+        owner: "manager@kpmg.com",
+        auditPhase: "control-test",
+        taskStatus: "todo",
+        blockers: ["GITC-001"],
+        nodeResponses: {},
+        materials: [],
+        milestones: {
+          planning: false,
+          review: false
+        },
+        milestoneActors: {
+          planning: "",
+          review: ""
+        },
+        extraTextFields: {},
+        fieldReviews: {},
+        reviewStatus: REVIEW_STATUS.NOT_SUBMITTED,
+        reviewComment: "",
+        updatedAt: new Date().toISOString()
+      }
+    ];
+
+    let currentUser = "alice@kpmg.com";
+    let controls = loadControls();
+    let selectedId = controls[1]?.id || controls[0]?.id || "";
+    let activePhase = "tod";
+    let openTextMenuKey = "";
+    let openReviewKey = "";
+    let openReplyKey = "";
+    let filters = {
+      owner: "",
+      type: "",
+      status: "",
+      actionOnly: false
+    };
+
+    function material(category, phaseId, nodeId, name, uploadedBy, size) {
+      return {
+        id: `mat_${Math.random().toString(36).slice(2, 9)}`,
+        category,
+        phaseId,
+        nodeId,
+        name,
+        fileType: "",
+        size,
+        uploadedBy,
+        uploadedAt: new Date().toISOString(),
+        status: "submitted"
+      };
+    }
+
+    function loadControls() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return normalizeControls(Array.isArray(saved) ? saved : structuredClone(demoControls));
+      } catch {
+        return normalizeControls(structuredClone(demoControls));
+      }
+    }
+
+    function normalizeControls(items) {
+      return items.map((control) => ({
+        ...control,
+        milestones: {
+          planning: Boolean(control.milestones?.planning),
+          review: Boolean(control.milestones?.review)
+        },
+        milestoneActors: normalizeMilestoneActors(control),
+        extraTextFields: normalizeExtraTextFields(control.extraTextFields),
+        fieldReviews: normalizeFieldReviews(control.fieldReviews)
+      }));
+    }
+
+    function normalizeMilestoneActors(control) {
+      const milestones = {
+        planning: Boolean(control.milestones?.planning),
+        review: Boolean(control.milestones?.review)
+      };
+      return {
+        planning: milestones.planning ? (control.milestoneActors?.planning || userInitials(control.owner)) : "",
+        review: milestones.review ? (control.milestoneActors?.review || userInitials(control.owner)) : ""
+      };
+    }
+
+    function normalizeExtraTextFields(value) {
+      if (!value || typeof value !== "object") return {};
+      return Object.fromEntries(
+        Object.entries(value).map(([nodeId, items]) => [
+          nodeId,
+          Array.isArray(items) ? items.map((item) => ({
+            id: item.id || `txt_${Math.random().toString(36).slice(2, 8)}`,
+            value: item.value || ""
+          })) : []
+        ])
+      );
+    }
+
+    function normalizeFieldReviews(value) {
+      if (!value || typeof value !== "object") return {};
+      return Object.fromEntries(
+        Object.entries(value).map(([fieldKey, review]) => [
+          fieldKey,
+          {
+            id: review.id || `rev_${Math.random().toString(36).slice(2, 8)}`,
+            text: review.text || "请补充说明。",
+            reply: review.reply || "",
+            status: review.status || "open",
+            createdBy: review.createdBy || "manager@kpmg.com",
+            createdAt: review.createdAt || new Date().toISOString(),
+            repliedBy: review.repliedBy || "",
+            repliedAt: review.repliedAt || ""
+          }
+        ])
+      );
+    }
+
+    function persist() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(controls));
+    }
+
+    function formatDateTime(value) {
+      if (!value) return "未更新";
+      return new Intl.DateTimeFormat("zh-CN", {
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(new Date(value));
+    }
+
+    function statusClass(value) {
+      return String(value || "").replaceAll("_", "-");
+    }
+
+    function userInitials(value = currentUser) {
+      const rawName = String(value || "").split("@")[0].trim();
+      const parts = rawName.split(/[._\-\s]+/).filter(Boolean);
+      if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+      return (rawName.slice(0, 2) || "U").toUpperCase();
+    }
+
+    function reviewReached(current, threshold) {
+      return (reviewOrder[current] || 0) >= (reviewOrder[threshold] || 0);
+    }
+
+    function milestoneActive(control, milestone) {
+      return Boolean(control.milestones?.[milestone]);
+    }
+
+    function milestoneLabel(control, milestone) {
+      if (!milestoneActive(control, milestone)) return milestone;
+      return control.milestoneActors?.[milestone] || userInitials(currentUser);
+    }
+
+    function nodeMaterials(control, node, phaseId) {
+      return control.materials.filter((item) => (
+        item.phaseId === phaseId
+        && item.category === node.category
+        && item.nodeId === node.id
+      ));
+    }
+
+    function nodeStatus(control, node, phaseId) {
+      if (node.type === "text") {
+        return control.nodeResponses[node.id]?.trim() ? NODE_STATUS.COMPLETED : NODE_STATUS.PENDING;
+      }
+      if (node.type.startsWith("upload")) {
+        return nodeMaterials(control, node, phaseId).length ? NODE_STATUS.COMPLETED : NODE_STATUS.PENDING;
+      }
+      if (node.type === "review") {
+        return reviewReached(control.reviewStatus, node.threshold) ? NODE_STATUS.COMPLETED : NODE_STATUS.PENDING;
+      }
+      return NODE_STATUS.PENDING;
+    }
+
+    function progressFor(control) {
+      const result = {
+        completedNodes: 0,
+        totalNodes: 0,
+        completedExecutionNodes: 0,
+        totalExecutionNodes: 0,
+        phases: {}
+      };
+
+      phases.forEach((phase) => {
+        const phaseProgress = {
+          completedNodes: 0,
+          totalNodes: 0,
+          completedExecutionNodes: 0,
+          totalExecutionNodes: 0
+        };
+
+        phase.nodes.forEach((node) => {
+          const required = node.required !== false;
+          const completed = nodeStatus(control, node, phase.id) === NODE_STATUS.COMPLETED;
+          const executionNode = required && !node.signoff;
+          if (required) {
+            result.totalNodes += 1;
+            phaseProgress.totalNodes += 1;
+          }
+          if (required && completed) {
+            result.completedNodes += 1;
+            phaseProgress.completedNodes += 1;
+          }
+          if (executionNode) {
+            result.totalExecutionNodes += 1;
+            phaseProgress.totalExecutionNodes += 1;
+          }
+          if (executionNode && completed) {
+            result.completedExecutionNodes += 1;
+            phaseProgress.completedExecutionNodes += 1;
+          }
+        });
+
+        result.phases[phase.id] = phaseProgress;
+      });
+
+      result.progressPercent = result.totalNodes ? Math.round((result.completedNodes / result.totalNodes) * 100) : 0;
+      result.executionComplete = result.totalExecutionNodes > 0 && result.completedExecutionNodes === result.totalExecutionNodes;
+      result.allRequiredComplete = result.totalNodes > 0 && result.completedNodes === result.totalNodes;
+      return result;
+    }
+
+    function progressStatus(control) {
+      if (!hasUploadedMaterial(control)) return PROGRESS_STATUS.NOT_STARTED;
+      if (allReviewCommentsCleared(control) && milestoneActive(control, "planning") && milestoneActive(control, "review")) {
+        return PROGRESS_STATUS.COMPLETED;
+      }
+      return PROGRESS_STATUS.IN_PROGRESS;
+    }
+
+    function hasUploadedMaterial(control) {
+      return Array.isArray(control.materials) && control.materials.length > 0;
+    }
+
+    function allReviewCommentsCleared(control) {
+      return Object.values(control.fieldReviews || {}).every((review) => review.status === "accepted");
+    }
+
+    function countsByCategory(control, category) {
+      return control.materials.filter((item) => item.category === category).length;
+    }
+
+    function visibleControls() {
+      return controls.filter((control) => {
+        const status = progressStatus(control);
+        return (!filters.owner || control.owner === filters.owner)
+          && (!filters.type || control.controlType === filters.type)
+          && (!filters.status || status === filters.status)
+          && (!filters.actionOnly || status !== PROGRESS_STATUS.COMPLETED);
+      });
+    }
+
+    function renderStats() {
+      const completed = controls.reduce((sum, control) => sum + progressFor(control).completedNodes, 0);
+      const total = controls.reduce((sum, control) => sum + progressFor(control).totalNodes, 0);
+      const testing = controls.filter((control) => progressStatus(control) === PROGRESS_STATUS.IN_PROGRESS).length;
+      const done = controls.filter((control) => progressStatus(control) === PROGRESS_STATUS.COMPLETED).length;
+      document.getElementById("stats").innerHTML = [
+        stat(controls.length, "测试点"),
+        stat(`${completed}/${total}`, "节点进度"),
+        stat(testing, "测试中"),
+        stat(done, "已完成")
+      ].join("");
+    }
+
+    function stat(value, label) {
+      return `<div class="workspace-stat"><strong>${value}</strong><span>${label}</span></div>`;
+    }
+
+    function renderFilters() {
+      const owners = [...new Set(controls.map((item) => item.owner))].sort();
+      const ownerSelect = document.getElementById("ownerFilter");
+      ownerSelect.innerHTML = `<option value="">全部</option>${owners.map((owner) => `<option value="${owner}">${owner}</option>`).join("")}`;
+      ownerSelect.value = filters.owner;
+
+      const statusSelect = document.getElementById("statusFilter");
+      statusSelect.innerHTML = `<option value="">全部状态</option>${Object.entries(PROGRESS_LABELS).map(([value, label]) => `<option value="${value}">${label}</option>`).join("")}`;
+      statusSelect.value = filters.status;
+
+      document.getElementById("typeFilter").value = filters.type;
+      document.getElementById("actionOnly").checked = filters.actionOnly;
+    }
+
+    function renderList() {
+      const list = visibleControls();
+      if (!list.some((item) => item.id === selectedId) && list.length) {
+        selectedId = list[0].id;
+      }
+
+      document.getElementById("controlList").innerHTML = list.length ? list.map((control) => {
+        const progress = progressFor(control);
+        const status = progressStatus(control);
+        return `
+          <button class="control-card ${control.id === selectedId ? "active" : ""}" type="button" data-select="${control.id}">
+            <div class="card-row">
+              <span class="tag ${control.controlType.toLowerCase()}">${control.controlType}</span>
+              <span>${control.owner}</span>
+            </div>
+            <strong>${control.title}</strong>
+            <span>${control.auditPhase} · 看板状态 ${control.taskStatus}</span>
+            <div class="progress-row">
+              <span class="status-pill ${statusClass(status)}">${PROGRESS_LABELS[status]}</span>
+              <span>${progress.completedNodes}/${progress.totalNodes}</span>
+            </div>
+            <div class="progress-track"><span style="width:${progress.progressPercent}%"></span></div>
+            <div class="phase-mini">
+              <span>TOD ${progress.phases.tod.completedNodes}/${progress.phases.tod.totalNodes}</span>
+              <span>TOE ${progress.phases.toe.completedNodes}/${progress.phases.toe.totalNodes}</span>
+            </div>
+            <small>SPP ${countsByCategory(control, "spp")} · 纪要 ${countsByCategory(control, "meeting_minutes")} · 资料 ${countsByCategory(control, "evidence")}</small>
+          </button>
+        `;
+      }).join("") : `
+        <div class="control-card">
+          <strong>暂无可记录的测试点</strong>
+          <span>当前筛选条件下没有结果。</span>
+        </div>
+      `;
+    }
+
+    function renderDetail() {
+      const control = controls.find((item) => item.id === selectedId);
+      if (!control) {
+        document.getElementById("detailPanel").innerHTML = `<div class="empty-line">暂无测试点。</div>`;
+        return;
+      }
+
+      const progress = progressFor(control);
+      const status = progressStatus(control);
+      const phase = phases.find((item) => item.id === activePhase) || phases[0];
+
+      document.getElementById("detailPanel").innerHTML = `
+        <div class="detail-head">
+          <div>
+            <span class="tag ${control.controlType.toLowerCase()}">${control.controlType}</span>
+            <h3>${control.title}</h3>
+            <p>${control.owner} · 看板状态 ${control.taskStatus} · 最近更新 ${formatDateTime(control.updatedAt)}</p>
+          </div>
+          <span class="status-pill ${statusClass(status)}">${PROGRESS_LABELS[status]}</span>
+        </div>
+
+        <div class="progress-summary">
+          ${meter("总进度", progress.completedNodes, progress.totalNodes)}
+          ${meter("TOD", progress.phases.tod.completedNodes, progress.phases.tod.totalNodes)}
+          ${meter("TOE", progress.phases.toe.completedNodes, progress.phases.toe.totalNodes)}
+        </div>
+
+        <div class="review-row">
+          <label class="field">
+            <span class="label">流程节点</span>
+            <div class="milestone-buttons">
+              <button class="milestone-button ${milestoneActive(control, "planning") ? "active" : ""}" type="button" data-milestone="planning">${milestoneLabel(control, "planning")}</button>
+              <button class="milestone-button ${milestoneActive(control, "review") ? "active" : ""}" type="button" data-milestone="review">${milestoneLabel(control, "review")}</button>
+            </div>
+          </label>
+        </div>
+
+        <div class="phase-tabs">
+          ${phases.map((item) => `<button class="${item.id === activePhase ? "active" : ""}" type="button" data-phase="${item.id}">${item.label}</button>`).join("")}
+        </div>
+
+        <section class="phase-panel">
+          <div class="phase-head">
+            <div>
+              <h4>${phase.label}</h4>
+              <p>${phase.description}</p>
+            </div>
+            <strong>${progress.phases[phase.id].completedNodes}/${progress.phases[phase.id].totalNodes}</strong>
+          </div>
+          <div class="node-list">
+            ${phase.nodes.map((node) => renderNode(control, node, phase.id)).join("")}
+          </div>
+        </section>
+
+        <div class="detail-actions">
+          <button class="button subtle" type="button" id="cancelButton">Cancel</button>
+          <button class="button success" type="button" id="saveButton">Save</button>
+        </div>
+      `;
+    }
+
+    function meter(label, completed, total) {
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      return `
+        <div class="meter">
+          <div class="meter-head"><span>${label}</span><strong>${completed}/${total}</strong></div>
+          <div class="progress-track"><span style="width:${percent}%"></span></div>
+        </div>
+      `;
+    }
+
+    function renderNode(control, node, phaseId) {
+      const status = nodeStatus(control, node, phaseId);
+      const value = control.nodeResponses[node.id] || "";
+      const extraTextFields = control.extraTextFields?.[node.id] || [];
+      const materials = node.type.startsWith("upload") ? nodeMaterials(control, node, phaseId) : [];
+      return `
+        <div class="node ${status}">
+          <div class="node-main">
+            <span class="node-status ${status}">${status === NODE_STATUS.COMPLETED ? "Done" : "Pending"}</span>
+            <div>
+              <strong>${node.label}</strong>
+              <span>${node.type}</span>
+            </div>
+          </div>
+          ${node.type === "text" ? `
+            ${renderTextBox(control, {
+              nodeId: node.id,
+              fieldKey: node.id,
+              value,
+              placeholder: node.placeholder || "",
+              extra: false
+            })}
+            ${extraTextFields.map((item) => renderTextBox(control, {
+              nodeId: node.id,
+              fieldKey: `${node.id}::${item.id}`,
+              extraId: item.id,
+              value: item.value,
+              placeholder: "补充文本框",
+              extra: true
+            })).join("")}
+          ` : ""}
+          ${node.type.startsWith("upload") ? `
+            <div class="node-upload">
+              <label class="button">
+                ${uploadLabel(node)}
+                <input type="file" multiple data-upload-node="${node.id}" data-upload-phase="${phaseId}" data-upload-category="${node.category}" />
+              </label>
+              ${materials.length ? `
+                <ul class="material-list">
+                  ${materials.map((item) => `
+                    <li>
+                      <div>
+                        <strong>${item.name}</strong>
+                        <span>${MATERIAL_LABELS[item.category]} · ${item.uploadedBy} · ${formatDateTime(item.uploadedAt)} · ${Math.round((item.size || 0) / 1024)} KB</span>
+                      </div>
+                      <button class="button subtle" type="button" data-remove-material="${item.id}">移除</button>
+                    </li>
+                  `).join("")}
+                </ul>
+              ` : `<p class="empty-line">暂无材料</p>`}
+            </div>
+          ` : ""}
+          ${node.type === "review" ? `
+            <p class="node-note">当前复核状态：${REVIEW_LABELS[control.reviewStatus]}。${node.threshold === REVIEW_STATUS.SIGNED_OFF ? "该节点需要签核。" : "提交复核后该节点完成。"}</p>
+          ` : ""}
+        </div>
+      `;
+    }
+
+    function renderTextBox(control, field) {
+      const review = control.fieldReviews?.[field.fieldKey] || null;
+      const menuOpen = openTextMenuKey === field.fieldKey;
+      const reviewOpen = openReviewKey === field.fieldKey;
+      return `
+        <div class="text-box">
+          <div class="text-box-toolbar">
+            <div class="text-menu-wrap">
+              <button class="text-menu-button" type="button" data-text-menu="${field.fieldKey}" title="更多操作">...</button>
+              ${review ? `<button class="comment-dot ${review.status}" type="button" data-open-review="${field.fieldKey}" title="${reviewStateLabel(review.status)}" aria-label="${reviewStateLabel(review.status)}"></button>` : ""}
+              ${menuOpen ? `
+                <div class="text-menu">
+                  <button type="button" data-add-textbox="${field.nodeId}">新增文本框</button>
+                  <button type="button" data-add-review="${field.fieldKey}">添加复核意见</button>
+                </div>
+              ` : ""}
+            </div>
+          </div>
+          <textarea
+            ${field.extra ? `data-extra-response="${field.extraId}" data-extra-node="${field.nodeId}"` : `data-node-response="${field.nodeId}"`}
+            placeholder="${escapeHtml(field.placeholder)}"
+          >${escapeHtml(field.value)}</textarea>
+          ${review && reviewOpen ? renderReviewThread(field.fieldKey, review) : ""}
+        </div>
+      `;
+    }
+
+    function renderReviewThread(fieldKey, review) {
+      const replyOpen = openReplyKey === fieldKey || review.status === "replied" || review.status === "accepted";
+      return `
+        <div class="review-thread ${review.status}">
+          <div class="review-thread-head">
+            <span>复核意见 · ${review.createdBy}</span>
+            <span class="review-state ${review.status}">${reviewStateLabel(review.status)}</span>
+          </div>
+          <textarea data-review-text="${fieldKey}" rows="2" placeholder="填写复核意见">${escapeHtml(review.text)}</textarea>
+          ${replyOpen ? `
+            <textarea data-review-reply="${fieldKey}" rows="2" placeholder="回复复核意见">${escapeHtml(review.reply || "")}</textarea>
+          ` : ""}
+          <div class="review-actions">
+            ${review.status === "open" && !replyOpen ? `<button class="button subtle" type="button" data-reply-review="${fieldKey}">回复</button>` : ""}
+            ${review.status !== "accepted" && replyOpen ? `<button class="button subtle" type="button" data-submit-reply="${fieldKey}">提交回复</button>` : ""}
+            ${review.status === "replied" ? `<button class="button primary" type="button" data-accept-review="${fieldKey}">接受意见</button>` : ""}
+          </div>
+        </div>
+      `;
+    }
+
+    function reviewStateLabel(status) {
+      if (status === "accepted") return "已接受";
+      if (status === "replied") return "已回复";
+      return "待回复";
+    }
+
+    function uploadLabel(node) {
+      if (node.type === "upload_spp") return "上传 SPP";
+      if (node.type === "upload_minutes") return "上传纪要";
+      return "上传资料";
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function selectedControl() {
+      return controls.find((item) => item.id === selectedId);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    function renderAll() {
+      renderStats();
+      renderFilters();
+      renderList();
+      renderDetail();
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+      if (!email || !password) {
+        document.getElementById("loginError").textContent = "请输入邮箱和密码。";
+        return;
+      }
+      currentUser = email;
+      document.getElementById("currentUser").textContent = email;
+      document.getElementById("avatar").textContent = email.slice(0, 1).toUpperCase();
+      document.getElementById("loginView").classList.add("hidden");
+      document.getElementById("appView").classList.remove("hidden");
+      renderAll();
+    });
+
+    document.addEventListener("change", (event) => {
+      const target = event.target;
+      if (target.id === "ownerFilter") filters.owner = target.value;
+      if (target.id === "typeFilter") filters.type = target.value;
+      if (target.id === "statusFilter") filters.status = target.value;
+      if (target.id === "actionOnly") filters.actionOnly = target.checked;
+
+      if (["ownerFilter", "typeFilter", "statusFilter", "actionOnly"].includes(target.id)) {
+        renderAll();
+        return;
+      }
+
+      const control = selectedControl();
+      if (!control) return;
+
+      if (target.matches("[data-upload-node]")) {
+        const files = [...target.files];
+        files.forEach((file) => {
+          control.materials.unshift({
+            id: `mat_${Math.random().toString(36).slice(2, 9)}`,
+            category: target.dataset.uploadCategory,
+            phaseId: target.dataset.uploadPhase,
+            nodeId: target.dataset.uploadNode,
+            name: file.name,
+            fileType: file.type,
+            size: file.size,
+            uploadedBy: currentUser,
+            uploadedAt: new Date().toISOString(),
+            status: "submitted"
+          });
+        });
+        control.updatedAt = new Date().toISOString();
+        target.value = "";
+        persist();
+        renderAll();
+        if (files.length) showToast(`已记录 ${files.length} 个材料。`);
+      }
+    });
+
+    document.addEventListener("input", (event) => {
+      const control = selectedControl();
+      if (!control) return;
+
+      if (event.target.matches("[data-node-response]")) {
+        control.nodeResponses[event.target.dataset.nodeResponse] = event.target.value;
+        control.updatedAt = new Date().toISOString();
+        renderStats();
+        renderList();
+        return;
+      }
+
+      if (event.target.matches("[data-extra-response]")) {
+        const nodeId = event.target.dataset.extraNode;
+        const extraId = event.target.dataset.extraResponse;
+        const items = control.extraTextFields?.[nodeId] || [];
+        const target = items.find((item) => item.id === extraId);
+        if (target) target.value = event.target.value;
+        control.updatedAt = new Date().toISOString();
+        renderStats();
+        renderList();
+        return;
+      }
+
+      if (event.target.matches("[data-review-text]")) {
+        const review = control.fieldReviews?.[event.target.dataset.reviewText];
+        if (review) {
+          review.text = event.target.value;
+          control.updatedAt = new Date().toISOString();
+        }
+        return;
+      }
+
+      if (event.target.matches("[data-review-reply]")) {
+        const review = control.fieldReviews?.[event.target.dataset.reviewReply];
+        if (review) {
+          review.reply = event.target.value;
+          review.repliedBy = currentUser;
+          review.repliedAt = new Date().toISOString();
+          control.updatedAt = new Date().toISOString();
+        }
+        return;
+      }
+    });
+
+    document.addEventListener("click", (event) => {
+      const openReviewButton = event.target.closest("[data-open-review]");
+      if (openReviewButton) {
+        const fieldKey = openReviewButton.dataset.openReview;
+        openReviewKey = openReviewKey === fieldKey ? "" : fieldKey;
+        openTextMenuKey = "";
+        if (!openReviewKey) openReplyKey = "";
+        renderDetail();
+        return;
+      }
+
+      const textMenuButton = event.target.closest("[data-text-menu]");
+      if (textMenuButton) {
+        const fieldKey = textMenuButton.dataset.textMenu;
+        openTextMenuKey = openTextMenuKey === fieldKey ? "" : fieldKey;
+        openReviewKey = "";
+        openReplyKey = "";
+        renderDetail();
+        return;
+      }
+
+      const addTextboxButton = event.target.closest("[data-add-textbox]");
+      if (addTextboxButton) {
+        const control = selectedControl();
+        const nodeId = addTextboxButton.dataset.addTextbox;
+        control.extraTextFields = control.extraTextFields || {};
+        control.extraTextFields[nodeId] = control.extraTextFields[nodeId] || [];
+        control.extraTextFields[nodeId].push({
+          id: `txt_${Math.random().toString(36).slice(2, 8)}`,
+          value: ""
+        });
+        openTextMenuKey = "";
+        control.updatedAt = new Date().toISOString();
+        persist();
+        renderDetail();
+        showToast("已新增文本框。");
+        return;
+      }
+
+      const addReviewButton = event.target.closest("[data-add-review]");
+      if (addReviewButton) {
+        const control = selectedControl();
+        const fieldKey = addReviewButton.dataset.addReview;
+        control.fieldReviews = control.fieldReviews || {};
+        control.fieldReviews[fieldKey] = {
+          id: `rev_${Math.random().toString(36).slice(2, 8)}`,
+          text: "请补充说明。",
+          reply: "",
+          status: "open",
+          createdBy: "manager@kpmg.com",
+          createdAt: new Date().toISOString(),
+          repliedBy: "",
+          repliedAt: ""
+        };
+        openTextMenuKey = "";
+        openReviewKey = "";
+        openReplyKey = "";
+        control.updatedAt = new Date().toISOString();
+        persist();
+        renderAll();
+        showToast("已添加复核意见。");
+        return;
+      }
+
+      const replyButton = event.target.closest("[data-reply-review]");
+      if (replyButton) {
+        openReplyKey = replyButton.dataset.replyReview;
+        renderDetail();
+        return;
+      }
+
+      const submitReplyButton = event.target.closest("[data-submit-reply]");
+      if (submitReplyButton) {
+        const control = selectedControl();
+        const fieldKey = submitReplyButton.dataset.submitReply;
+        const review = control.fieldReviews?.[fieldKey];
+        if (review && review.reply.trim()) {
+          review.status = "replied";
+          review.repliedBy = currentUser;
+          review.repliedAt = new Date().toISOString();
+          openReplyKey = "";
+          control.updatedAt = new Date().toISOString();
+          persist();
+          renderAll();
+          showToast("回复已提交。");
+        } else {
+          showToast("请先填写回复内容。");
+        }
+        return;
+      }
+
+      const acceptButton = event.target.closest("[data-accept-review]");
+      if (acceptButton) {
+        const control = selectedControl();
+        const review = control.fieldReviews?.[acceptButton.dataset.acceptReview];
+        if (review) {
+          review.status = "accepted";
+          control.updatedAt = new Date().toISOString();
+          persist();
+          renderAll();
+          showToast("复核意见已接受。");
+        }
+        return;
+      }
+
+      const selectButton = event.target.closest("[data-select]");
+      if (selectButton) {
+        selectedId = selectButton.dataset.select;
+        activePhase = "tod";
+        openTextMenuKey = "";
+        openReviewKey = "";
+        openReplyKey = "";
+        renderAll();
+        return;
+      }
+
+      const milestoneButton = event.target.closest("[data-milestone]");
+      if (milestoneButton) {
+        const control = selectedControl();
+        const milestone = milestoneButton.dataset.milestone;
+        control.milestones = {
+          planning: Boolean(control.milestones?.planning),
+          review: Boolean(control.milestones?.review)
+        };
+        control.milestoneActors = {
+          planning: control.milestoneActors?.planning || "",
+          review: control.milestoneActors?.review || ""
+        };
+        const nextValue = !control.milestones[milestone];
+        control.milestones[milestone] = nextValue;
+        control.milestoneActors[milestone] = nextValue ? userInitials(currentUser) : "";
+        if (milestone === "review") {
+          control.reviewStatus = nextValue
+            ? REVIEW_STATUS.SIGNED_OFF
+            : REVIEW_STATUS.NOT_SUBMITTED;
+        }
+        control.updatedAt = new Date().toISOString();
+        persist();
+        renderAll();
+        showToast(`${milestone === "planning" ? "planning" : "review"} 已${nextValue ? "确认" : "取消"}。`);
+        return;
+      }
+
+      const phaseButton = event.target.closest("[data-phase]");
+      if (phaseButton) {
+        activePhase = phaseButton.dataset.phase;
+        openTextMenuKey = "";
+        openReviewKey = "";
+        openReplyKey = "";
+        renderDetail();
+        return;
+      }
+
+      const removeButton = event.target.closest("[data-remove-material]");
+      if (removeButton) {
+        const control = selectedControl();
+        control.materials = control.materials.filter((item) => item.id !== removeButton.dataset.removeMaterial);
+        control.updatedAt = new Date().toISOString();
+        persist();
+        renderAll();
+        showToast("材料记录已移除。");
+        return;
+      }
+
+      if (event.target.id === "saveButton") {
+        const control = selectedControl();
+        control.updatedAt = new Date().toISOString();
+        persist();
+        renderAll();
+        showToast("测试点已保存。");
+        return;
+      }
+
+      if (event.target.id === "cancelButton") {
+        controls = loadControls();
+        if (!controls.some((item) => item.id === selectedId)) {
+          selectedId = controls[0]?.id || "";
+        }
+        openTextMenuKey = "";
+        openReviewKey = "";
+        openReplyKey = "";
+        renderAll();
+        showToast("已取消未保存修改。");
+      }
+    });
+
+    renderFilters();
+  </script>
+</body>
+</html>
