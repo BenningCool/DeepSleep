@@ -198,6 +198,17 @@ export function updateEditableProject(projectId, payload) {
   });
 }
 
+export function markScopeDefined(projectId) {
+  return updateProject(projectId, { scopeStatus: "defined" });
+}
+
+export function getDefaultOwnerEmail(project) {
+  const active = (project?.members || []).filter((member) => member.status === "active");
+  return active.find((member) => member.role === "in_charge")?.email
+    || active.find((member) => member.role === "manager")?.email
+    || "";
+}
+
 export function getProject(projectId) {
   const project = loadProjects().find((item) => item.id === projectId);
   return project ? migrateProject(project) : null;

@@ -8,7 +8,8 @@ export function Sidebar({
     { id: "detail", icon: "O", label: "项目概览" },
     { id: "members", icon: "M", label: "成员管理" },
     { id: "workspace", icon: "W", label: "工作台" },
-    { id: "board", icon: "K", label: "看板" }
+    { id: "board", icon: "K", label: "看板" },
+    { id: "progress", icon: "P", label: "进度" }
   ] : [];
 
   const globalNav = [

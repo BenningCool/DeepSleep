@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { labelOfProgressStatus } from "../../data/progressLabels";
 import {
   EVIDENCE_STATUS,
   PROGRESS_STATUS,
@@ -11,13 +12,13 @@ import {
 } from "../../services/workspaceProgressService";
 
 const PROGRESS_LABELS = {
-  [PROGRESS_STATUS.NOT_STARTED]: "未开始",
-  [PROGRESS_STATUS.IN_PROGRESS]: "测试中",
-  [PROGRESS_STATUS.EVIDENCE_SUBMITTED]: "证据已提交",
-  [PROGRESS_STATUS.PENDING_REVIEW]: "待复核",
-  [PROGRESS_STATUS.NEEDS_REWORK]: "待补充",
-  [PROGRESS_STATUS.COMPLETED]: "已完成",
-  [PROGRESS_STATUS.BLOCKED]: "被阻塞"
+  [PROGRESS_STATUS.NOT_STARTED]: labelOfProgressStatus(PROGRESS_STATUS.NOT_STARTED),
+  [PROGRESS_STATUS.IN_PROGRESS]: labelOfProgressStatus(PROGRESS_STATUS.IN_PROGRESS),
+  [PROGRESS_STATUS.EVIDENCE_SUBMITTED]: labelOfProgressStatus(PROGRESS_STATUS.EVIDENCE_SUBMITTED),
+  [PROGRESS_STATUS.PENDING_REVIEW]: labelOfProgressStatus(PROGRESS_STATUS.PENDING_REVIEW),
+  [PROGRESS_STATUS.NEEDS_REWORK]: labelOfProgressStatus(PROGRESS_STATUS.NEEDS_REWORK),
+  [PROGRESS_STATUS.COMPLETED]: labelOfProgressStatus(PROGRESS_STATUS.COMPLETED),
+  [PROGRESS_STATUS.BLOCKED]: labelOfProgressStatus(PROGRESS_STATUS.BLOCKED)
 };
 
 const EVIDENCE_LABELS = {
@@ -98,7 +99,7 @@ function MaterialList({ title, items, onRemove }) {
   );
 }
 
-export function WorkspacePage({ project, tasks, onToast }) {
+export function WorkspacePage({ project, tasks, focusControlId = "", onToast }) {
   const [ownerFilter, setOwnerFilter] = useState("");
   const [selectedId, setSelectedId] = useState("");
   const [refreshToken, setRefreshToken] = useState(0);
@@ -129,12 +130,15 @@ export function WorkspacePage({ project, tasks, onToast }) {
   }), [snapshot.controls]);
 
   useEffect(() => {
+    if (!focusControlId) return;
+    setSelectedId(focusControlId);
+  }, [focusControlId]);
+
+  useEffect(() => {
     if (!selectedControl) {
-      setSelectedId("");
       setDetail(emptyDetail);
       return;
     }
-
     if (selectedId !== selectedControl.id) {
       setSelectedId(selectedControl.id);
     }

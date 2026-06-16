@@ -3,12 +3,14 @@ import { createRoot } from "react-dom/client";
 import "./styles.css";
 import { Board } from "./components/Board";
 import { BoardHeader } from "./components/BoardHeader";
-import { EmptyBoardState } from "./components/EmptyBoardState";
+import { ScopeGateState } from "./components/ScopeGateState";
 import { Sidebar } from "./components/Sidebar";
 import { TaskDrawer } from "./components/TaskDrawer";
 import { Topbar } from "./components/Topbar";
 import { COLUMNS, STORAGE_KEY } from "./data/mockData";
+import { ProgressBoardPage } from "./modules/progress-board/ProgressBoardPage";
 import { CreateProjectPage } from "./modules/project/CreateProjectPage";
+import { resolveTaskContributorGroup } from "./modules/project/contributorGroup";
 import { ProjectDetailPage } from "./modules/project/ProjectDetailPage";
 import { ProjectMembersPage } from "./modules/project/ProjectMembersPage";
 import { ProjectsHomePage } from "./modules/project/ProjectsHomePage";
@@ -20,8 +22,10 @@ import {
   getProject,
   loadCurrentProjectId,
   loadProjects,
+  markScopeDefined,
   saveCurrentProjectId
 } from "./modules/project/projectStore";
+import { migrateTasks } from "./utils/taskStatusMigration";
 import { validateStatusTransition } from "./modules/scope-init/scopeRules";
 import { cloneTasks, columnTitle, nextTaskId } from "./utils/taskUtils";
 
@@ -41,7 +45,7 @@ const emptyTask = {
 function loadTasks() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    return Array.isArray(saved) ? saved : [];
+    return migrateTasks(Array.isArray(saved) ? saved : []);
   } catch {
     return [];
   }
@@ -72,6 +76,7 @@ function App() {
   const [toast, setToast] = useState("");
   const [detailTick, setDetailTick] = useState(0);
   const [specialistTeamId, setSpecialistTeamId] = useState("");
+  const [focusControlId, setFocusControlId] = useState("");
 
   const currentProject = useMemo(
     () => getProject(currentProjectId),
@@ -146,6 +151,33 @@ function App() {
     const cleanUrl = `${window.location.origin}${window.location.pathname}`;
     window.history.replaceState({}, "", cleanUrl);
   }, []);
+
+  const scopeTaskCount = useMemo(
+    () => projectTasks.filter((task) => task.scopeGenerated).length,
+    [projectTasks]
+  );
+
+  function handleScopeGenerated(generatedTasks) {
+    setTasks((current) => {
+      const preserved = current.filter(
+        (task) => task.projectId !== currentProjectId || !task.scopeGenerated
+      );
+      return [...generatedTasks, ...preserved];
+    });
+    markScopeDefined(currentProjectId);
+    refreshProjects();
+    setDetailTick((value) => value + 1);
+  }
+
+  function goToWorkspace(controlId = "") {
+    setFocusControlId(controlId);
+    setActiveView("workspace");
+  }
+
+  function goToBoard(controlId = "") {
+    setFocusControlId(controlId);
+    setActiveView("board");
+  }
 
   function refreshProjects() {
     setProjects(loadProjects());
@@ -231,6 +263,10 @@ function App() {
       product: draft.product.trim() || currentProject?.name || "",
       owner: draft.owner.trim() || "未分配",
       projectId: currentProjectId,
+      contributorGroup: resolveTaskContributorGroup(
+        { ...draft, owner: draft.owner.trim() || "未分配" },
+        currentProject?.specialistTeams
+      ),
       comments
     };
 
@@ -323,8 +359,12 @@ function App() {
         <ProjectDetailPage
           projectId={currentProjectId}
           refreshToken={detailTick}
+          scopeTaskCount={scopeTaskCount}
+          startTaskId={Number(nextTaskId(tasks).replace("DS-", ""))}
           onOpenBoard={() => setActiveView("board")}
+          onOpenProgress={() => setActiveView("progress")}
           onOpenMembers={() => setActiveView("members")}
+          onScopeGenerated={handleScopeGenerated}
           onBack={goHome}
           onDelete={() => handleDeleteProject(currentProjectId, currentProject.name)}
           onToast={setToast}
@@ -346,10 +386,20 @@ function App() {
     }
 
     if (activeView === "workspace") {
+      if (scopePending) {
+        return (
+          <ScopeGateState
+            title="工作台等待 Scope 明确"
+            onGoScope={() => setActiveView("detail")}
+          />
+        );
+      }
+
       return (
         <WorkspacePage
           project={currentProject}
           tasks={projectTasks}
+          focusControlId={focusControlId}
           onToast={setToast}
         />
       );
@@ -371,9 +421,9 @@ function App() {
     if (activeView === "board") {
       if (scopePending) {
         return (
-          <EmptyBoardState
-            projectName={currentProject.name}
-            onGoDetail={() => setActiveView("detail")}
+          <ScopeGateState
+            title="看板等待 Scope 明确"
+            onGoScope={() => setActiveView("detail")}
           />
         );
       }
@@ -393,6 +443,27 @@ function App() {
             onMoveTask={moveTask}
           />
         </>
+      );
+    }
+
+    if (activeView === "progress") {
+      if (scopePending) {
+        return (
+          <ScopeGateState
+            title="进度看板等待 Scope 明确"
+            onGoScope={() => setActiveView("detail")}
+          />
+        );
+      }
+
+      return (
+        <ProgressBoardPage
+          project={currentProject}
+          tasks={projectTasks}
+          focusControlId={focusControlId}
+          onGoWorkspace={goToWorkspace}
+          onGoBoard={goToBoard}
+        />
       );
     }
 
@@ -418,7 +489,7 @@ function App() {
         <Topbar
           activeView={activeView}
           project={currentProject}
-          scopePending={scopePending && activeView === "board"}
+          scopePending={scopePending && (activeView === "board" || activeView === "workspace" || activeView === "progress")}
           onNewTask={() => openTask()}
         />
         {renderMain()}

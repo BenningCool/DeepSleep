@@ -7,21 +7,32 @@ export const AUDIT_PHASE_ORDER = {
   "scope-confirm": 0,
   "risk-assessment": 1,
   "control-design": 2,
-  "industry-addon": 3,
-  "control-test": 4,
-  "deficiency-review": 5,
-  "wrap-up": 6
+  "control-test": 3,
+  "deficiency-review": 4,
+  "wrap-up": 5
+};
+
+export const LEGACY_AUDIT_PHASE_MAP = {
+  "industry-addon": "control-test"
 };
 
 export const CRITICAL_PHASE_LABELS = {
   "scope-confirm": "Scope 确认",
   "risk-assessment": "风险评估",
   "control-design": "控制设计",
-  "industry-addon": "行业专项",
   "control-test": "控制测试",
   "deficiency-review": "缺陷评估",
   "wrap-up": "项目收尾"
 };
+
+export function normalizeAuditPhase(phase) {
+  return LEGACY_AUDIT_PHASE_MAP[phase] || phase || "";
+}
+
+export function labelOfAuditPhase(phase) {
+  const normalized = normalizeAuditPhase(phase);
+  return CRITICAL_PHASE_LABELS[normalized] || normalized || "—";
+}
 
 export const WORKFLOW_STEPS = [
   { id: "scope-confirm", label: "Scope 确认", critical: true },
@@ -37,7 +48,7 @@ export function isScopeCriticalTask(task) {
 }
 
 export function getPhaseOrder(phase) {
-  return AUDIT_PHASE_ORDER[phase] ?? 99;
+  return AUDIT_PHASE_ORDER[normalizeAuditPhase(phase)] ?? 99;
 }
 
 export function statusIndex(status) {
@@ -45,6 +56,9 @@ export function statusIndex(status) {
 }
 
 function sameScopeProject(task, target) {
+  if (task?.projectId && target?.projectId) {
+    return task.projectId === target.projectId;
+  }
   if (!task?.scopeMeta?.projectName || !target?.scopeMeta?.projectName) return false;
   return task.scopeMeta.projectName === target.scopeMeta.projectName;
 }
@@ -113,8 +127,7 @@ export function getWorkflowHint(task, allTasks = []) {
 
   const parts = [];
   if (isScopeCriticalTask(task)) {
-    const phase = CRITICAL_PHASE_LABELS[task.auditPhase];
-    parts.push(`关键步骤 · ${phase || task.auditPhase}`);
+    parts.push(`关键步骤 · ${labelOfAuditPhase(task.auditPhase)}`);
   }
 
   parts.push(`当前阶段：${columnTitle(task.status)}`);
@@ -133,11 +146,11 @@ export function groupTasksByPhase(tasks) {
   const groups = new Map();
 
   tasks.forEach((task) => {
-    const phase = task.auditPhase || "general";
+    const phase = normalizeAuditPhase(task.auditPhase) || "general";
     if (!groups.has(phase)) {
       groups.set(phase, {
         phase,
-        label: CRITICAL_PHASE_LABELS[phase] || phase,
+        label: labelOfAuditPhase(phase),
         order: getPhaseOrder(phase),
         tasks: []
       });

@@ -1,11 +1,9 @@
 export const STORAGE_KEY = "deepsleep-project-kanban-v1";
 
 export const COLUMNS = [
-  { id: "todo", title: "待办" },
-  { id: "grooming", title: "需求梳理" },
-  { id: "design", title: "设计中" },
-  { id: "development", title: "开发中" },
-  { id: "review", title: "测试/复核" },
+  { id: "todo", title: "待开始" },
+  { id: "doing", title: "进行中" },
+  { id: "review", title: "待复核" },
   { id: "done", title: "已完成" }
 ];
 

@@ -1,3 +1,5 @@
+import { getPhaseOrder, normalizeAuditPhase } from "../modules/scope-init/scopeRules";
+
 export const WORKSPACE_PROGRESS_STORAGE_KEY = "deepsleep-workspace-progress-v1";
 
 export const PROGRESS_STATUS = {
@@ -30,16 +32,6 @@ const DEFAULT_TEST_CONTENT = {
   procedure: "",
   sampleInfo: "",
   result: ""
-};
-
-const PHASE_ORDER = {
-  "scope-confirm": 0,
-  "risk-assessment": 1,
-  "control-design": 2,
-  "industry-addon": 3,
-  "control-test": 4,
-  "deficiency-review": 5,
-  "wrap-up": 6
 };
 
 function clone(value) {
@@ -100,7 +92,7 @@ function getMaterials(record, category) {
   return (record?.materials || []).filter((item) => item.category === category);
 }
 
-function inferControlType(task = {}) {
+export function inferControlType(task = {}) {
   const source = [
     task.title,
     task.description,
@@ -120,7 +112,7 @@ function inferControlType(task = {}) {
 }
 
 function phaseOrder(phase) {
-  return PHASE_ORDER[phase] ?? 99;
+  return getPhaseOrder(normalizeAuditPhase(phase));
 }
 
 function sameScopeProject(task, target) {

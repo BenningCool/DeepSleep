@@ -1,4 +1,6 @@
 import { getSystemTasks, labelOfSystem } from "./scopeSystems";
+import { resolveContributorGroup } from "../project/contributorGroup";
+import { normalizeTaskStatus } from "../../utils/taskStatusMigration";
 
 export const SCOPE_DRAFT_KEY = "deepsleep-scope-draft-v1";
 
@@ -215,42 +217,42 @@ const INDUSTRY_ADDONS = {
     description: "关注人民银行/银保监会报送接口、核心账务系统变更与灾备切换。",
     priority: "P0",
     status: "design",
-    auditPhase: "industry-addon"
+    auditPhase: "control-test"
   },
   manufacturing: {
     title: "ERP 与生产系统集成控制",
     description: "检查 BOM、成本核算与 MES 工单数据在 ERP 中的勾稽关系。",
     priority: "P1",
     status: "design",
-    auditPhase: "industry-addon"
+    auditPhase: "control-test"
   },
   tech: {
     title: "CI/CD 与云资源配置审查",
     description: "审查代码仓库权限、流水线审批与云 IAM 最小权限配置。",
     priority: "P0",
     status: "design",
-    auditPhase: "industry-addon"
+    auditPhase: "control-test"
   },
   retail: {
     title: "POS 与电商订单对账",
     description: "验证门店 POS、OMS 与财务收入确认的端到端数据一致性。",
     priority: "P0",
     status: "development",
-    auditPhase: "industry-addon"
+    auditPhase: "control-test"
   },
   healthcare: {
     title: "临床试验与患者数据隔离",
     description: "检查 EDC 系统权限、数据脱敏与 GxP 合规要求。",
     priority: "P0",
     status: "design",
-    auditPhase: "industry-addon"
+    auditPhase: "control-test"
   },
   energy: {
     title: "OT/IT 边界与工控安全",
     description: "评估 SCADA 与办公网隔离、工控设备补丁与远程运维控制。",
     priority: "P0",
     status: "design",
-    auditPhase: "industry-addon"
+    auditPhase: "control-test"
   }
 };
 
@@ -308,9 +310,15 @@ function labelOf(options, id) {
 }
 
 export function buildScopeSummary(selection) {
-  const { industry, auditDomain, projectType, systems = [] } = selection;
+  const {
+    industry,
+    auditDomain,
+    projectType,
+    systems = [],
+    industryLabel: industryLabelOverride
+  } = selection;
   return {
-    industryLabel: labelOf(INDUSTRIES, industry),
+    industryLabel: industryLabelOverride || labelOf(INDUSTRIES, industry) || "通用行业",
     auditDomainLabel: labelOf(AUDIT_DOMAINS, auditDomain),
     projectTypeLabel: labelOf(PROJECT_TYPES, projectType),
     systemsLabel: systems.length
@@ -342,7 +350,7 @@ export function computeScopeStats(tasks) {
   };
 }
 
-export function generateScopeTasks(selection, startId = 200) {
+export function generateScopeTasks(selection, options = {}) {
   const {
     projectName,
     industry,
@@ -353,10 +361,16 @@ export function generateScopeTasks(selection, startId = 200) {
     startDate = new Date().toISOString().slice(0, 10)
   } = selection;
 
+  const {
+    startId = 200,
+    projectId = "",
+    specialistTeams = []
+  } = options;
+
   const summary = buildScopeSummary(selection);
   const product = projectName.trim() || "新建审计项目";
   const baseTasks = DOMAIN_TASKS[auditDomain] || DOMAIN_TASKS.itgc;
-  const industryAddon = INDUSTRY_ADDONS[industry];
+  const industryAddon = industry ? INDUSTRY_ADDONS[industry] : null;
   const projectAddon = PROJECT_ADDONS[projectType];
   const systemTasks = getSystemTasks(systems);
 
@@ -381,7 +395,7 @@ export function generateScopeTasks(selection, startId = 200) {
     product,
     owner: owner.trim() || "未分配",
     due: addDays(startDate, 7 + index * 3),
-    status: template.status,
+    status: normalizeTaskStatus(template.status),
     comments: [
       {
         author: "Scope 引擎",
@@ -392,12 +406,15 @@ export function generateScopeTasks(selection, startId = 200) {
     scopeCritical: Boolean(template.scopeCritical),
     auditPhase: template.auditPhase,
     systemScoped: Boolean(template.systemScoped),
+    contributorGroup: resolveContributorGroup(template, auditDomain, owner, specialistTeams),
+    projectId,
     scopeMeta: {
       industry,
       auditDomain,
       projectType,
       systems,
-      projectName: product
+      projectName: product,
+      projectId
     }
   }));
 }
