@@ -17,7 +17,9 @@ import {
 } from "../../services/workspaceProgressService";
 ```
 
-模块 2 在每个测试点内记录 TOD / TOE 节点、材料、Planning/Review 流程节点和字段级复核意见。模块 3 读取 snapshot 做汇总和依赖图，点击节点时读取 detail 展示材料与明细。
+模块 2 在每个测试点内记录阶段节点、材料和字段级复核意见。模块 3 读取 snapshot 做汇总和依赖图，点击节点时读取 detail 展示材料与明细。Planning / Review 流程按钮已从模块 2 移除，模块 3 不应展示或依赖这两个节点。
+
+GITC 测试点使用专属 12 节点流程：TOD 6 个、TOE 6 个，完成度只按这 12 个 required 节点计算。ITAC 测试点只有 TOD，固定 5 个 required 节点；不会返回 TOE。TASK 使用轻量默认模板。因此模块 3 不要假设 TOD/TOE 一定同时存在，应以接口返回的 `completedNodes`、`totalNodes`、`phaseProgress` 和 `phases[].nodes` 为准。
 
 ## Snapshot
 
@@ -35,33 +37,36 @@ const snapshot = getControlProgressSnapshot(projectId, projectTasks);
   updatedAt: "2026-06-15T10:00:00.000Z",
   controls: [
     {
-      id: "ITAC-001",
-      title: "三单匹配自动控制测试",
-      controlType: "ITAC",
+      id: "GITC-001",
+      title: "访问管理控制测试",
+      controlType: "GITC",
       owner: "alice@kpmg.com",
+      assigneeEmail: "alice@kpmg.com",
       auditPhase: "control-test",
       taskStatus: "doing",
       progressStatus: "in_progress",
       workspaceStatus: "in_progress",
-      progressPercent: 90,
-      completedNodes: 9,
-      totalNodes: 10,
+      progressPercent: 50,
+      completedNodes: 6,
+      totalNodes: 12,
       phaseProgress: {
-        tod: { completedNodes: 3, totalNodes: 4 },
-        toe: { completedNodes: 6, totalNodes: 6 }
+        tod: { completedNodes: 4, totalNodes: 6 },
+        toe: { completedNodes: 2, totalNodes: 6 }
       },
       evidenceStatus: "partial_uploaded",
       evidenceCount: 0,
-      meetingMinutesCount: 2,
-      sppCount: 2,
+      meetingMinutesCount: 1,
+      sppCount: 0,
+      policyCount: 1,
+      supportingMaterialCount: 1,
+      requirementListCount: 1,
+      samplePoolCount: 1,
+      returnedSampleSupportCount: 1,
       reviewStatus: "pending_review",
-      milestones: {
-        planning: true,
-        review: false
-      },
-      milestoneActors: {
-        planning: "AL",
-        review: ""
+      nodeDueDates: {
+        "gitc-tod-policy": "2026-06-23",
+        "gitc-tod-design": "2026-06-30",
+        "gitc-tod-minutes": "2026-07-07"
       },
       fieldReviewSummary: {
         open: 1,
@@ -69,7 +74,7 @@ const snapshot = getControlProgressSnapshot(projectId, projectTasks);
         accepted: 2
       },
       blockers: [],
-      dependencies: ["GITC-001"],
+      dependencies: [],
       updatedAt: "2026-06-15T10:00:00.000Z"
     }
   ]
@@ -81,14 +86,18 @@ const snapshot = getControlProgressSnapshot(projectId, projectTasks);
 | 字段 | 用途 |
 | --- | --- |
 | `controlType` | 测试点类型：`GITC`、`ITAC`、`TASK` |
+| `owner` / `assigneeEmail` | 当前测试点负责人/被指派成员；模块 3 做成员工作量统计时优先使用 `assigneeEmail`，当前值与 `owner` 一致 |
 | `progressStatus` | 模块 3 的主状态，优先用于节点颜色和聚合 |
-| `workspaceStatus` | 模块 2 页面三态：`not_started`、`in_progress`、`completed`。如果模块 3 要和工作台 UI 完全一致，优先展示这个字段 |
+| `workspaceStatus` | 模块 2 页面三态：`not_started`、`in_progress`、`completed`。只要节点文本、结构化字段或材料有内容即进入 `in_progress`；如果模块 3 要和工作台 UI 完全一致，优先展示这个字段 |
 | `progressPercent` | 由节点完成度计算，等于 `completedNodes / totalNodes` |
-| `completedNodes` / `totalNodes` | 当前测试点总完成节点数，适合显示 `9/10` |
-| `phaseProgress` | TOD / TOE 分阶段完成度，适合显示 `TOD 3/4`、`TOE 6/6` |
-| `evidenceCount` / `meetingMinutesCount` / `sppCount` | 已上传材料数量 |
+| `completedNodes` / `totalNodes` | 当前测试点总完成节点数，适合显示 `6/12`；不要写死分母 |
+| `phaseProgress` | 分阶段完成度，按返回 key 动态显示；GITC 通常有 `tod` / `toe`，ITAC 只有 `tod` |
+| `evidenceCount` / `meetingMinutesCount` / `sppCount` | 旧材料类别数量，继续兼容 |
+| `policyCount` / `supportingMaterialCount` | GITC TOD 使用：制度、支持性材料数量 |
+| `requirementListCount` / `samplePoolCount` / `returnedSampleSupportCount` | GITC TOE 使用：需求清单、样本池、客户返回样本支持材料数量 |
 | `reviewStatus` | 复核状态，可用于 sign-off 标识 |
-| `milestones` / `milestoneActors` | Planning / Review 是否点击完成，以及点击人缩写 |
+| `milestones` / `milestoneActors` | 旧版兼容字段。Planning / Review 节点已移除，模块 3 不应展示或依赖 |
+| `nodeDueDates` | 节点预计完成日期 map，key 为节点 id，value 为 `YYYY-MM-DD`；模块 3 可用于逾期提醒 |
 | `fieldReviewSummary` | 字段级复核意见数量汇总，按 `open`、`replied`、`accepted` 统计 |
 | `blockers` | 当前测试点被哪些前置关键任务阻塞 |
 | `dependencies` | 当前测试点依赖的前置任务，MVP 与 `blockers` 同源 |
@@ -97,7 +106,7 @@ const snapshot = getControlProgressSnapshot(projectId, projectTasks);
 
 ## Detail
 
-用于点击进度图节点后打开详情抽屉，展示 TOD / TOE 子流程、文字记录和材料清单。
+用于点击进度图节点后打开详情抽屉，展示阶段子流程、文字记录和材料清单。
 
 ```js
 const detail = getControlProgressDetail("ITAC-001", task, projectTasks);
@@ -111,78 +120,114 @@ const detail = getControlProgressDetail("ITAC-001", task, projectTasks);
   title: "三单匹配自动控制测试",
   controlType: "ITAC",
   testContent: {
-    objective: "验证自动控制设计有效。",
-    procedure: "检查配置、样本和重新执行结果。",
-    sampleInfo: "样本量 25，期间 2026 Q1。",
-    result: "No exception noted."
+    objective: "Implementation 草稿...",
+    procedure: "",
+    sampleInfo: "",
+    result: "ITAC Test of One\n\n| 样本编号 | 配置/代码对象 | ..."
   },
   nodeResponses: {
-    "tod-objective": "验证自动控制设计有效。",
-    "toe-result": "No exception noted."
+    "itac-tod-implementation": "Implementation 草稿\n依据会议纪要整理控制执行人、控制频率、关键配置或代码对象。",
+    "itac-tod-test-of-one": "ITAC Test of One\n\n| 样本编号 | 配置/代码对象 | 关键参数 | 支持材料索引 | 检查结果 | 结论 |\n| --- | --- | --- | --- | --- | --- |\n| ITAC-TOO-001 | 三单匹配容差配置 | 金额容差 0.5% | 支持材料.xlsx | 与审批一致 | 未发现例外 |"
+  },
+  nodeDueDates: {
+    "itac-tod-minutes": "2026-06-23",
+    "itac-tod-implementation": "2026-06-30",
+    "itac-tod-supporting-material": "2026-07-07",
+    "itac-tod-test-of-one-support": "2026-07-14",
+    "itac-tod-test-of-one": "2026-07-21"
   },
   phases: [
     {
       id: "tod",
       label: "TOD",
-      completedNodes: 3,
-      totalNodes: 4,
+      completedNodes: 5,
+      totalNodes: 5,
       nodes: [
         {
-          id: "tod-objective",
+          id: "itac-tod-minutes",
           phaseId: "tod",
-          label: "TOD 测试目标",
-          type: "text",
+          label: "上传会议纪要",
+          type: "upload_minutes",
           required: true,
+          category: "meeting_minutes",
+          dueDate: "2026-06-23",
           status: "completed",
-          value: "验证自动控制设计有效。",
-          materialCount: 0
+          materialCount: 1
         },
         {
-          id: "tod-spp",
+          id: "itac-tod-implementation",
           phaseId: "tod",
-          label: "TOD支持性材料",
-          type: "upload_spp",
+          label: "自动生成 Implementation",
+          type: "generated_text",
           required: true,
-          category: "spp",
-          status: "pending",
-          materialCount: 0
+          dependsOnNodeId: "itac-tod-minutes",
+          generationKind: "implementation",
+          dueDate: "2026-06-30",
+          status: "completed",
+          value: "Implementation 草稿..."
+        },
+        {
+          id: "itac-tod-supporting-material",
+          phaseId: "tod",
+          label: "上传配置/代码支持性材料",
+          type: "upload_supporting_material",
+          required: true,
+          category: "supporting_material",
+          supportKindOptions: [
+            { value: "configuration", label: "配置" },
+            { value: "code", label: "代码" }
+          ],
+          status: "completed",
+          materialCount: 1
+        },
+        {
+          id: "itac-tod-test-of-one-support",
+          phaseId: "tod",
+          label: "上传 Test of One 支持性材料",
+          type: "upload_test_of_one_support",
+          required: true,
+          category: "supporting_material",
+          defaultSupportingMaterialKind: "test_of_one",
+          status: "completed",
+          materialCount: 1
+        },
+        {
+          id: "itac-tod-test-of-one",
+          phaseId: "tod",
+          label: "填写 Test of One 样本表",
+          type: "generated_text",
+          required: true,
+          builderKind: "itac_test_of_one_table",
+          status: "completed",
+          value: "ITAC Test of One\n\n| 样本编号 | 配置/代码对象 | ..."
         }
       ]
     }
   ],
-  completedNodes: 9,
-  totalNodes: 10,
+  completedNodes: 5,
+  totalNodes: 5,
   phaseProgress: {
-    tod: { completedNodes: 3, totalNodes: 4 },
-    toe: { completedNodes: 6, totalNodes: 6 }
+    tod: { completedNodes: 5, totalNodes: 5 }
   },
-  progressPercent: 90,
-  progressStatus: "in_progress",
-  workspaceStatus: "in_progress",
-  milestones: {
-    planning: true,
-    review: false
-  },
-  milestoneActors: {
-    planning: "AL",
-    review: ""
-  },
+  progressPercent: 100,
+  progressStatus: "completed",
+  workspaceStatus: "completed",
   extraTextFields: {
-    "tod-process": [
+    "itac-tod-test-of-one": [
       {
         id: "txt_abc123",
         label: "补充说明",
-        value: "补充记录控制人访谈要点。",
+        value: "补充记录样本表生成依据。",
         createdAt: "2026-06-15T10:00:00.000Z"
       }
     ]
   },
   fieldReviews: {
-    "tod-process": {
+    "itac-tod-test-of-one": {
       id: "rev_abc123",
       status: "replied",
-      comment: "请补充控制频率。",
-      reply: "已补充为每日自动运行。",
+      comment: "请补充配置参数来源。",
+      reply: "已补充支持材料索引。",
       createdBy: "Reviewer",
       repliedBy: "alice@kpmg.com",
       acceptedBy: "",
@@ -193,10 +238,11 @@ const detail = getControlProgressDetail("ITAC-001", task, projectTasks);
   materials: [
     {
       id: "mat_abc123",
-      category: "spp",
-      phaseId: "toe",
-      nodeId: "toe-spp",
-      name: "三单匹配 TOE 支持性材料.xlsx",
+      category: "supporting_material",
+      supportingMaterialKind: "configuration",
+      phaseId: "tod",
+      nodeId: "itac-tod-supporting-material",
+      name: "三单匹配配置截图.xlsx",
       fileType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       size: 238000,
       uploadedBy: "alice@kpmg.com",
@@ -213,14 +259,45 @@ const detail = getControlProgressDetail("ITAC-001", task, projectTasks);
 
 ## 节点模板
 
-当前 MVP 使用统一 TOD / TOE 模板：
+当前模板按测试点类型区分。模块 3 不需要根据类型推导节点，只读取返回的 `phases`。
+
+GITC 专属模板：
+
+| 阶段 | 节点数 | 内容 |
+| --- | ---: | --- |
+| `tod` | 6 | 上传制度、自动生成 Design、上传会议纪要、自动生成 Implementation、上传支持性材料、手动填写字段并生成 Test of One 表格 |
+| `toe` | 6 | 上传需求清单、上传客户提供的样本池、自动抽样生成抽样样本、是否发送样本、上传客户返回的样本支持性材料、手动填写字段并生成样本抄写表 |
+
+GITC 的生成类节点会在模块 2 本地生成可编辑草稿，但只有用户点击 `Save` 后，草稿才写入 service 并计入 `completedNodes`。其中 `gitc-tod-test-of-one`、`gitc-toe-transcription` 都改为先由操作人员手动填写样本字段名，再按字段录入样本信息并生成表格。模块 2 页面会渲染为实际表格；模块 3 只会看到已经保存进对应 `nodeResponses` 的表格文本，可按表格展示。
+
+TASK 轻量模板：
 
 | 阶段 | 节点数 | 内容 |
 | --- | ---: | --- |
 | `tod` | 4 | TOD 会议纪要、测试目标、流程理解、TOD支持性材料 |
 | `toe` | 6 | 样本信息、测试程序、执行过程、上传TOE支持性材料、TOE 会议纪要、TOE 结论 |
 
-后续如果模块 2 按 `GITC/ITAC` 或行业扩展模板，模块 3 不需要改读取方式，只按返回的 `phases[].nodes` 渲染即可。
+ITAC TOD-only 模板：
+
+| 阶段 | 节点数 | 内容 |
+| --- | ---: | --- |
+| `tod` | 5 | 上传会议纪要、自动生成 Implementation、上传配置/代码支持性材料、上传 Test of One 支持性材料、填写 Test of One 样本表 |
+
+ITAC 不返回 `toe` 阶段。模块 3 如果要展示分阶段进度，应遍历 `Object.entries(phaseProgress)` 或 `detail.phases`，不要固定读取 `phaseProgress.toe`。
+
+ITAC 的 `itac-tod-supporting-material` 是一个二选一上传节点，材料仍使用 `category = "supporting_material"`，并通过 `supportingMaterialKind` 区分：
+
+| `supportingMaterialKind` | 含义 |
+| --- | --- |
+| `configuration` | 配置支持性材料 |
+| `code` | 代码支持性材料 |
+| `test_of_one` | Test of One 支持性材料 |
+
+ITAC 的 `itac-tod-test-of-one` 使用 `builderKind = "itac_test_of_one_table"`。模块 2 会让操作人员先手动填写样本字段名，再填写样本信息，并把生成的表格写入 `nodeResponses["itac-tod-test-of-one"]`；模块 2 页面渲染为实际表格，模块 3 只展示保存后的内容即可。
+
+新建测试点时，模块 2 会按所选类型列出当前模板的 required 节点，并为每个节点写入预计完成日期。操作员选择第一个节点日期后，后续节点默认逐个后推 7 天，且每个节点都可人工覆盖。模块 3 不需要自己推导默认日期，只读取 `nodeDueDates` 或 `phases[].nodes[].dueDate`。
+
+后续如果模块 2 继续按行业或项目类型扩展模板，模块 3 不需要改读取方式，只按返回的 `phases[].nodes` 渲染即可。
 
 ## 节点和材料枚举
 
@@ -233,7 +310,12 @@ NODE_STATUS = {
 MATERIAL_CATEGORY = {
   SPP: "spp",
   MEETING_MINUTES: "meeting_minutes",
-  EVIDENCE: "evidence"
+  EVIDENCE: "evidence",
+  POLICY: "policy",
+  SUPPORTING_MATERIAL: "supporting_material",
+  REQUIREMENT_LIST: "requirement_list",
+  SAMPLE_POOL: "sample_pool",
+  RETURNED_SAMPLE_SUPPORT: "returned_sample_support"
 }
 
 FIELD_REVIEW_STATUS = {
@@ -248,12 +330,31 @@ FIELD_REVIEW_STATUS = {
 | `type` | 完成规则 |
 | --- | --- |
 | `text` | 对应 `nodeResponses[node.id]` 或 legacy 字段非空 |
+| `structured` | 对应 `nodeResponses["{nodeId}.{fieldId}"]`；必填字段按字段类型完成规则判断 |
+| `generated_text` | 对应 `nodeResponses[node.id]` 非空。上传依赖材料后模块 2 可生成草稿，但 Save 前不计入完成 |
+| `send_toggle` | 对应 `nodeResponses[node.id].sent === true`；再次点击会取消并扣回完成度 |
 | `upload_spp` | 当前节点下至少有一个 `category = "spp"` 材料 |
 | `upload_minutes` | 当前节点下至少有一个 `category = "meeting_minutes"` 材料 |
 | `upload_evidence` | 当前节点下至少有一个 `category = "evidence"` 材料 |
-| `review` | `reviewStatus` 达到节点定义的 `threshold` |
+| `upload_policy` | 当前节点下至少有一个 `category = "policy"` 材料；GITC 制度节点仅允许 Word 文件（`.doc` / `.docx`），节点会返回 `accept` 和 `fileHint` |
+| `upload_supporting_material` | 当前节点下至少有一个 `category = "supporting_material"` 材料；ITAC 该节点还会记录 `supportingMaterialKind = "configuration" | "code"` |
+| `upload_test_of_one_support` | 当前节点下至少有一个 `category = "supporting_material"` 且 `supportingMaterialKind = "test_of_one"` 的材料 |
+| `upload_requirement_list` | 当前节点下至少有一个 `category = "requirement_list"` 材料 |
+| `upload_sample_pool` | 当前节点下至少有一个 `category = "sample_pool"` 材料 |
+| `upload_returned_sample_support` | 当前节点下至少有一个 `category = "returned_sample_support"` 材料 |
+生成表格类节点通过 `builderKind` 区分交互形态：`test_of_one_table` 用于 GITC TOD 单样本 Test of One，`itac_test_of_one_table` 用于 ITAC TOD 单样本 Test of One，`sample_transcription_table` 用于 GITC TOE 多样本抄写。三者都由模块 2 先手动录入字段名，再录入样本值并生成表格；模块 3 不需要实现填表器，只读取保存后的 `nodeResponses[node.id]` 内容并渲染为表格。
 
-字段级复核意见不改变节点完成数，但会影响模块 2 的 `workspaceStatus`：所有字段级复核意见都为 `accepted`，且 Planning / Review 均完成后，`workspaceStatus` 才会变为 `completed`。
+`structured` 字段类型：
+
+| 字段类型 | `nodeResponses` 形态 | 完成规则 |
+| --- | --- | --- |
+| `text` / `textarea` / `select` / `yes_no` | 字符串 | 非空 |
+| `checkbox` | 布尔值 | `true` |
+| `checkbox_group` | 字符串数组 | 至少选择一项 |
+| `date_range` | `{ start, end }` | 起止日期均非空 |
+| `matrix` | `{ [rowId]: { [columnId]: value } }` | 默认至少一行有有效单元格；后续模板可通过配置提高要求 |
+
+字段级复核意见不改变节点完成数，但会影响模块 2 的 `workspaceStatus`：全部 required 节点完成且所有字段级复核意见都为 `accepted` 后，`workspaceStatus` 变为 `completed`。
 
 ## 状态枚举
 
@@ -288,16 +389,16 @@ REVIEW_STATUS = {
 
 1. 有 blocker：`blocked`
 2. Reviewer 退回：`needs_rework`
-3. 全部 required 节点完成且已签核：`completed`
+3. 全部 required 节点完成且所有字段级复核意见 accepted：`completed`
 4. 已提交复核，或全部执行节点完成但未完成复核：`pending_review`
 5. `completedNodes = 0`：`not_started`
 6. 其他：`in_progress`
 
 `workspaceStatus` 是模块 2 页面用的简化三态：
 
-1. 没有上传任何材料：`not_started`
-2. 已上传材料但未同时满足 Planning、Review 和全部复核意见 accepted：`in_progress`
-3. 已上传材料、Planning 已点、Review 已点、全部字段级复核意见 accepted：`completed`
+1. 没有任何节点文本、结构化字段、补充文本或材料：`not_started`
+2. 识别到任一节点文本、结构化字段、补充文本或材料：`in_progress`
+3. 全部 required 节点完成，且全部字段级复核意见 accepted：`completed`
 
 ## 推荐接入方式
 
@@ -306,7 +407,7 @@ REVIEW_STATUS = {
 3. 节点主标签显示 `title`，副标签显示 `completedNodes/totalNodes` 和 `progressPercent`。
 4. 节点颜色按 `progressStatus`，其中 `blocked` 优先级最高。
 5. 点击节点时调用 `getControlProgressDetail(controlId, task, projectTasks)`。
-6. 详情抽屉展示 `phases`、`materials`、`milestones`、`fieldReviews`、`reviewStatus`。
+6. 详情抽屉展示 `phases`、`materials`、`fieldReviews`、`reviewStatus`，不要展示 Planning / Review 旧流程节点。
 7. 模块 2 保存后，模块 3 重新调用 snapshot/detail 即可拿到最新进度。
 
 ## 注意事项
