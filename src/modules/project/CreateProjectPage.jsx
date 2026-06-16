@@ -286,7 +286,7 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
           <div className="form-panel">
             <h3>Specialist 团队</h3>
             <p className="panel-note">
-              Audit 项目可邀请 ITA / Tax / FRM 专家组。Lead 收到链接后补充本组 Staff。
+              Audit team 项目可邀请 ITA / Tax / FRM 专家组。Lead 接受邀请后进入成员管理页补充 Specialist team staff。
             </p>
 
             <div className="specialist-grid">

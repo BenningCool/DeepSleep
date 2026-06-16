@@ -10,6 +10,7 @@ import {
   labelOfSpecialistLeadRole,
   labelOfSpecialistTeam
 } from "./specialistConstants";
+import { ProjectScopeSection } from "./ProjectScopeSection";
 import {
   getProject,
   updateEditableProject
@@ -29,8 +30,11 @@ function LockedItem({ label, value }) {
 export function ProjectDetailPage({
   projectId,
   refreshToken = 0,
+  scopeTaskCount = 0,
   onOpenBoard,
   onOpenMembers,
+  onOpenProgress,
+  onScopeGenerated,
   onBack,
   onDelete,
   onToast,
@@ -175,17 +179,19 @@ export function ProjectDetailPage({
           </div>
         </section>
 
-        <section className="detail-panel scope-panel">
-          <div className="scope-panel-head">
-            <h3>Scope</h3>
-            <span className="status-pill pending">Pending</span>
-          </div>
-          <div className="scope-placeholder">
-            <strong>项目 Scope 尚未明确</strong>
-            <p>
-              后续将在此初始化审计范围与任务清单。Scope 明确前，看板保持为空并提示等待 Scope。
-            </p>
-          </div>
+        <section className="detail-panel scope-panel full">
+          <ProjectScopeSection
+            project={project}
+            existingTaskCount={scopeTaskCount}
+            onGenerate={onScopeGenerated}
+            onToast={onToast}
+          />
+          {project.scopeStatus === "defined" ? (
+            <div className="scope-defined-links">
+              <button className="button" type="button" onClick={onOpenBoard}>查看看板</button>
+              <button className="button primary" type="button" onClick={onOpenProgress}>查看进度</button>
+            </div>
+          ) : null}
         </section>
 
         <section className="detail-panel full members-summary">
@@ -214,7 +220,9 @@ export function ProjectDetailPage({
             <div className="panel-toolbar">
               <div>
                 <h3>Specialist 团队</h3>
-                <p className="panel-note">Audit 跨组协作 · 共 {specialistTeams.length} 个专家组（可在成员管理中增删改）</p>
+                <p className="panel-note">
+                  Audit team 跨组协作 · 已启用 {specialistTeams.map((t) => labelOfSpecialistTeam(t.team)).join("、")}（Lead 受邀后在成员管理补充 Specialist team staff）
+                </p>
               </div>
               <button className="button" type="button" onClick={onOpenMembers}>
                 管理 Specialist

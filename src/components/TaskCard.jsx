@@ -1,6 +1,12 @@
+import { labelOfContributorGroup } from "../modules/project/contributorGroup";
+import { labelOfAuditPhase } from "../modules/scope-init/scopeRules";
+import { inferControlType } from "../services/workspaceProgressService";
 import { initials, platformClass } from "../utils/taskUtils";
 
 export function TaskCard({ task, onOpen }) {
+  const controlType = inferControlType(task);
+  const phaseLabel = labelOfAuditPhase(task.auditPhase);
+
   return (
     <article
       className="card"
@@ -22,7 +28,17 @@ export function TaskCard({ task, onOpen }) {
       <div className="card-meta">
         <span className={`pill ${task.priority.toLowerCase()}`}>{task.priority}</span>
         {task.scopeCritical ? <span className="pill critical">关键</span> : null}
-        <span className={`pill ${platformClass(task.platform)}`}>{task.platform}</span>
+        {task.scopeGenerated ? (
+          <>
+            <span className={`pill control-type ${controlType.toLowerCase()}`}>{controlType}</span>
+            {phaseLabel ? <span className="pill phase">{phaseLabel}</span> : null}
+            {task.contributorGroup ? (
+              <span className="pill group">{labelOfContributorGroup(task.contributorGroup)}</span>
+            ) : null}
+          </>
+        ) : (
+          <span className={`pill ${platformClass(task.platform)}`}>{task.platform}</span>
+        )}
       </div>
       <h4 className="card-title">{task.title}</h4>
       <p className="card-desc">{task.description}</p>
