@@ -5,10 +5,49 @@ import {
   labelOfProjectType,
   labelOfTeam
 } from "../../data/projectConstants";
+import {
+  formatWorkspaceStatusSummary,
+  WorkspaceStatusOverviewBar
+} from "../progress-board/WorkspaceStatusOverviewBar";
 import { countActiveMembers, filterProjects, sortProjects } from "./projectSearch";
+import { getProjectWorkspaceStatusOverview } from "./projectProgressOverview";
 import { PROJECT_SORT_OPTIONS } from "./specialistConstants";
 
-function ProjectCard({ project, active, onOpen }) {
+function ProjectCardProgress({ project, tasks }) {
+  if (project.scopeStatus === "pending") {
+    return (
+      <div className="project-card-progress" aria-label="状态概述">
+        <WorkspaceStatusOverviewBar breakdown={{ total: 0 }} pending />
+        <p className="project-card-progress-meta muted">待 Scope</p>
+      </div>
+    );
+  }
+
+  const breakdown = getProjectWorkspaceStatusOverview(project.id, tasks);
+  const { total } = breakdown;
+
+  if (!total) {
+    return (
+      <div className="project-card-progress" aria-label="状态概述">
+        <WorkspaceStatusOverviewBar breakdown={breakdown} pending />
+        <p className="project-card-progress-meta muted">暂无控制点</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="project-card-progress" aria-label="状态概述">
+      <div className="project-card-progress-head">
+        <span>状态概述</span>
+        <strong>{total} 控制点</strong>
+      </div>
+      <WorkspaceStatusOverviewBar breakdown={breakdown} />
+      <p className="project-card-progress-meta">{formatWorkspaceStatusSummary(breakdown)}</p>
+    </div>
+  );
+}
+
+function ProjectCard({ project, tasks, active, onOpen }) {
   return (
     <button
       className={`project-card ${active ? "active" : ""}`}
@@ -29,6 +68,7 @@ function ProjectCard({ project, active, onOpen }) {
       {project.reportDate ? (
         <div className="project-card-report">Report Date · {project.reportDate}</div>
       ) : null}
+      <ProjectCardProgress project={project} tasks={tasks} />
       <div className="project-card-footer">
         <span className={`scope-badge ${project.scopeStatus}`}>
           Scope {project.scopeStatus === "pending" ? "Pending" : "Defined"}
@@ -39,7 +79,13 @@ function ProjectCard({ project, active, onOpen }) {
   );
 }
 
-export function ProjectsHomePage({ projects, currentProjectId, onCreate, onOpen }) {
+export function ProjectsHomePage({
+  projects,
+  tasks = [],
+  currentProjectId,
+  onCreate,
+  onOpen
+}) {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("recent");
 
@@ -89,6 +135,7 @@ export function ProjectsHomePage({ projects, currentProjectId, onCreate, onOpen 
                 <ProjectCard
                   key={project.id}
                   project={project}
+                  tasks={tasks}
                   active={project.id === currentProjectId}
                   onOpen={onOpen}
                 />

@@ -9,7 +9,7 @@ export function Sidebar({
     { id: "members", icon: "M", label: "成员管理" },
     { id: "workspace", icon: "W", label: "工作台" },
     { id: "board", icon: "K", label: "看板" },
-    { id: "progress", icon: "P", label: "进度" }
+    { id: "progress", icon: "P", label: "进度看板" }
   ] : [];
 
   const globalNav = [

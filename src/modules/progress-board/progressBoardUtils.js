@@ -10,7 +10,7 @@ const PENDING_STATUSES = new Set([
 
 export function isDelayedControl(control, task) {
   if (control.progressStatus === PROGRESS_STATUS.BLOCKED) return true;
-  if (!task?.due || control.progressStatus === PROGRESS_STATUS.COMPLETED) return false;
+  if (!task?.due || control.workspaceStatus === PROGRESS_STATUS.COMPLETED) return false;
   const due = new Date(task.due);
   if (Number.isNaN(due.getTime())) return false;
   const today = new Date();
@@ -48,7 +48,7 @@ export function computePhaseProgress(controls) {
 
     const entry = groups.get(phase);
     entry.total += 1;
-    if (control.progressStatus === PROGRESS_STATUS.COMPLETED) {
+    if (control.workspaceStatus === PROGRESS_STATUS.COMPLETED) {
       entry.completed += 1;
     }
   });
@@ -66,5 +66,5 @@ export function isBoardProgressMismatch(control) {
   if (!control) return false;
   if (control.progressStatus === PROGRESS_STATUS.BLOCKED) return false;
   return control.taskStatus === "done"
-    && control.progressStatus !== PROGRESS_STATUS.COMPLETED;
+    && control.workspaceStatus !== PROGRESS_STATUS.COMPLETED;
 }

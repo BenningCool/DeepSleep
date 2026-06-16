@@ -7,7 +7,7 @@ const VIEW_LABELS = {
   members: "成员管理",
   workspace: "工作台",
   board: "看板",
-  progress: "进度"
+  progress: "进度看板"
 };
 
 export function Topbar({

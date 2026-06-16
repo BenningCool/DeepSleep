@@ -97,7 +97,7 @@ export function ProjectScopeSection({
 
     const message = scopeDefined
       ? `将替换当前项目已生成的 ${existingTaskCount} 条 Scope 任务，是否继续？`
-      : `将生成 ${tasks.length} 条控制点任务并解锁工作台 / 看板 / 进度，是否继续？`;
+      : `将生成 ${tasks.length} 条控制点任务并解锁工作台 / 看板 / 进度看板，是否继续？`;
 
     if (!window.confirm(message)) return;
 
@@ -115,7 +115,7 @@ export function ProjectScopeSection({
           <span className="status-pill active">Defined</span>
         </div>
         <p className="panel-note">
-          已生成 {existingTaskCount} 个控制点。可在看板推进执行、在工作台记录测试，在进度页查看整体健康度。
+          已生成 {existingTaskCount} 个控制点。可在看板推进执行、在工作台记录测试，在进度看板查看整体健康度。
         </p>
         <div className="scope-defined-actions">
           <button className="button" type="button" onClick={() => setEditing(true)}>重新配置 Scope</button>
@@ -134,7 +134,7 @@ export function ProjectScopeSection({
       </div>
 
       <p className="panel-note">
-        选择审计领域与关键系统，自动生成控制点清单。生成后解锁工作台、看板与进度。
+        选择审计领域与关键系统，自动生成控制点清单。生成后解锁工作台、看板与进度看板。
       </p>
 
       <div className="scope-locked-meta">

@@ -8,6 +8,7 @@ import { Sidebar } from "./components/Sidebar";
 import { TaskDrawer } from "./components/TaskDrawer";
 import { Topbar } from "./components/Topbar";
 import { COLUMNS, STORAGE_KEY } from "./data/mockData";
+import { deleteProjectWorkspaceProgress } from "./services/workspaceProgressService";
 import { ProgressBoardPage } from "./modules/progress-board/ProgressBoardPage";
 import { CreateProjectPage } from "./modules/project/CreateProjectPage";
 import { resolveTaskContributorGroup } from "./modules/project/contributorGroup";
@@ -76,6 +77,7 @@ function App() {
   const [detailTick, setDetailTick] = useState(0);
   const [specialistTeamId, setSpecialistTeamId] = useState("");
   const [focusControlId, setFocusControlId] = useState("");
+  const [progressDataRefreshKey, setProgressDataRefreshKey] = useState(0);
 
   const currentProject = useMemo(
     () => getProject(currentProjectId),
@@ -114,6 +116,12 @@ function App() {
       done
     };
   }, [projectTasks]);
+
+  useEffect(() => {
+    if (activeView === "progress") {
+      setProgressDataRefreshKey((value) => value + 1);
+    }
+  }, [activeView]);
 
   useEffect(() => {
     saveTasks(tasks);
@@ -166,6 +174,13 @@ function App() {
     markScopeDefined(currentProjectId);
     refreshProjects();
     setDetailTick((value) => value + 1);
+  }
+
+  function navigateTo(view) {
+    if (view !== "workspace" && view !== "board") {
+      setFocusControlId("");
+    }
+    setActiveView(view);
   }
 
   function goToWorkspace(controlId = "") {
@@ -312,6 +327,10 @@ function App() {
     if (!confirmed) return;
 
     deleteProject(projectId);
+    const controlIds = tasks
+      .filter((task) => task.projectId === projectId)
+      .map((task) => task.id);
+    deleteProjectWorkspaceProgress(projectId, controlIds);
     setTasks((current) => current.filter((task) => task.projectId !== projectId));
     setCurrentProjectId("");
     saveCurrentProjectId("");
@@ -325,6 +344,7 @@ function App() {
       return (
         <ProjectsHomePage
           projects={projects}
+          tasks={tasks}
           currentProjectId={currentProjectId}
           onCreate={() => setActiveView("create")}
           onOpen={(projectId) => openProject(projectId, "detail")}
@@ -346,6 +366,7 @@ function App() {
       return (
         <ProjectsHomePage
           projects={projects}
+          tasks={tasks}
           currentProjectId=""
           onCreate={() => setActiveView("create")}
           onOpen={(projectId) => openProject(projectId, "detail")}
@@ -461,6 +482,7 @@ function App() {
           project={currentProject}
           tasks={projectTasks}
           focusControlId={focusControlId}
+          dataRefreshKey={progressDataRefreshKey}
           onGoWorkspace={goToWorkspace}
           onGoBoard={goToBoard}
         />
@@ -470,6 +492,7 @@ function App() {
     return (
       <ProjectsHomePage
         projects={projects}
+        tasks={tasks}
         currentProjectId={currentProjectId}
         onCreate={() => setActiveView("create")}
         onOpen={(projectId) => openProject(projectId, "detail")}
@@ -482,7 +505,7 @@ function App() {
       <Sidebar
         activeView={activeView}
         currentProject={currentProject}
-        onNavigate={setActiveView}
+        onNavigate={navigateTo}
         onGoHome={goHome}
       />
       <main className="content content-fluid">
@@ -492,7 +515,9 @@ function App() {
           scopePending={scopePending && (activeView === "board" || activeView === "workspace" || activeView === "progress")}
           onNewTask={() => openTask()}
         />
-        {renderMain()}
+        <div className="content-body">
+          {renderMain()}
+        </div>
       </main>
       <TaskDrawer
         open={taskDrawerOpen}
@@ -514,6 +539,15 @@ function App() {
 }
 
 const rootElement = document.getElementById("root");
-const root = rootElement._deepsleepRoot || createRoot(rootElement);
-rootElement._deepsleepRoot = root;
+if (!rootElement) {
+  throw new Error("找不到 #root 容器，无法启动 DeepSleep。");
+}
+
+const root = createRoot(rootElement);
 root.render(<App />);
+
+if (import.meta.hot) {
+  import.meta.hot.accept(() => {
+    root.render(<App />);
+  });
+}

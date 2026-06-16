@@ -1,6 +1,7 @@
 import { getPhaseOrder, normalizeAuditPhase } from "../modules/scope-init/scopeRules";
 
 export const WORKSPACE_PROGRESS_STORAGE_KEY = "deepsleep-workspace-progress-v1";
+const STORE_SCHEMA_VERSION = 2;
 
 export const PROGRESS_STATUS = {
   NOT_STARTED: "not_started",
@@ -166,15 +167,34 @@ function safeStorage() {
   return typeof window !== "undefined" ? window.localStorage : null;
 }
 
+function normalizeStore(raw = {}) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    return {
+      schemaVersion: STORE_SCHEMA_VERSION,
+      updatedAt: nowIso(),
+      projects: {}
+    };
+  }
+
+  return {
+    schemaVersion: raw.schemaVersion || 1,
+    updatedAt: raw.updatedAt || nowIso(),
+    projects: raw.projects && typeof raw.projects === "object" ? raw.projects : {},
+    records: raw.records && typeof raw.records === "object" ? raw.records : undefined
+  };
+}
+
 function loadStore() {
   const storage = safeStorage();
-  if (!storage) return {};
+  if (!storage) {
+    return normalizeStore();
+  }
 
   try {
     const saved = JSON.parse(storage.getItem(WORKSPACE_PROGRESS_STORAGE_KEY) || "{}");
-    return saved && typeof saved === "object" && !Array.isArray(saved) ? saved : {};
+    return normalizeStore(saved);
   } catch {
-    return {};
+    return normalizeStore();
   }
 }
 
@@ -182,6 +202,77 @@ function saveStore(store) {
   const storage = safeStorage();
   if (!storage) return;
   storage.setItem(WORKSPACE_PROGRESS_STORAGE_KEY, JSON.stringify(store));
+}
+
+function resolveProjectId(projectId, task) {
+  return String(projectId || task?.projectId || "").trim();
+}
+
+function ensureProjectBucket(store, projectId) {
+  if (!projectId) return null;
+  if (!store.projects[projectId]) {
+    store.projects[projectId] = { records: {} };
+  }
+  if (!store.projects[projectId].records) {
+    store.projects[projectId].records = {};
+  }
+  return store.projects[projectId].records;
+}
+
+function migrateLegacyRecord(store, projectId, controlId) {
+  if (!projectId || !store.records?.[controlId]) return false;
+
+  const bucket = ensureProjectBucket(store, projectId);
+  if (!bucket[controlId]) {
+    bucket[controlId] = store.records[controlId];
+  }
+  delete store.records[controlId];
+  if (!Object.keys(store.records).length) {
+    delete store.records;
+  }
+  store.schemaVersion = STORE_SCHEMA_VERSION;
+  return true;
+}
+
+function migrateProjectRecords(store, projectId, controlIds = []) {
+  if (!projectId) return false;
+  let changed = false;
+  controlIds.forEach((controlId) => {
+    if (migrateLegacyRecord(store, projectId, controlId)) {
+      changed = true;
+    }
+  });
+  return changed;
+}
+
+function readProjectRecord(store, projectId, controlId) {
+  if (projectId) {
+    migrateLegacyRecord(store, projectId, controlId);
+    const projectRecord = store.projects?.[projectId]?.records?.[controlId];
+    if (projectRecord) return projectRecord;
+  }
+
+  return store.records?.[controlId] || null;
+}
+
+function writeProjectRecord(store, projectId, controlId, record) {
+  if (projectId) {
+    const bucket = ensureProjectBucket(store, projectId);
+    bucket[controlId] = record;
+    if (store.records?.[controlId]) {
+      delete store.records[controlId];
+      if (!Object.keys(store.records).length) {
+        delete store.records;
+      }
+    }
+  } else if (store.records) {
+    store.records[controlId] = record;
+  } else {
+    store.records = { [controlId]: record };
+  }
+
+  store.schemaVersion = STORE_SCHEMA_VERSION;
+  store.updatedAt = nowIso();
 }
 
 function normalizeMaterial(material = {}) {
@@ -255,25 +346,26 @@ function normalizeFieldReviews(fieldReviews = {}) {
 }
 
 function normalizeRecord(controlId, record = {}) {
-  const milestones = normalizeMilestones(record.milestones);
+  const safe = record || {};
+  const milestones = normalizeMilestones(safe.milestones);
 
   return {
     id: controlId,
     testContent: {
       ...DEFAULT_TEST_CONTENT,
-      ...(record.testContent || {})
+      ...(safe.testContent || {})
     },
-    nodeResponses: record.nodeResponses && typeof record.nodeResponses === "object"
-      ? record.nodeResponses
+    nodeResponses: safe.nodeResponses && typeof safe.nodeResponses === "object"
+      ? safe.nodeResponses
       : {},
-    materials: Array.isArray(record.materials) ? record.materials.map(normalizeMaterial) : [],
+    materials: Array.isArray(safe.materials) ? safe.materials.map(normalizeMaterial) : [],
     milestones,
-    milestoneActors: normalizeMilestoneActors(record.milestoneActors, milestones),
-    extraTextFields: normalizeExtraTextFields(record.extraTextFields),
-    fieldReviews: normalizeFieldReviews(record.fieldReviews),
-    reviewStatus: record.reviewStatus || REVIEW_STATUS.NOT_SUBMITTED,
-    reviewComment: record.reviewComment || "",
-    updatedAt: record.updatedAt || nowIso()
+    milestoneActors: normalizeMilestoneActors(safe.milestoneActors, milestones),
+    extraTextFields: normalizeExtraTextFields(safe.extraTextFields),
+    fieldReviews: normalizeFieldReviews(safe.fieldReviews),
+    reviewStatus: safe.reviewStatus || REVIEW_STATUS.NOT_SUBMITTED,
+    reviewComment: safe.reviewComment || "",
+    updatedAt: safe.updatedAt || nowIso()
   };
 }
 
@@ -471,14 +563,16 @@ function deriveStatusFromProgress(record, task, allTasks = [], progress = buildP
   return PROGRESS_STATUS.IN_PROGRESS;
 }
 
-function allFieldReviewsAccepted(record) {
-  return Object.values(record.fieldReviews || {}).every((review) => (
-    review.status === FIELD_REVIEW_STATUS.ACCEPTED
-  ));
-}
-
 function hasUploadedWorkspaceMaterial(record) {
   return (record.materials || []).length > 0;
+}
+
+function workspaceCompletionReady(record) {
+  const reviews = Object.values(record.fieldReviews || {});
+  if (!reviews.length) {
+    return record.reviewStatus === REVIEW_STATUS.SIGNED_OFF;
+  }
+  return reviews.every((review) => review.status === FIELD_REVIEW_STATUS.ACCEPTED);
 }
 
 function deriveWorkspaceStatus(record) {
@@ -486,7 +580,7 @@ function deriveWorkspaceStatus(record) {
   if (
     record.milestones?.planning
     && record.milestones?.review
-    && allFieldReviewsAccepted(record)
+    && workspaceCompletionReady(record)
   ) {
     return PROGRESS_STATUS.COMPLETED;
   }
@@ -582,10 +676,17 @@ function buildSnapshotItem(task, record, allTasks) {
 
 export function getControlProgressSnapshot(projectId, tasks = []) {
   const store = loadStore();
-  const records = store.records || {};
   const projectTasks = tasks.filter((task) => !projectId || task.projectId === projectId);
+  if (migrateProjectRecords(store, projectId, projectTasks.map((task) => task.id))) {
+    saveStore(store);
+  }
+
   const controls = projectTasks.map((task) => (
-    buildSnapshotItem(task, normalizeRecord(task.id, records[task.id]), projectTasks)
+    buildSnapshotItem(
+      task,
+      normalizeRecord(task.id, readProjectRecord(store, projectId, task.id)),
+      projectTasks
+    )
   ));
 
   return {
@@ -596,14 +697,20 @@ export function getControlProgressSnapshot(projectId, tasks = []) {
 }
 
 export function getControlProgressDetail(controlId, task = null, allTasks = []) {
-  const records = loadStore().records || {};
-  return buildDetail(controlId, records[controlId], task, allTasks);
+  const projectId = resolveProjectId("", task);
+  const store = loadStore();
+  if (projectId) {
+    migrateLegacyRecord(store, projectId, controlId);
+    saveStore(store);
+  }
+  const record = readProjectRecord(store, projectId, controlId);
+  return buildDetail(controlId, record, task, allTasks);
 }
 
-export function upsertControlProgress(controlId, patch) {
+export function upsertControlProgress(controlId, patch, projectId = "") {
   const store = loadStore();
-  const records = store.records || {};
-  const current = normalizeRecord(controlId, records[controlId]);
+  const resolvedProjectId = resolveProjectId(projectId);
+  const current = normalizeRecord(controlId, readProjectRecord(store, resolvedProjectId, controlId));
   const updatedAt = nowIso();
   const nextRecord = normalizeRecord(controlId, {
     ...current,
@@ -630,30 +737,53 @@ export function upsertControlProgress(controlId, patch) {
     updatedAt
   });
 
-  const nextStore = {
-    ...store,
-    updatedAt,
-    records: {
-      ...records,
-      [controlId]: nextRecord
-    }
-  };
-  saveStore(nextStore);
+  writeProjectRecord(store, resolvedProjectId, controlId, nextRecord);
+  saveStore(store);
   return clone(nextRecord);
 }
 
-export function updateWorkspaceNodeResponse(controlId, nodeId, value) {
-  const current = getControlProgressDetail(controlId);
+/** 删除项目时清理工作台进度（按 projectId 分区 + 遗留 flat records） */
+export function deleteProjectWorkspaceProgress(projectId, controlIds = []) {
+  if (!projectId) return;
+
+  const store = loadStore();
+  let changed = false;
+
+  if (store.projects?.[projectId]) {
+    delete store.projects[projectId];
+    changed = true;
+  }
+
+  if (store.records && controlIds.length) {
+    controlIds.forEach((controlId) => {
+      if (store.records[controlId]) {
+        delete store.records[controlId];
+        changed = true;
+      }
+    });
+    if (!Object.keys(store.records).length) {
+      delete store.records;
+    }
+  }
+
+  if (changed) {
+    store.updatedAt = nowIso();
+    saveStore(store);
+  }
+}
+
+export function updateWorkspaceNodeResponse(controlId, nodeId, value, projectId = "") {
+  const current = getControlProgressDetail(controlId, projectId ? { id: controlId, projectId } : null);
   return upsertControlProgress(controlId, {
     nodeResponses: {
       ...current.nodeResponses,
       [nodeId]: value
     }
-  });
+  }, projectId);
 }
 
-export function addWorkspaceMaterial(controlId, material) {
-  const current = getControlProgressDetail(controlId);
+export function addWorkspaceMaterial(controlId, material, projectId = "") {
+  const current = getControlProgressDetail(controlId, projectId ? { id: controlId, projectId } : null);
   const nextMaterial = normalizeMaterial({
     ...material,
     uploadedAt: nowIso()
@@ -661,12 +791,12 @@ export function addWorkspaceMaterial(controlId, material) {
 
   return upsertControlProgress(controlId, {
     materials: [nextMaterial, ...current.materials]
-  });
+  }, projectId);
 }
 
-export function removeWorkspaceMaterial(controlId, materialId) {
-  const current = getControlProgressDetail(controlId);
+export function removeWorkspaceMaterial(controlId, materialId, projectId = "") {
+  const current = getControlProgressDetail(controlId, projectId ? { id: controlId, projectId } : null);
   return upsertControlProgress(controlId, {
     materials: current.materials.filter((item) => item.id !== materialId)
-  });
+  }, projectId);
 }

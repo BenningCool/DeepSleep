@@ -189,7 +189,7 @@ export function ProjectDetailPage({
           {project.scopeStatus === "defined" ? (
             <div className="scope-defined-links">
               <button className="button" type="button" onClick={onOpenBoard}>查看看板</button>
-              <button className="button primary" type="button" onClick={onOpenProgress}>查看进度</button>
+              <button className="button primary" type="button" onClick={onOpenProgress}>查看进度看板</button>
             </div>
           ) : null}
         </section>

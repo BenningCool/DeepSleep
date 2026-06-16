@@ -1,4 +1,10 @@
 import { PROGRESS_STATUS } from "../../services/workspaceProgressService";
+import {
+  daysOverdueForControl,
+  daysUntilPlanDue,
+  isControlPlanOverdue,
+  resolveControlPlanDue
+} from "./progressDueUtils";
 
 const DAY_MS = 1000 * 60 * 60 * 24;
 export const STALE_NOT_STARTED_DAYS = 14;
@@ -10,6 +16,7 @@ function startOfDay(date) {
   return value;
 }
 
+/** @deprecated 使用 daysOverdueForControl(control, task) */
 export function daysOverdue(task) {
   if (!task?.due) return 0;
   const due = startOfDay(task.due);
@@ -19,12 +26,8 @@ export function daysOverdue(task) {
   return diff > 0 ? Math.ceil(diff / DAY_MS) : 0;
 }
 
-function daysUntilDue(task) {
-  if (!task?.due) return null;
-  const due = startOfDay(task.due);
-  if (Number.isNaN(due.getTime())) return null;
-  const today = startOfDay(new Date());
-  return Math.ceil((due - today) / DAY_MS);
+export function isControlOverdue(control, task) {
+  return isControlPlanOverdue(control, task);
 }
 
 function daysSinceProjectStart(projectStartDate) {
@@ -37,15 +40,16 @@ function daysSinceProjectStart(projectStartDate) {
 
 export function getOverdueControls(controls, taskMap = {}) {
   return controls
-    .filter((control) => {
-      if (control.progressStatus === PROGRESS_STATUS.COMPLETED) return false;
-      return daysOverdue(taskMap[control.id]) > 0;
+    .filter((control) => isControlPlanOverdue(control, taskMap[control.id]))
+    .map((control) => {
+      const task = taskMap[control.id];
+      return {
+        control,
+        task,
+        planDue: resolveControlPlanDue(control, task),
+        overdueDays: daysOverdueForControl(control, task)
+      };
     })
-    .map((control) => ({
-      control,
-      task: taskMap[control.id],
-      overdueDays: daysOverdue(taskMap[control.id])
-    }))
     .sort((a, b) => b.overdueDays - a.overdueDays);
 }
 
@@ -56,14 +60,13 @@ export function getStaleNotStartedControls(controls, taskMap = {}, projectStartD
   return controls
     .filter((control) => {
       if (overdueIds.has(control.id)) return false;
-      if (control.progressStatus !== PROGRESS_STATUS.NOT_STARTED) return false;
-      if (control.progressStatus === PROGRESS_STATUS.COMPLETED) return false;
+      if (control.workspaceStatus !== PROGRESS_STATUS.NOT_STARTED) return false;
       if (control.progressStatus === PROGRESS_STATUS.BLOCKED) return false;
 
       const task = taskMap[control.id];
       if (task?.status && task.status !== "todo") return false;
 
-      const untilDue = daysUntilDue(task);
+      const untilDue = daysUntilPlanDue(control, task);
       if (untilDue !== null && untilDue >= 0 && untilDue <= DUE_SOON_NOT_STARTED_DAYS) {
         return true;
       }
@@ -76,7 +79,7 @@ export function getStaleNotStartedControls(controls, taskMap = {}, projectStartD
     })
     .map((control) => {
       const task = taskMap[control.id];
-      const untilDue = daysUntilDue(task);
+      const untilDue = daysUntilPlanDue(control, task);
       let reason = `项目已进行 ${daysSinceStart} 天仍未启动`;
       if (untilDue !== null && untilDue >= 0 && untilDue <= DUE_SOON_NOT_STARTED_DAYS) {
         reason = `距计划完成日仅剩 ${untilDue} 天，仍未启动`;

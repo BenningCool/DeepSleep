@@ -289,7 +289,11 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onToast }) 
 
   function persist(nextDetail, message = "") {
     if (!selectedControl) return;
-    upsertControlProgress(selectedControl.id, detailPatch(nextDetail));
+    upsertControlProgress(
+      selectedControl.id,
+      detailPatch(nextDetail),
+      project?.id || selectedTask?.projectId || ""
+    );
     refresh();
     if (message) notify(message);
   }
@@ -444,7 +448,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onToast }) 
         fileType: file.type,
         size: file.size,
         uploadedBy: selectedControl.owner || "成员"
-      });
+      }, project?.id || selectedTask?.projectId || "");
     });
     event.target.value = "";
     refresh();
@@ -455,7 +459,11 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onToast }) 
 
   function removeMaterial(materialId) {
     if (!selectedControl) return;
-    removeWorkspaceMaterial(selectedControl.id, materialId);
+    removeWorkspaceMaterial(
+      selectedControl.id,
+      materialId,
+      project?.id || selectedTask?.projectId || ""
+    );
     refresh();
     notify("材料记录已移除。");
   }
