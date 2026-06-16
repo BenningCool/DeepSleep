@@ -12,11 +12,12 @@ import {
   EVIDENCE_STATUS,
   REVIEW_STATUS,
   NODE_STATUS,
-  MATERIAL_CATEGORY
+  MATERIAL_CATEGORY,
+  FIELD_REVIEW_STATUS
 } from "../../services/workspaceProgressService";
 ```
 
-模块 2 在每个测试点内记录 TOD / TOE 节点、材料和复核状态。模块 3 读取 snapshot 做汇总和依赖图，点击节点时读取 detail 展示材料与明细。
+模块 2 在每个测试点内记录 TOD / TOE 节点、材料、Planning/Review 流程节点和字段级复核意见。模块 3 读取 snapshot 做汇总和依赖图，点击节点时读取 detail 展示材料与明细。
 
 ## Snapshot
 
@@ -41,6 +42,7 @@ const snapshot = getControlProgressSnapshot(projectId, projectTasks);
       auditPhase: "control-test",
       taskStatus: "doing",
       progressStatus: "in_progress",
+      workspaceStatus: "in_progress",
       progressPercent: 90,
       completedNodes: 9,
       totalNodes: 10,
@@ -53,6 +55,19 @@ const snapshot = getControlProgressSnapshot(projectId, projectTasks);
       meetingMinutesCount: 2,
       sppCount: 2,
       reviewStatus: "pending_review",
+      milestones: {
+        planning: true,
+        review: false
+      },
+      milestoneActors: {
+        planning: "AL",
+        review: ""
+      },
+      fieldReviewSummary: {
+        open: 1,
+        replied: 0,
+        accepted: 2
+      },
       blockers: [],
       dependencies: ["GITC-001"],
       updatedAt: "2026-06-15T10:00:00.000Z"
@@ -67,11 +82,14 @@ const snapshot = getControlProgressSnapshot(projectId, projectTasks);
 | --- | --- |
 | `controlType` | 测试点类型：`GITC`、`ITAC`、`TASK` |
 | `progressStatus` | 模块 3 的主状态，优先用于节点颜色和聚合 |
+| `workspaceStatus` | 模块 2 页面三态：`not_started`、`in_progress`、`completed`。如果模块 3 要和工作台 UI 完全一致，优先展示这个字段 |
 | `progressPercent` | 由节点完成度计算，等于 `completedNodes / totalNodes` |
 | `completedNodes` / `totalNodes` | 当前测试点总完成节点数，适合显示 `9/10` |
 | `phaseProgress` | TOD / TOE 分阶段完成度，适合显示 `TOD 3/4`、`TOE 6/6` |
 | `evidenceCount` / `meetingMinutesCount` / `sppCount` | 已上传材料数量 |
 | `reviewStatus` | 复核状态，可用于 sign-off 标识 |
+| `milestones` / `milestoneActors` | Planning / Review 是否点击完成，以及点击人缩写 |
+| `fieldReviewSummary` | 字段级复核意见数量汇总，按 `open`、`replied`、`accepted` 统计 |
 | `blockers` | 当前测试点被哪些前置关键任务阻塞 |
 | `dependencies` | 当前测试点依赖的前置任务，MVP 与 `blockers` 同源 |
 
@@ -140,6 +158,38 @@ const detail = getControlProgressDetail("ITAC-001", task, projectTasks);
   },
   progressPercent: 90,
   progressStatus: "in_progress",
+  workspaceStatus: "in_progress",
+  milestones: {
+    planning: true,
+    review: false
+  },
+  milestoneActors: {
+    planning: "AL",
+    review: ""
+  },
+  extraTextFields: {
+    "tod-process": [
+      {
+        id: "txt_abc123",
+        label: "补充说明",
+        value: "补充记录控制人访谈要点。",
+        createdAt: "2026-06-15T10:00:00.000Z"
+      }
+    ]
+  },
+  fieldReviews: {
+    "tod-process": {
+      id: "rev_abc123",
+      status: "replied",
+      comment: "请补充控制频率。",
+      reply: "已补充为每日自动运行。",
+      createdBy: "Reviewer",
+      repliedBy: "alice@kpmg.com",
+      acceptedBy: "",
+      createdAt: "2026-06-15T10:00:00.000Z",
+      updatedAt: "2026-06-15T10:30:00.000Z"
+    }
+  },
   materials: [
     {
       id: "mat_abc123",
@@ -185,6 +235,12 @@ MATERIAL_CATEGORY = {
   MEETING_MINUTES: "meeting_minutes",
   EVIDENCE: "evidence"
 }
+
+FIELD_REVIEW_STATUS = {
+  OPEN: "open",
+  REPLIED: "replied",
+  ACCEPTED: "accepted"
+}
 ```
 
 节点类型：
@@ -196,6 +252,8 @@ MATERIAL_CATEGORY = {
 | `upload_minutes` | 当前节点下至少有一个 `category = "meeting_minutes"` 材料 |
 | `upload_evidence` | 当前节点下至少有一个 `category = "evidence"` 材料 |
 | `review` | `reviewStatus` 达到节点定义的 `threshold` |
+
+字段级复核意见不改变节点完成数，但会影响模块 2 的 `workspaceStatus`：所有字段级复核意见都为 `accepted`，且 Planning / Review 均完成后，`workspaceStatus` 才会变为 `completed`。
 
 ## 状态枚举
 
@@ -235,6 +293,12 @@ REVIEW_STATUS = {
 5. `completedNodes = 0`：`not_started`
 6. 其他：`in_progress`
 
+`workspaceStatus` 是模块 2 页面用的简化三态：
+
+1. 没有上传任何材料：`not_started`
+2. 已上传材料但未同时满足 Planning、Review 和全部复核意见 accepted：`in_progress`
+3. 已上传材料、Planning 已点、Review 已点、全部字段级复核意见 accepted：`completed`
+
 ## 推荐接入方式
 
 1. 依赖图初始化时调用 `getControlProgressSnapshot(projectId, projectTasks)`。
@@ -242,7 +306,7 @@ REVIEW_STATUS = {
 3. 节点主标签显示 `title`，副标签显示 `completedNodes/totalNodes` 和 `progressPercent`。
 4. 节点颜色按 `progressStatus`，其中 `blocked` 优先级最高。
 5. 点击节点时调用 `getControlProgressDetail(controlId, task, projectTasks)`。
-6. 详情抽屉展示 `phases`、`materials`、`reviewStatus`、`reviewComment`。
+6. 详情抽屉展示 `phases`、`materials`、`milestones`、`fieldReviews`、`reviewStatus`。
 7. 模块 2 保存后，模块 3 重新调用 snapshot/detail 即可拿到最新进度。
 
 ## 注意事项

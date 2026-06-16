@@ -45,6 +45,17 @@ const DEFAULT_TEST_CONTENT = {
   result: ""
 };
 
+const DEFAULT_MILESTONES = {
+  planning: false,
+  review: false
+};
+
+export const FIELD_REVIEW_STATUS = {
+  OPEN: "open",
+  REPLIED: "replied",
+  ACCEPTED: "accepted"
+};
+
 export const WORKSPACE_PHASES = [
   {
     id: "tod",
@@ -188,7 +199,64 @@ function normalizeMaterial(material = {}) {
   };
 }
 
+function normalizeMilestones(milestones = {}) {
+  return {
+    planning: Boolean(milestones.planning),
+    review: Boolean(milestones.review)
+  };
+}
+
+function normalizeMilestoneActors(actors = {}, milestones = DEFAULT_MILESTONES) {
+  return {
+    planning: milestones.planning ? (actors.planning || "") : "",
+    review: milestones.review ? (actors.review || "") : ""
+  };
+}
+
+function normalizeExtraTextFields(extraTextFields = {}) {
+  if (!extraTextFields || typeof extraTextFields !== "object" || Array.isArray(extraTextFields)) {
+    return {};
+  }
+
+  return Object.entries(extraTextFields).reduce((result, [nodeId, fields]) => {
+    if (!Array.isArray(fields)) return result;
+    result[nodeId] = fields.map((field) => ({
+      id: field.id || `txt_${Math.random().toString(36).slice(2, 9)}`,
+      label: field.label || "补充说明",
+      value: field.value || "",
+      createdAt: field.createdAt || nowIso()
+    }));
+    return result;
+  }, {});
+}
+
+function normalizeFieldReviews(fieldReviews = {}) {
+  if (!fieldReviews || typeof fieldReviews !== "object" || Array.isArray(fieldReviews)) {
+    return {};
+  }
+
+  return Object.entries(fieldReviews).reduce((result, [fieldKey, review]) => {
+    if (!review || typeof review !== "object") return result;
+    result[fieldKey] = {
+      id: review.id || `rev_${Math.random().toString(36).slice(2, 9)}`,
+      status: Object.values(FIELD_REVIEW_STATUS).includes(review.status)
+        ? review.status
+        : FIELD_REVIEW_STATUS.OPEN,
+      comment: review.comment || "",
+      reply: review.reply || "",
+      createdBy: review.createdBy || "Reviewer",
+      repliedBy: review.repliedBy || "",
+      acceptedBy: review.acceptedBy || "",
+      createdAt: review.createdAt || nowIso(),
+      updatedAt: review.updatedAt || review.createdAt || nowIso()
+    };
+    return result;
+  }, {});
+}
+
 function normalizeRecord(controlId, record = {}) {
+  const milestones = normalizeMilestones(record.milestones);
+
   return {
     id: controlId,
     testContent: {
@@ -199,6 +267,10 @@ function normalizeRecord(controlId, record = {}) {
       ? record.nodeResponses
       : {},
     materials: Array.isArray(record.materials) ? record.materials.map(normalizeMaterial) : [],
+    milestones,
+    milestoneActors: normalizeMilestoneActors(record.milestoneActors, milestones),
+    extraTextFields: normalizeExtraTextFields(record.extraTextFields),
+    fieldReviews: normalizeFieldReviews(record.fieldReviews),
     reviewStatus: record.reviewStatus || REVIEW_STATUS.NOT_SUBMITTED,
     reviewComment: record.reviewComment || "",
     updatedAt: record.updatedAt || nowIso()
@@ -399,6 +471,28 @@ function deriveStatusFromProgress(record, task, allTasks = [], progress = buildP
   return PROGRESS_STATUS.IN_PROGRESS;
 }
 
+function allFieldReviewsAccepted(record) {
+  return Object.values(record.fieldReviews || {}).every((review) => (
+    review.status === FIELD_REVIEW_STATUS.ACCEPTED
+  ));
+}
+
+function hasUploadedWorkspaceMaterial(record) {
+  return (record.materials || []).length > 0;
+}
+
+function deriveWorkspaceStatus(record) {
+  if (!hasUploadedWorkspaceMaterial(record)) return PROGRESS_STATUS.NOT_STARTED;
+  if (
+    record.milestones?.planning
+    && record.milestones?.review
+    && allFieldReviewsAccepted(record)
+  ) {
+    return PROGRESS_STATUS.COMPLETED;
+  }
+  return PROGRESS_STATUS.IN_PROGRESS;
+}
+
 function phaseProgressMap(phases) {
   return phases.reduce((result, phase) => ({
     ...result,
@@ -438,6 +532,11 @@ function buildDetail(controlId, record, task = null, allTasks = []) {
     phaseProgress: phaseProgressMap(progress.phases),
     progressPercent: progress.progressPercent,
     progressStatus,
+    workspaceStatus: deriveWorkspaceStatus(normalized),
+    milestones: normalized.milestones,
+    milestoneActors: normalized.milestoneActors,
+    extraTextFields: normalized.extraTextFields,
+    fieldReviews: normalized.fieldReviews,
     reviewStatus: normalized.reviewStatus,
     reviewComment: normalized.reviewComment,
     blockers,
@@ -459,6 +558,7 @@ function buildSnapshotItem(task, record, allTasks) {
     auditPhase: task.auditPhase || "",
     taskStatus: task.status || "todo",
     progressStatus: detail.progressStatus,
+    workspaceStatus: detail.workspaceStatus,
     progressPercent: detail.progressPercent,
     completedNodes: detail.completedNodes,
     totalNodes: detail.totalNodes,
@@ -468,6 +568,12 @@ function buildSnapshotItem(task, record, allTasks) {
     meetingMinutesCount,
     sppCount,
     reviewStatus: detail.reviewStatus,
+    milestones: detail.milestones,
+    milestoneActors: detail.milestoneActors,
+    fieldReviewSummary: Object.values(detail.fieldReviews || {}).reduce((summary, review) => ({
+      ...summary,
+      [review.status]: (summary[review.status] || 0) + 1
+    }), {}),
     blockers: detail.blockers,
     dependencies: getDependencies(task, allTasks),
     updatedAt: detail.updatedAt
@@ -510,6 +616,16 @@ export function upsertControlProgress(controlId, patch) {
       ...current.nodeResponses,
       ...(patch.nodeResponses || {})
     },
+    milestones: {
+      ...current.milestones,
+      ...(patch.milestones || {})
+    },
+    milestoneActors: {
+      ...current.milestoneActors,
+      ...(patch.milestoneActors || {})
+    },
+    extraTextFields: patch.extraTextFields || current.extraTextFields,
+    fieldReviews: patch.fieldReviews || current.fieldReviews,
     materials: patch.materials || current.materials,
     updatedAt
   });

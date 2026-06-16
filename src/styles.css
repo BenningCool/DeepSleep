@@ -223,6 +223,12 @@ button {
   color: #fff;
 }
 
+.button.success {
+  border-color: var(--green);
+  background: var(--green);
+  color: #fff;
+}
+
 .button.danger {
   border-color: var(--red-soft);
   background: var(--red-soft);
@@ -1916,6 +1922,40 @@ button {
   font-size: 13px;
 }
 
+.workspace-milestone-section {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.workspace-milestone-section > span {
+  color: var(--subtle);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.workspace-milestone-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.workspace-milestone-button {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+  color: var(--subtle);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.workspace-milestone-button.active {
+  border-color: #72c892;
+  background: var(--green-soft);
+  color: var(--green);
+}
+
 .workspace-review-row {
   display: grid;
   grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
@@ -1945,6 +1985,29 @@ button {
 
 .workspace-upload-row input[type="file"] {
   display: none;
+}
+
+.workspace-phase-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.workspace-phase-tabs button {
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--subtle);
+  font-weight: 900;
+}
+
+.workspace-phase-tabs button.active {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+  color: #0747a6;
 }
 
 .workspace-phase-list {
@@ -2050,6 +2113,129 @@ button {
   resize: vertical;
 }
 
+.workspace-text-box {
+  display: grid;
+  gap: 6px;
+}
+
+.workspace-text-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 28px;
+}
+
+.workspace-text-menu-wrap {
+  position: relative;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.workspace-text-menu-button {
+  width: 30px;
+  height: 26px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--subtle);
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.workspace-comment-dot {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+}
+
+.workspace-comment-dot.open {
+  background: var(--red);
+}
+
+.workspace-comment-dot.replied {
+  background: #d28a00;
+}
+
+.workspace-comment-dot.accepted {
+  background: var(--green);
+}
+
+.workspace-text-menu {
+  position: absolute;
+  top: 32px;
+  right: 0;
+  z-index: 10;
+  min-width: 148px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.workspace-text-menu button {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font-weight: 700;
+}
+
+.workspace-text-menu button:hover {
+  background: var(--surface-soft);
+}
+
+.workspace-review-thread {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.workspace-review-thread-head,
+.workspace-review-actions,
+.workspace-detail-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.workspace-review-state {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.workspace-review-state.open {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.workspace-review-state.replied {
+  background: var(--amber-soft);
+  color: #7a4a00;
+}
+
+.workspace-review-state.accepted {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
 .workspace-node-upload {
   display: grid;
   gap: 10px;
@@ -2122,6 +2308,13 @@ button {
 
 .workspace-empty-line {
   margin: 0;
+}
+
+.workspace-detail-actions {
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
 }
 
 .empty-state.compact {

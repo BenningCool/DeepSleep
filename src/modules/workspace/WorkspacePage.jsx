@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { labelOfProgressStatus } from "../../data/progressLabels";
 import {
-  EVIDENCE_STATUS,
+  FIELD_REVIEW_STATUS,
   MATERIAL_CATEGORY,
   NODE_STATUS,
   PROGRESS_STATUS,
@@ -13,29 +12,10 @@ import {
   upsertControlProgress
 } from "../../services/workspaceProgressService";
 
-const PROGRESS_LABELS = {
-  [PROGRESS_STATUS.NOT_STARTED]: labelOfProgressStatus(PROGRESS_STATUS.NOT_STARTED),
-  [PROGRESS_STATUS.IN_PROGRESS]: labelOfProgressStatus(PROGRESS_STATUS.IN_PROGRESS),
-  [PROGRESS_STATUS.EVIDENCE_SUBMITTED]: labelOfProgressStatus(PROGRESS_STATUS.EVIDENCE_SUBMITTED),
-  [PROGRESS_STATUS.PENDING_REVIEW]: labelOfProgressStatus(PROGRESS_STATUS.PENDING_REVIEW),
-  [PROGRESS_STATUS.NEEDS_REWORK]: labelOfProgressStatus(PROGRESS_STATUS.NEEDS_REWORK),
-  [PROGRESS_STATUS.COMPLETED]: labelOfProgressStatus(PROGRESS_STATUS.COMPLETED),
-  [PROGRESS_STATUS.BLOCKED]: labelOfProgressStatus(PROGRESS_STATUS.BLOCKED)
-};
-
-const EVIDENCE_LABELS = {
-  [EVIDENCE_STATUS.NONE]: "无资料",
-  [EVIDENCE_STATUS.PARTIAL_UPLOADED]: "部分上传",
-  [EVIDENCE_STATUS.UPLOADED]: "已上传",
-  [EVIDENCE_STATUS.APPROVED]: "已认可",
-  [EVIDENCE_STATUS.REJECTED]: "需修订"
-};
-
-const REVIEW_LABELS = {
-  [REVIEW_STATUS.NOT_SUBMITTED]: "未提交",
-  [REVIEW_STATUS.PENDING_REVIEW]: "待复核",
-  [REVIEW_STATUS.COMMENTED]: "有复核意见",
-  [REVIEW_STATUS.SIGNED_OFF]: "已签核"
+const WORKSPACE_PROGRESS_LABELS = {
+  [PROGRESS_STATUS.NOT_STARTED]: "未开始",
+  [PROGRESS_STATUS.IN_PROGRESS]: "测试中",
+  [PROGRESS_STATUS.COMPLETED]: "已完成"
 };
 
 const MATERIAL_LABELS = {
@@ -44,7 +24,14 @@ const MATERIAL_LABELS = {
   [MATERIAL_CATEGORY.EVIDENCE]: "测试资料"
 };
 
+const REVIEW_DOT_LABELS = {
+  [FIELD_REVIEW_STATUS.OPEN]: "待回复",
+  [FIELD_REVIEW_STATUS.REPLIED]: "已回复",
+  [FIELD_REVIEW_STATUS.ACCEPTED]: "已接受"
+};
+
 const emptyDetail = {
+  id: "",
   testContent: {
     objective: "",
     procedure: "",
@@ -58,6 +45,17 @@ const emptyDetail = {
   totalNodes: 0,
   phaseProgress: {},
   progressPercent: 0,
+  workspaceStatus: PROGRESS_STATUS.NOT_STARTED,
+  milestones: {
+    planning: false,
+    review: false
+  },
+  milestoneActors: {
+    planning: "",
+    review: ""
+  },
+  extraTextFields: {},
+  fieldReviews: {},
   reviewStatus: REVIEW_STATUS.NOT_SUBMITTED,
   reviewComment: ""
 };
@@ -86,12 +84,59 @@ function uploadLabel(node) {
   return "上传资料";
 }
 
+function actorInitials(value = "") {
+  const source = String(value || "").split("@")[0].replace(/[._-]+/g, " ").trim();
+  if (!source) return "ME";
+  const parts = source.split(/\s+/).filter(Boolean);
+  if (parts.length > 1) {
+    return `${parts[0][0] || ""}${parts[parts.length - 1][0] || ""}`.toUpperCase();
+  }
+  return source.slice(0, 2).toUpperCase();
+}
+
+function normalizeWorkspaceStatus(status) {
+  if (status === PROGRESS_STATUS.COMPLETED) return PROGRESS_STATUS.COMPLETED;
+  if (status === PROGRESS_STATUS.NOT_STARTED) return PROGRESS_STATUS.NOT_STARTED;
+  return PROGRESS_STATUS.IN_PROGRESS;
+}
+
+function workspaceStatusForControl(control) {
+  return normalizeWorkspaceStatus(control?.workspaceStatus || control?.progressStatus);
+}
+
+function workspaceStatusForDetail(detail) {
+  if (!detail?.materials?.length) return PROGRESS_STATUS.NOT_STARTED;
+  const reviewComments = Object.values(detail.fieldReviews || {});
+  const commentsCleared = reviewComments.every((review) => (
+    review.status === FIELD_REVIEW_STATUS.ACCEPTED
+  ));
+
+  if (detail.milestones?.planning && detail.milestones?.review && commentsCleared) {
+    return PROGRESS_STATUS.COMPLETED;
+  }
+
+  return PROGRESS_STATUS.IN_PROGRESS;
+}
+
 function syncLegacyTestContent(detail) {
   return {
     objective: detail.nodeResponses["tod-objective"] || detail.testContent.objective || "",
     procedure: detail.nodeResponses["toe-procedure"] || detail.testContent.procedure || "",
     sampleInfo: detail.nodeResponses["toe-sample"] || detail.testContent.sampleInfo || "",
     result: detail.nodeResponses["toe-result"] || detail.testContent.result || ""
+  };
+}
+
+function detailPatch(detail) {
+  return {
+    nodeResponses: detail.nodeResponses,
+    testContent: syncLegacyTestContent(detail),
+    reviewStatus: detail.reviewStatus,
+    reviewComment: detail.reviewComment,
+    milestones: detail.milestones,
+    milestoneActors: detail.milestoneActors,
+    extraTextFields: detail.extraTextFields,
+    fieldReviews: detail.fieldReviews
   };
 }
 
@@ -153,6 +198,9 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onToast }) 
   const [selectedId, setSelectedId] = useState("");
   const [refreshToken, setRefreshToken] = useState(0);
   const [detail, setDetail] = useState(emptyDetail);
+  const [activePhase, setActivePhase] = useState("tod");
+  const [openTextMenuKey, setOpenTextMenuKey] = useState("");
+  const [openReviewKey, setOpenReviewKey] = useState("");
 
   const snapshot = useMemo(
     () => getControlProgressSnapshot(project?.id || "", tasks),
@@ -165,10 +213,11 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onToast }) 
 
   const visibleControls = useMemo(() => (
     snapshot.controls.filter((item) => {
+      const displayStatus = workspaceStatusForControl(item);
       const matchesOwner = !ownerFilter || item.owner === ownerFilter;
       const matchesType = !typeFilter || item.controlType === typeFilter;
-      const matchesStatus = !statusFilter || item.progressStatus === statusFilter;
-      const matchesAction = !actionOnly || item.progressStatus !== PROGRESS_STATUS.COMPLETED;
+      const matchesStatus = !statusFilter || displayStatus === statusFilter;
+      const matchesAction = !actionOnly || displayStatus !== PROGRESS_STATUS.COMPLETED;
       return matchesOwner && matchesType && matchesStatus && matchesAction;
     })
   ), [actionOnly, ownerFilter, snapshot.controls, statusFilter, typeFilter]);
@@ -187,12 +236,19 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onToast }) 
 
     return {
       total: snapshot.controls.length,
-      blocked: snapshot.controls.filter((item) => item.progressStatus === PROGRESS_STATUS.BLOCKED).length,
-      pendingReview: snapshot.controls.filter((item) => item.progressStatus === PROGRESS_STATUS.PENDING_REVIEW).length,
-      completed: snapshot.controls.filter((item) => item.progressStatus === PROGRESS_STATUS.COMPLETED).length,
+      testing: snapshot.controls.filter((item) => workspaceStatusForControl(item) === PROGRESS_STATUS.IN_PROGRESS).length,
+      completed: snapshot.controls.filter((item) => workspaceStatusForControl(item) === PROGRESS_STATUS.COMPLETED).length,
       nodeProgress: `${completedNodes}/${totalNodes}`
     };
   }, [snapshot.controls]);
+
+  const activePhaseDetail = useMemo(() => (
+    detail.phases.find((phase) => phase.id === activePhase) || detail.phases[0] || null
+  ), [activePhase, detail.phases]);
+
+  const detailDisplayStatus = detail.id
+    ? workspaceStatusForDetail(detail)
+    : workspaceStatusForControl(selectedControl);
 
   useEffect(() => {
     if (!focusControlId) return;
@@ -210,8 +266,32 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onToast }) 
     setDetail(getControlProgressDetail(selectedControl.id, selectedTask, tasks));
   }, [selectedControl, selectedId, selectedTask, tasks, refreshToken]);
 
+  useEffect(() => {
+    setActivePhase("tod");
+    setOpenTextMenuKey("");
+    setOpenReviewKey("");
+  }, [selectedControl?.id]);
+
+  useEffect(() => {
+    if (!detail.phases.length) return;
+    if (!detail.phases.some((phase) => phase.id === activePhase)) {
+      setActivePhase(detail.phases[0].id);
+    }
+  }, [activePhase, detail.phases]);
+
+  function notify(message) {
+    if (typeof onToast === "function") onToast(message);
+  }
+
   function refresh() {
     setRefreshToken((value) => value + 1);
+  }
+
+  function persist(nextDetail, message = "") {
+    if (!selectedControl) return;
+    upsertControlProgress(selectedControl.id, detailPatch(nextDetail));
+    refresh();
+    if (message) notify(message);
   }
 
   function updateNodeResponse(nodeId, value) {
@@ -224,20 +304,132 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onToast }) 
     }));
   }
 
-  function updateField(name, value) {
-    setDetail((current) => ({ ...current, [name]: value }));
+  function addExtraTextField(nodeId) {
+    setDetail((current) => ({
+      ...current,
+      extraTextFields: {
+        ...current.extraTextFields,
+        [nodeId]: [
+          ...(current.extraTextFields?.[nodeId] || []),
+          {
+            id: `txt_${Date.now().toString(36)}`,
+            label: "补充说明",
+            value: "",
+            createdAt: new Date().toISOString()
+          }
+        ]
+      }
+    }));
+    setOpenTextMenuKey("");
+  }
+
+  function updateExtraTextField(nodeId, fieldId, value) {
+    setDetail((current) => ({
+      ...current,
+      extraTextFields: {
+        ...current.extraTextFields,
+        [nodeId]: (current.extraTextFields?.[nodeId] || []).map((field) => (
+          field.id === fieldId ? { ...field, value } : field
+        ))
+      }
+    }));
+  }
+
+  function updateFieldReview(fieldKey, patch) {
+    setDetail((current) => ({
+      ...current,
+      fieldReviews: {
+        ...current.fieldReviews,
+        [fieldKey]: {
+          ...(current.fieldReviews?.[fieldKey] || {
+            id: `rev_${Date.now().toString(36)}`,
+            status: FIELD_REVIEW_STATUS.OPEN,
+            comment: "",
+            reply: "",
+            createdBy: "Reviewer",
+            createdAt: new Date().toISOString()
+          }),
+          ...patch,
+          updatedAt: new Date().toISOString()
+        }
+      }
+    }));
+  }
+
+  function addFieldReview(fieldKey) {
+    updateFieldReview(fieldKey, {
+      status: FIELD_REVIEW_STATUS.OPEN,
+      comment: detail.fieldReviews?.[fieldKey]?.comment || ""
+    });
+    setOpenReviewKey(fieldKey);
+    setOpenTextMenuKey("");
+  }
+
+  function submitReviewReply(fieldKey) {
+    const review = detail.fieldReviews?.[fieldKey];
+    if (!review?.reply?.trim()) return;
+    updateFieldReview(fieldKey, {
+      status: FIELD_REVIEW_STATUS.REPLIED,
+      repliedBy: selectedControl?.owner || "成员"
+    });
+  }
+
+  function acceptFieldReview(fieldKey) {
+    updateFieldReview(fieldKey, {
+      status: FIELD_REVIEW_STATUS.ACCEPTED,
+      acceptedBy: "Reviewer"
+    });
+  }
+
+  function actorSourceFor(milestone) {
+    if (milestone === "review") {
+      return project?.reviewer || project?.manager || selectedControl?.owner || project?.owner || "member";
+    }
+    return project?.inCharge || selectedControl?.owner || project?.owner || "member";
+  }
+
+  function toggleMilestone(milestone) {
+    if (!selectedControl) return;
+    const nextActive = !detail.milestones?.[milestone];
+    const nextDetail = {
+      ...detail,
+      milestones: {
+        ...detail.milestones,
+        [milestone]: nextActive
+      },
+      milestoneActors: {
+        ...detail.milestoneActors,
+        [milestone]: nextActive ? actorInitials(actorSourceFor(milestone)) : ""
+      },
+      reviewStatus: milestone === "review" && nextActive
+        ? REVIEW_STATUS.SIGNED_OFF
+        : milestone === "review"
+          ? REVIEW_STATUS.NOT_SUBMITTED
+          : detail.reviewStatus
+    };
+
+    setDetail(nextDetail);
+    persist(nextDetail, nextActive ? `${milestone} 节点已完成。` : `${milestone} 节点已撤销。`);
   }
 
   function saveDetail() {
     if (!selectedControl) return;
-    upsertControlProgress(selectedControl.id, {
-      nodeResponses: detail.nodeResponses,
-      testContent: syncLegacyTestContent(detail),
-      reviewStatus: detail.reviewStatus,
-      reviewComment: detail.reviewComment
-    });
-    refresh();
-    onToast("测试点子流程已保存，模块 3 进度接口已更新。");
+    const nextDetail = {
+      ...detail,
+      reviewStatus: detail.milestones?.review
+        ? REVIEW_STATUS.SIGNED_OFF
+        : REVIEW_STATUS.NOT_SUBMITTED
+    };
+    setDetail(nextDetail);
+    persist(nextDetail, "工作台内容已保存，模块 3 进度接口已更新。");
+  }
+
+  function cancelDetail() {
+    if (!selectedControl) return;
+    setDetail(getControlProgressDetail(selectedControl.id, selectedTask, tasks));
+    setOpenTextMenuKey("");
+    setOpenReviewKey("");
+    notify("已取消未保存修改。");
   }
 
   function uploadMaterials(event, node) {
@@ -257,7 +449,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onToast }) 
     event.target.value = "";
     refresh();
     if (files.length) {
-      onToast(`已记录 ${files.length} 个${materialLabel(node.category)}。`);
+      notify(`已记录 ${files.length} 个${materialLabel(node.category)}。`);
     }
   }
 
@@ -265,7 +457,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onToast }) 
     if (!selectedControl) return;
     removeWorkspaceMaterial(selectedControl.id, materialId);
     refresh();
-    onToast("材料记录已移除。");
+    notify("材料记录已移除。");
   }
 
   function materialsForNode(node) {
@@ -280,17 +472,101 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onToast }) 
     return detail.nodeResponses[node.id] ?? node.value ?? "";
   }
 
+  function renderReviewThread(fieldKey) {
+    const review = detail.fieldReviews?.[fieldKey];
+    if (!review || openReviewKey !== fieldKey) return null;
+
+    return (
+      <div className="workspace-review-thread">
+        <div className="workspace-review-thread-head">
+          <strong>复核意见</strong>
+          <span className={`workspace-review-state ${review.status}`}>
+            {REVIEW_DOT_LABELS[review.status] || "待处理"}
+          </span>
+        </div>
+        <textarea
+          rows="2"
+          value={review.comment}
+          onChange={(event) => updateFieldReview(fieldKey, { comment: event.target.value })}
+          placeholder="输入 reviewer 复核意见。"
+        />
+        <textarea
+          rows="2"
+          value={review.reply}
+          onChange={(event) => updateFieldReview(fieldKey, { reply: event.target.value })}
+          placeholder="回复复核意见。"
+        />
+        <div className="workspace-review-actions">
+          <button className="button subtle" type="button" onClick={() => submitReviewReply(fieldKey)}>
+            回复
+          </button>
+          <button className="button success" type="button" onClick={() => acceptFieldReview(fieldKey)}>
+            接受
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  function renderTextBox({ node, fieldKey, value, placeholder, onChange }) {
+    const review = detail.fieldReviews?.[fieldKey];
+    const menuOpen = openTextMenuKey === fieldKey;
+
+    return (
+      <div className="workspace-text-box" key={fieldKey}>
+        <div className="workspace-text-toolbar">
+          <span />
+          <div className="workspace-text-menu-wrap">
+            <button
+              className="workspace-text-menu-button"
+              type="button"
+              aria-label="文本框操作"
+              onClick={() => setOpenTextMenuKey(menuOpen ? "" : fieldKey)}
+            >
+              ...
+            </button>
+            {review ? (
+              <button
+                className={`workspace-comment-dot ${review.status}`}
+                type="button"
+                aria-label={REVIEW_DOT_LABELS[review.status] || "复核意见"}
+                onClick={() => setOpenReviewKey(openReviewKey === fieldKey ? "" : fieldKey)}
+              />
+            ) : null}
+            {menuOpen ? (
+              <div className="workspace-text-menu">
+                <button type="button" onClick={() => addExtraTextField(node.id)}>
+                  新增文本框
+                </button>
+                <button type="button" onClick={() => addFieldReview(fieldKey)}>
+                  添加复核意见
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </div>
+        <textarea
+          rows="3"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder}
+        />
+        {renderReviewThread(fieldKey)}
+      </div>
+    );
+  }
+
   return (
     <section className="workspace-page">
       <header className="page-header">
         <div>
           <p className="page-eyebrow">Workspace · 测试点执行工作台</p>
-          <h2>{project.clientName || project.name}</h2>
+          <h2>{project?.clientName || project?.name || "项目工作台"}</h2>
         </div>
         <div className="workspace-stats">
           <WorkspaceStat value={stats.total} label="测试点" />
           <WorkspaceStat value={stats.nodeProgress} label="节点进度" />
-          <WorkspaceStat value={stats.pendingReview} label="待复核" />
+          <WorkspaceStat value={stats.testing} label="测试中" />
           <WorkspaceStat value={stats.completed} label="已完成" />
         </div>
       </header>
@@ -329,7 +605,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onToast }) 
               <span className="label">进度状态</span>
               <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
                 <option value="">全部状态</option>
-                {Object.entries(PROGRESS_LABELS).map(([value, label]) => (
+                {Object.entries(WORKSPACE_PROGRESS_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>{label}</option>
                 ))}
               </select>
@@ -346,36 +622,40 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onToast }) 
           </div>
 
           <div className="workspace-control-list">
-            {visibleControls.length ? visibleControls.map((control) => (
-              <button
-                key={control.id}
-                className={`workspace-control-card ${selectedControl?.id === control.id ? "active" : ""}`}
-                type="button"
-                onClick={() => setSelectedId(control.id)}
-              >
-                <span className={`control-type ${control.controlType.toLowerCase()}`}>
-                  {control.controlType}
-                </span>
-                <strong>{control.title}</strong>
-                <span>{control.owner} · {control.auditPhase || "general"}</span>
-                <div className="workspace-progress-row">
-                  <span className={`progress-pill ${statusClass(control.progressStatus)}`}>
-                    {PROGRESS_LABELS[control.progressStatus]}
+            {visibleControls.length ? visibleControls.map((control) => {
+              const displayStatus = workspaceStatusForControl(control);
+
+              return (
+                <button
+                  key={control.id}
+                  className={`workspace-control-card ${selectedControl?.id === control.id ? "active" : ""}`}
+                  type="button"
+                  onClick={() => setSelectedId(control.id)}
+                >
+                  <span className={`control-type ${control.controlType.toLowerCase()}`}>
+                    {control.controlType}
                   </span>
-                  <span>{control.completedNodes || 0}/{control.totalNodes || 0}</span>
-                </div>
-                <div className="workspace-progress-track">
-                  <span style={{ width: `${control.progressPercent}%` }} />
-                </div>
-                <div className="workspace-phase-mini">
-                  <span>TOD {control.phaseProgress?.tod?.completedNodes || 0}/{control.phaseProgress?.tod?.totalNodes || 0}</span>
-                  <span>TOE {control.phaseProgress?.toe?.completedNodes || 0}/{control.phaseProgress?.toe?.totalNodes || 0}</span>
-                </div>
-                <small>
-                  SPP {control.sppCount || 0} · 纪要 {control.meetingMinutesCount || 0} · 资料 {control.evidenceCount || 0} · {EVIDENCE_LABELS[control.evidenceStatus]}
-                </small>
-              </button>
-            )) : (
+                  <strong>{control.title}</strong>
+                  <span>{control.owner} · {control.auditPhase || "general"}</span>
+                  <div className="workspace-progress-row">
+                    <span className={`progress-pill ${statusClass(displayStatus)}`}>
+                      {WORKSPACE_PROGRESS_LABELS[displayStatus]}
+                    </span>
+                    <span>{control.completedNodes || 0}/{control.totalNodes || 0}</span>
+                  </div>
+                  <div className="workspace-progress-track">
+                    <span style={{ width: `${control.progressPercent}%` }} />
+                  </div>
+                  <div className="workspace-phase-mini">
+                    <span>TOD {control.phaseProgress?.tod?.completedNodes || 0}/{control.phaseProgress?.tod?.totalNodes || 0}</span>
+                    <span>TOE {control.phaseProgress?.toe?.completedNodes || 0}/{control.phaseProgress?.toe?.totalNodes || 0}</span>
+                  </div>
+                  <small>
+                    SPP {control.sppCount || 0} · 纪要 {control.meetingMinutesCount || 0} · 资料 {control.evidenceCount || 0}
+                  </small>
+                </button>
+              );
+            }) : (
               <div className="empty-state compact">
                 <h3>暂无可记录的测试点</h3>
                 <p>请先在 Scope 或看板中生成当前项目任务。</p>
@@ -399,16 +679,10 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onToast }) 
                     最近更新 {formatDateTime(detail.updatedAt)}
                   </p>
                 </div>
-                <span className={`progress-pill ${statusClass(selectedControl.progressStatus)}`}>
-                  {PROGRESS_LABELS[selectedControl.progressStatus]}
+                <span className={`progress-pill ${statusClass(detailDisplayStatus)}`}>
+                  {WORKSPACE_PROGRESS_LABELS[detailDisplayStatus]}
                 </span>
               </div>
-
-              {selectedControl.blockers.length ? (
-                <div className="workspace-blocker">
-                  前置关键步骤未完成：{selectedControl.blockers.join("、")}
-                </div>
-              ) : null}
 
               <div className="workspace-progress-summary">
                 <ProgressMeter
@@ -426,102 +700,117 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onToast }) 
                 ))}
               </div>
 
-              <div className="workspace-review-row">
-                <label className="field">
-                  <span className="label">复核状态 Review</span>
-                  <select
-                    value={detail.reviewStatus}
-                    onChange={(event) => updateField("reviewStatus", event.target.value)}
-                  >
-                    {Object.entries(REVIEW_LABELS).map(([value, label]) => (
-                      <option key={value} value={value}>{label}</option>
-                    ))}
-                  </select>
-                </label>
+              <div className="workspace-milestone-section">
+                <span>流程节点</span>
+                <div className="workspace-milestone-buttons">
+                  {["planning", "review"].map((milestone) => {
+                    const active = Boolean(detail.milestones?.[milestone]);
+                    const label = active
+                      ? detail.milestoneActors?.[milestone] || actorInitials(actorSourceFor(milestone))
+                      : milestone;
 
-                <label className="field">
-                  <span className="label">复核意见</span>
-                  <textarea
-                    rows="3"
-                    value={detail.reviewComment}
-                    onChange={(event) => updateField("reviewComment", event.target.value)}
-                    placeholder="Reviewer comment / 待补证据说明。"
-                  />
-                </label>
+                    return (
+                      <button
+                        key={milestone}
+                        className={`workspace-milestone-button ${active ? "active" : ""}`}
+                        type="button"
+                        onClick={() => toggleMilestone(milestone)}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="workspace-phase-list">
+              <div className="workspace-phase-tabs">
                 {(detail.phases || []).map((phase) => (
-                  <section key={phase.id} className="workspace-phase-panel">
-                    <div className="workspace-phase-head">
-                      <div>
-                        <h4>{phase.label}</h4>
-                        <p>{phase.description}</p>
-                      </div>
-                      <strong>{phase.completedNodes}/{phase.totalNodes}</strong>
-                    </div>
-
-                    <div className="workspace-node-list">
-                      {phase.nodes.map((node) => {
-                        const textValue = textValueForNode(node);
-                        const textComplete = node.type === "text" && textValue.trim();
-                        const nodeStatus = textComplete ? NODE_STATUS.COMPLETED : node.status;
-                        const nodeMaterials = node.type.startsWith("upload") ? materialsForNode(node) : [];
-
-                        return (
-                          <div key={node.id} className={`workspace-node ${nodeStatus}`}>
-                            <div className="workspace-node-main">
-                              <span className={`node-status ${nodeStatus}`}>
-                                {nodeStatus === NODE_STATUS.COMPLETED ? "Done" : "Pending"}
-                              </span>
-                              <div>
-                                <strong>{node.label}</strong>
-                                <span>{node.type}</span>
-                              </div>
-                            </div>
-
-                            {node.type === "text" ? (
-                              <textarea
-                                rows="3"
-                                value={textValue}
-                                onChange={(event) => updateNodeResponse(node.id, event.target.value)}
-                                placeholder={node.placeholder}
-                              />
-                            ) : null}
-
-                            {node.type.startsWith("upload") ? (
-                              <div className="workspace-node-upload">
-                                <label className="button">
-                                  {uploadLabel(node)}
-                                  <input
-                                    type="file"
-                                    multiple
-                                    onChange={(event) => uploadMaterials(event, node)}
-                                  />
-                                </label>
-                                <MaterialList items={nodeMaterials} onRemove={removeMaterial} />
-                              </div>
-                            ) : null}
-
-                            {node.type === "review" ? (
-                              <p className="workspace-node-note">
-                                当前复核状态：{REVIEW_LABELS[detail.reviewStatus]}。
-                                {node.threshold === REVIEW_STATUS.SIGNED_OFF
-                                  ? "该节点需要最终签核。"
-                                  : "提交复核后该节点完成。"}
-                              </p>
-                            ) : null}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </section>
+                  <button
+                    key={phase.id}
+                    className={phase.id === activePhase ? "active" : ""}
+                    type="button"
+                    onClick={() => setActivePhase(phase.id)}
+                  >
+                    {phase.label}
+                  </button>
                 ))}
               </div>
 
-              <div className="workspace-upload-row">
-                <button className="button primary" type="button" onClick={saveDetail}>
-                  保存测试点子流程
+              {activePhaseDetail ? (
+                <section className="workspace-phase-panel">
+                  <div className="workspace-phase-head">
+                    <div>
+                      <h4>{activePhaseDetail.label}</h4>
+                      <p>{activePhaseDetail.description}</p>
+                    </div>
+                    <strong>{activePhaseDetail.completedNodes}/{activePhaseDetail.totalNodes}</strong>
+                  </div>
+
+                  <div className="workspace-node-list">
+                    {activePhaseDetail.nodes.map((node) => {
+                      const textValue = textValueForNode(node);
+                      const textComplete = Boolean(textValue.trim());
+                      const nodeStatus = textComplete ? NODE_STATUS.COMPLETED : node.status;
+                      const nodeMaterials = node.type.startsWith("upload") ? materialsForNode(node) : [];
+                      const extraFields = detail.extraTextFields?.[node.id] || [];
+
+                      return (
+                        <div key={node.id} className={`workspace-node ${nodeStatus}`}>
+                          <div className="workspace-node-main">
+                            <span className={`node-status ${nodeStatus}`}>
+                              {nodeStatus === NODE_STATUS.COMPLETED ? "Done" : "Pending"}
+                            </span>
+                            <div>
+                              <strong>{node.label}</strong>
+                              <span>{node.type}</span>
+                            </div>
+                          </div>
+
+                          {node.type === "text" ? (
+                            <>
+                              {renderTextBox({
+                                node,
+                                fieldKey: node.id,
+                                value: textValue,
+                                placeholder: node.placeholder,
+                                onChange: (value) => updateNodeResponse(node.id, value)
+                              })}
+                              {extraFields.map((field) => renderTextBox({
+                                node,
+                                fieldKey: `${node.id}::${field.id}`,
+                                value: field.value,
+                                placeholder: field.label || "补充说明",
+                                onChange: (value) => updateExtraTextField(node.id, field.id, value)
+                              }))}
+                            </>
+                          ) : null}
+
+                          {node.type.startsWith("upload") ? (
+                            <div className="workspace-node-upload">
+                              <label className="button">
+                                {uploadLabel(node)}
+                                <input
+                                  type="file"
+                                  multiple
+                                  onChange={(event) => uploadMaterials(event, node)}
+                                />
+                              </label>
+                              <MaterialList items={nodeMaterials} onRemove={removeMaterial} />
+                            </div>
+                          ) : null}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              ) : null}
+
+              <div className="workspace-detail-actions">
+                <button className="button subtle" type="button" onClick={cancelDetail}>
+                  Cancel
+                </button>
+                <button className="button success" type="button" onClick={saveDetail}>
+                  Save
                 </button>
               </div>
             </>
