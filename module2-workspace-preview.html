@@ -498,6 +498,101 @@
       grid-column: 1 / -1;
     }
 
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(15, 23, 42, 0.38);
+    }
+
+    .modal {
+      width: min(760px, 100%);
+      max-height: calc(100vh - 48px);
+      display: grid;
+      gap: 16px;
+      padding: 20px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      box-shadow: 0 20px 48px rgba(15, 23, 42, 0.22);
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .modal-head h3 {
+      margin: 0;
+    }
+
+    .modal-head p {
+      margin: 4px 0 0;
+      color: var(--subtle);
+      font-size: 13px;
+    }
+
+    .create-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .create-grid .full {
+      grid-column: 1 / -1;
+    }
+
+    .due-table {
+      display: grid;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .due-table-head,
+    .due-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 180px;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 12px;
+    }
+
+    .due-table-head {
+      background: var(--surface-soft);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .due-row {
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .due-row span {
+      display: grid;
+      gap: 2px;
+    }
+
+    .due-row small {
+      color: var(--subtle);
+    }
+
+    .due-row input {
+      width: 100%;
+      min-height: 36px;
+      padding: 7px 9px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+    }
+
     .workspace-check {
       display: flex;
       gap: 8px;
@@ -613,7 +708,7 @@
 
     .phase-mini {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
       gap: 8px;
     }
 
@@ -684,35 +779,6 @@
       font-size: 13px;
     }
 
-    .review-row {
-      display: grid;
-      grid-template-columns: minmax(220px, 320px);
-      gap: 14px;
-      align-items: end;
-      margin-bottom: 16px;
-    }
-
-    .milestone-buttons {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-    }
-
-    .milestone-button {
-      min-height: 46px;
-      border: 1px solid var(--line-strong);
-      border-radius: var(--radius);
-      background: #f1f2f4;
-      color: var(--muted);
-      font-weight: 900;
-    }
-
-    .milestone-button.active {
-      border-color: #8fd4a8;
-      background: var(--green-soft);
-      color: var(--green);
-    }
-
     .detail-actions {
       display: flex;
       justify-content: flex-end;
@@ -777,14 +843,6 @@
       line-height: 1.5;
     }
 
-    .phase-head strong {
-      flex: 0 0 auto;
-      padding: 4px 8px;
-      border-radius: 6px;
-      background: var(--surface);
-      font-size: 13px;
-    }
-
     .node-list {
       display: grid;
       gap: 10px;
@@ -829,6 +887,210 @@
     }
 
     .node-status.completed {
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .generated-node {
+      display: grid;
+      gap: 8px;
+    }
+
+    .generated-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .generated-actions span,
+    .send-node span {
+      color: var(--subtle);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .test-one-builder {
+      display: grid;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .test-one-fields {
+      display: grid;
+      gap: 8px;
+    }
+
+    .test-one-fields > span,
+    .test-one-actions span {
+      color: var(--subtle);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .field-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .field-name-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field-name-row {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .field-name-row span {
+      color: var(--subtle);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .field-name-row input {
+      width: 100%;
+      min-height: 38px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font: inherit;
+    }
+
+    .field-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 32px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-soft);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .field-option.active {
+      border-color: var(--blue);
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+
+    .field-option input {
+      width: 14px;
+      min-height: 14px;
+    }
+
+    .test-one-table {
+      overflow-x: auto;
+    }
+
+    .test-one-table table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .test-one-table th,
+    .test-one-table td {
+      padding: 8px;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .test-one-table th {
+      background: var(--surface-soft);
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .test-one-table input {
+      width: 100%;
+      min-height: 34px;
+      padding: 7px 8px;
+      font-size: 12px;
+    }
+
+    .test-one-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .generated-table-output {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    .generated-table-output .text-box-toolbar span {
+      color: var(--subtle);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .generated-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    .generated-table {
+      width: 100%;
+      min-width: 520px;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: #fff;
+    }
+
+    .generated-table th,
+    .generated-table td {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .generated-table th {
+      background: var(--surface-soft);
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .send-node {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .send-button {
+      min-width: 112px;
+      min-height: 40px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: #f1f2f4;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .send-button.active {
+      border-color: #8fd4a8;
       background: var(--green-soft);
       color: var(--green);
     }
@@ -993,6 +1255,35 @@
       gap: 10px;
     }
 
+    .upload-kind {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .upload-kind label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .upload-kind label.active {
+      border-color: #86caa0;
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .upload-kind input {
+      margin: 0;
+    }
+
     .node-upload input[type="file"] {
       display: none;
     }
@@ -1061,8 +1352,7 @@
       .app,
       .workspace-grid,
       .page-header,
-      .progress-summary,
-      .review-row {
+      .progress-summary {
         grid-template-columns: 1fr;
       }
 
@@ -1095,8 +1385,18 @@
       }
 
       .workspace-stats,
+      .create-grid,
       .filter-grid,
       .login-metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .create-grid .full {
+        grid-column: auto;
+      }
+
+      .due-table-head,
+      .due-row {
         grid-template-columns: 1fr;
       }
 
@@ -1162,7 +1462,6 @@
         <div>
           <h1>DeepSleep</h1>
           <p>星河零售集团</p>
-          <p>FY26 IT Audit</p>
         </div>
       </section>
       <nav class="nav" aria-label="主导航">
@@ -1211,6 +1510,7 @@
                 <h3>测试点清单</h3>
                 <p class="panel-note">一张卡片代表一个 GITC / ITAC 测试点</p>
               </div>
+              <button class="button primary" id="openCreateControl" type="button">新建测试点</button>
             </div>
             <div class="filter-grid">
               <label class="field">
@@ -1244,10 +1544,48 @@
     </main>
   </section>
 
+  <div class="modal-backdrop hidden" id="createControlModal">
+    <form class="modal" id="createControlForm">
+      <div class="modal-head">
+        <div>
+          <h3>新建测试点</h3>
+          <p>选择类型后自动生成节点预计完成时间，保存后同步给模块 3。</p>
+        </div>
+        <button class="button subtle" id="closeCreateControl" type="button">关闭</button>
+      </div>
+
+      <div class="create-grid">
+        <label class="field full">
+          <span class="label">测试点名称</span>
+          <input id="createTitle" placeholder="例如：APD-1 Password" />
+        </label>
+        <label class="field">
+          <span class="label">测试点类型</span>
+          <select id="createType">
+            <option value="GITC">GITC</option>
+            <option value="ITAC">ITAC</option>
+          </select>
+        </label>
+        <label class="field" id="createOwnerField"></label>
+        <label class="field">
+          <span class="label">第一个节点预计完成日期</span>
+          <input id="createFirstDueDate" type="date" />
+        </label>
+      </div>
+
+      <div class="due-table" id="createDueTable"></div>
+
+      <div class="detail-actions">
+        <button class="button subtle" id="cancelCreateControl" type="button">Cancel</button>
+        <button class="button primary" type="submit">Create</button>
+      </div>
+    </form>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script>
-    const STORAGE_KEY = "module2-workspace-html-preview-v11";
+    const STORAGE_KEY = "module2-workspace-html-preview-v17";
 
     const PROGRESS_STATUS = {
       NOT_STARTED: "not_started",
@@ -1270,7 +1608,12 @@
     const MATERIAL_CATEGORY = {
       SPP: "spp",
       MEETING_MINUTES: "meeting_minutes",
-      EVIDENCE: "evidence"
+      EVIDENCE: "evidence",
+      POLICY: "policy",
+      SUPPORTING_MATERIAL: "supporting_material",
+      REQUIREMENT_LIST: "requirement_list",
+      SAMPLE_POOL: "sample_pool",
+      RETURNED_SAMPLE_SUPPORT: "returned_sample_support"
     };
 
     const PROGRESS_LABELS = {
@@ -1289,10 +1632,15 @@
     const MATERIAL_LABELS = {
       [MATERIAL_CATEGORY.SPP]: "SPP",
       [MATERIAL_CATEGORY.MEETING_MINUTES]: "会议纪要",
-      [MATERIAL_CATEGORY.EVIDENCE]: "测试资料"
+      [MATERIAL_CATEGORY.EVIDENCE]: "测试资料",
+      [MATERIAL_CATEGORY.POLICY]: "制度",
+      [MATERIAL_CATEGORY.SUPPORTING_MATERIAL]: "支持性材料",
+      [MATERIAL_CATEGORY.REQUIREMENT_LIST]: "需求清单",
+      [MATERIAL_CATEGORY.SAMPLE_POOL]: "样本池",
+      [MATERIAL_CATEGORY.RETURNED_SAMPLE_SUPPORT]: "客户返回材料"
     };
 
-    const phases = [
+    const defaultPhases = [
       {
         id: "tod",
         label: "TOD",
@@ -1319,6 +1667,68 @@
       }
     ];
 
+    const itacPhases = [
+      {
+        id: "tod",
+        label: "TOD",
+        description: "ITAC 测试执行：上传会议纪要，生成 Implementation，记录配置/代码支持材料并完成 Test of One 样本表。",
+        nodes: [
+          { id: "itac-tod-minutes", label: "上传会议纪要", type: "upload_minutes", required: true, category: MATERIAL_CATEGORY.MEETING_MINUTES, actionLabel: "上传纪要" },
+          { id: "itac-tod-implementation", label: "自动生成 Implementation", type: "generated_text", required: true, dependsOnNodeId: "itac-tod-minutes", generationKind: "implementation", placeholder: "上传会议纪要后自动生成 Implementation 草稿，保存后计入完成度。" },
+          {
+            id: "itac-tod-supporting-material",
+            label: "上传配置/代码支持性材料",
+            type: "upload_supporting_material",
+            required: true,
+            category: MATERIAL_CATEGORY.SUPPORTING_MATERIAL,
+            actionLabel: "上传支持性材料",
+            supportKindOptions: [
+              { value: "configuration", label: "配置" },
+              { value: "code", label: "代码" }
+            ],
+            defaultSupportingMaterialKind: "configuration"
+          },
+          { id: "itac-tod-test-of-one-support", label: "上传 Test of One 支持性材料", type: "upload_test_of_one_support", required: true, category: MATERIAL_CATEGORY.SUPPORTING_MATERIAL, actionLabel: "上传 Test of One 支持材料", defaultSupportingMaterialKind: "test_of_one" },
+          { id: "itac-tod-test-of-one", label: "填写 Test of One 样本表", type: "generated_text", required: true, dependsOnNodeId: "itac-tod-test-of-one-support", generationKind: "test_of_one", builderKind: "itac_test_of_one_table", placeholder: "手动填写样本字段并填写样本信息后生成 Test of One 表格，保存后计入完成度。" }
+        ]
+      }
+    ];
+
+    const gitcPhases = [
+      {
+        id: "tod",
+        label: "TOD",
+        description: "GITC 设计有效性：上传制度、生成 Design、记录访谈实施情况并完成 Test of One。",
+        nodes: [
+          { id: "gitc-tod-policy", label: "上传制度", type: "upload_policy", required: true, category: MATERIAL_CATEGORY.POLICY, actionLabel: "上传制度", accept: ".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document", acceptedFileKind: "word", fileHint: "仅支持 Word（.doc/.docx）" },
+          { id: "gitc-tod-design", label: "自动生成 Design", type: "generated_text", required: true, dependsOnNodeId: "gitc-tod-policy", generationKind: "design", placeholder: "上传制度后自动生成 Design 草稿，保存后计入完成度。" },
+          { id: "gitc-tod-minutes", label: "上传会议纪要", type: "upload_minutes", required: true, category: MATERIAL_CATEGORY.MEETING_MINUTES, actionLabel: "上传纪要" },
+          { id: "gitc-tod-implementation", label: "自动生成 Implementation", type: "generated_text", required: true, dependsOnNodeId: "gitc-tod-minutes", generationKind: "implementation", placeholder: "上传会议纪要后自动生成 Implementation 草稿，保存后计入完成度。" },
+          { id: "gitc-tod-supporting-material", label: "上传支持性材料", type: "upload_supporting_material", required: true, category: MATERIAL_CATEGORY.SUPPORTING_MATERIAL, actionLabel: "上传支持性材料" },
+          { id: "gitc-tod-test-of-one", label: "填写 Test of One 样本表", type: "generated_text", required: true, dependsOnNodeId: "gitc-tod-supporting-material", generationKind: "test_of_one", builderKind: "test_of_one_table", placeholder: "手动填写样本字段和样本信息后生成 Test of One 表格，保存后计入完成度。" }
+        ]
+      },
+      {
+        id: "toe",
+        label: "TOE",
+        description: "GITC 运行有效性：上传需求和样本池，生成抽样样本，发送并完成抄写。",
+        nodes: [
+          { id: "gitc-toe-requirement-list", label: "上传需求清单", type: "upload_requirement_list", required: true, category: MATERIAL_CATEGORY.REQUIREMENT_LIST, actionLabel: "上传需求清单" },
+          { id: "gitc-toe-sample-pool", label: "上传客户提供的样本池", type: "upload_sample_pool", required: true, category: MATERIAL_CATEGORY.SAMPLE_POOL, actionLabel: "上传样本池" },
+          { id: "gitc-toe-sampling", label: "自动抽样生成抽样样本", type: "generated_text", required: true, dependsOnNodeId: "gitc-toe-sample-pool", generationKind: "sampling", placeholder: "上传样本池后自动生成抽样样本，保存后计入完成度。" },
+          { id: "gitc-toe-send-sample", label: "是否发送样本", type: "send_toggle", required: true },
+          { id: "gitc-toe-returned-sample-support", label: "上传客户返回的样本支持性材料", type: "upload_returned_sample_support", required: true, category: MATERIAL_CATEGORY.RETURNED_SAMPLE_SUPPORT, actionLabel: "上传返回材料" },
+          { id: "gitc-toe-transcription", label: "填写样本抄写表", type: "generated_text", required: true, dependsOnNodeId: "gitc-toe-returned-sample-support", generationKind: "transcription", builderKind: "sample_transcription_table", placeholder: "手动填写样本字段并录入多个样本后，点击生成抄写表格，保存后计入完成度。" }
+        ]
+      }
+    ];
+
+    function phasesFor(control) {
+      if (control?.controlType === "GITC") return gitcPhases;
+      if (control?.controlType === "ITAC") return itacPhases;
+      return defaultPhases;
+    }
+
     const reviewOrder = {
       [REVIEW_STATUS.NOT_SUBMITTED]: 0,
       [REVIEW_STATUS.COMMENTED]: 1,
@@ -1336,18 +1746,24 @@
         taskStatus: "done",
         blockers: [],
         nodeResponses: {
-          "tod-objective": "验证访问管理控制设计有效。",
-          "tod-process": "梳理入职、转岗、离职及季度权限复核流程。",
-          "toe-sample": "Q1 样本 15 个。",
-          "toe-procedure": "检查审批记录、复核清单和离职回收记录。",
-          "toe-execution": "已逐项检查样本审批、复核和系统日志。",
-          "toe-result": "No exception noted."
+          "gitc-tod-design": "Design 草稿\n访问管理制度定义了入职、转岗、离职和季度权限复核控制，覆盖用户访问授权和定期复核要求。",
+          "gitc-tod-implementation": "Implementation 草稿\n访谈纪要显示控制由 IT 管理员和业务负责人按月执行，系统保留审批和复核痕迹。",
+          "gitc-tod-test-of-one": "Test of One\n\n| 样本编号 | 请求/工单编号 | 审批记录 | 账号创建/变更时间 | 权限分配结果 |\n| --- | --- | --- | --- | --- |\n| AM-001 | REQ-2026-014 | 已取得业务负责人审批 | 2026-03-14 10:32 | 与审批权限一致 |",
+          "gitc-toe-sampling": "抽样样本草稿\nSample-01、Sample-08、Sample-15、Sample-22、Sample-30。",
+          "gitc-toe-send-sample": {
+            sent: true,
+            sentBy: "AL",
+            sentAt: new Date().toISOString()
+          },
+          "gitc-toe-transcription": "样本抄写\n\n| 样本编号 | 请求/工单编号 | 客户返回材料 | 控制属性 | 证据内容 | 测试结果 |\n| --- | --- | --- | --- | --- | --- |\n| AM-001 | REQ-2026-014 | 客户返回样本材料.zip | 访问权限审批 | 审批截图与账号创建记录一致 | 未发现例外 |"
         },
         materials: [
-          material("spp", "tod", "tod-spp", "访问管理 TOD 支持性材料.xlsx", "alice@kpmg.com", 421000),
-          material("meeting_minutes", "tod", "tod-minutes", "访问管理访谈纪要.docx", "alice@kpmg.com", 88000),
-          material("spp", "toe", "toe-spp", "访问管理 TOE 支持性材料.xlsx", "alice@kpmg.com", 438000),
-          material("meeting_minutes", "toe", "toe-minutes", "访问管理 TOE 纪要.docx", "alice@kpmg.com", 91000)
+          material("policy", "tod", "gitc-tod-policy", "访问管理制度.docx", "alice@kpmg.com", 188000),
+          material("meeting_minutes", "tod", "gitc-tod-minutes", "访问管理访谈纪要.docx", "alice@kpmg.com", 88000),
+          material("supporting_material", "tod", "gitc-tod-supporting-material", "访问管理 TOD 支持性材料.xlsx", "alice@kpmg.com", 421000),
+          material("requirement_list", "toe", "gitc-toe-requirement-list", "访问管理需求清单.xlsx", "alice@kpmg.com", 112000),
+          material("sample_pool", "toe", "gitc-toe-sample-pool", "访问管理样本池.xlsx", "alice@kpmg.com", 438000),
+          material("returned_sample_support", "toe", "gitc-toe-returned-sample-support", "客户返回样本材料.zip", "alice@kpmg.com", 91000)
         ],
         milestones: {
           planning: true,
@@ -1359,7 +1775,7 @@
         },
         extraTextFields: {},
         fieldReviews: {
-          "toe-procedure": {
+          "gitc-toe-transcription": {
             id: "rev_gitc_toe_procedure",
             text: "请补充权限复核样本的抽样口径。",
             reply: "已补充样本范围和期间说明。",
@@ -1383,14 +1799,13 @@
         taskStatus: "review",
         blockers: [],
         nodeResponses: {
-          "tod-objective": "验证三单匹配自动控制设计有效。",
-          "tod-process": "理解 PO、GR、Invoice 匹配流程和容差设置。",
-          "toe-sample": "Q1 采购样本 25 个。",
-          "toe-procedure": "抽取样本，检查系统匹配日志并重新执行关键计算。"
+          "itac-tod-implementation": "Implementation 草稿\n三单匹配控制由系统在发票入账前自动执行，依据 PO、GR、Invoice 金额和供应商维度进行匹配。",
+          "itac-tod-test-of-one": "ITAC Test of One\n\n| 样本编号 | 配置/代码对象 | 关键参数 | 支持材料索引 | 检查结果 | 结论 |\n| --- | --- | --- | --- | --- | --- |\n| ITAC-TOO-001 | 三单匹配容差配置 | 金额容差 0.5% | 三单匹配 Test of One 支持材料.xlsx | 参数与审批记录一致 | 未发现例外 |"
         },
         materials: [
-          material("spp", "tod", "tod-spp", "三单匹配 TOD 支持性材料.xlsx", "alice@kpmg.com", 366000),
-          material("meeting_minutes", "tod", "tod-minutes", "采购流程访谈纪要.docx", "alice@kpmg.com", 76000)
+          material("meeting_minutes", "tod", "itac-tod-minutes", "采购流程访谈纪要.docx", "alice@kpmg.com", 76000),
+          material("supporting_material", "tod", "itac-tod-supporting-material", "三单匹配配置截图.xlsx", "alice@kpmg.com", 366000, "configuration"),
+          material("supporting_material", "tod", "itac-tod-test-of-one-support", "三单匹配 Test of One 支持材料.xlsx", "alice@kpmg.com", 244000, "test_of_one")
         ],
         milestones: {
           planning: true,
@@ -1402,7 +1817,7 @@
         },
         extraTextFields: {},
         fieldReviews: {
-          "tod-process": {
+          "itac-tod-test-of-one": {
             id: "rev_itac_tod_process",
             text: "请补充三单匹配容差参数的系统配置来源。",
             reply: "",
@@ -1424,8 +1839,7 @@
         taskStatus: "development",
         blockers: [],
         nodeResponses: {
-          "tod-objective": "验证价格主数据变更审批控制设计。",
-          "tod-process": "理解价格申请、审批、配置和上线流程。"
+          "itac-tod-implementation": "Implementation 草稿\n价格主数据变更由业务提交申请，经审批后由系统管理员维护配置。"
         },
         materials: [],
         milestones: {
@@ -1475,17 +1889,28 @@
     let openTextMenuKey = "";
     let openReviewKey = "";
     let openReplyKey = "";
+    let draftResponses = {};
+    let testOfOneBuilders = {};
+    let supportKindSelections = {};
     let filters = {
       owner: "",
       type: "",
       status: "",
       actionOnly: false
     };
+    let createDraft = {
+      title: "",
+      controlType: "GITC",
+      owner: "",
+      firstDueDate: todayDate(),
+      nodeDueDates: {}
+    };
 
-    function material(category, phaseId, nodeId, name, uploadedBy, size) {
+    function material(category, phaseId, nodeId, name, uploadedBy, size, supportingMaterialKind = "") {
       return {
         id: `mat_${Math.random().toString(36).slice(2, 9)}`,
         category,
+        supportingMaterialKind,
         phaseId,
         nodeId,
         name,
@@ -1509,6 +1934,7 @@
     function normalizeControls(items) {
       return items.map((control) => ({
         ...control,
+        nodeDueDates: normalizeNodeDueDates(control.nodeDueDates),
         milestones: {
           planning: Boolean(control.milestones?.planning),
           review: Boolean(control.milestones?.review)
@@ -1517,6 +1943,119 @@
         extraTextFields: normalizeExtraTextFields(control.extraTextFields),
         fieldReviews: normalizeFieldReviews(control.fieldReviews)
       }));
+    }
+
+    function normalizeNodeDueDates(nodeDueDates = {}) {
+      if (!nodeDueDates || typeof nodeDueDates !== "object" || Array.isArray(nodeDueDates)) return {};
+      return Object.entries(nodeDueDates).reduce((result, [nodeId, dueDate]) => {
+        const normalized = String(dueDate || "").trim();
+        if (normalized) result[nodeId] = normalized;
+        return result;
+      }, {});
+    }
+
+    function formatDateParts(year, month, day) {
+      return [
+        String(year).padStart(4, "0"),
+        String(month).padStart(2, "0"),
+        String(day).padStart(2, "0")
+      ].join("-");
+    }
+
+    function todayDate() {
+      const date = new Date();
+      return formatDateParts(date.getFullYear(), date.getMonth() + 1, date.getDate());
+    }
+
+    function addDays(dateValue, days) {
+      if (!dateValue) return "";
+      const [year, month, day] = String(dateValue).split("-").map(Number);
+      if (!year || !month || !day) return "";
+      const date = new Date(year, month - 1, day);
+      if (Number.isNaN(date.getTime())) return "";
+      date.setDate(date.getDate() + days);
+      return formatDateParts(date.getFullYear(), date.getMonth() + 1, date.getDate());
+    }
+
+    function nodesForType(controlType) {
+      return phasesFor({ controlType }).flatMap((phase) => (
+        phase.nodes
+          .filter((node) => node.required !== false)
+          .map((node) => ({ ...node, phaseId: phase.id, phaseLabel: phase.label }))
+      ));
+    }
+
+    function buildNodeDueDates(controlType, firstDate, overrides = {}) {
+      return nodesForType(controlType).reduce((result, node, index) => ({
+        ...result,
+        [node.id]: overrides[node.id] || addDays(firstDate, index * 7)
+      }), {});
+    }
+
+    function memberOptions() {
+      return [...new Set([
+        currentUser,
+        "manager@kpmg.com",
+        "bob@kpmg.com",
+        ...controls.map((control) => control.owner).filter(Boolean)
+      ])].sort();
+    }
+
+    function nextControlId(controlType) {
+      const prefix = controlType === "ITAC" ? "ITAC" : "GITC";
+      const max = controls.reduce((current, control) => {
+        const match = String(control.id || "").match(new RegExp(`^${prefix}-(\\d+)$`));
+        return match ? Math.max(current, Number(match[1])) : current;
+      }, 0);
+      return `${prefix}-${String(max + 1).padStart(3, "0")}`;
+    }
+
+    function resetCreateDraft() {
+      const firstDueDate = todayDate();
+      createDraft = {
+        title: "",
+        controlType: "GITC",
+        owner: memberOptions()[0] || currentUser,
+        firstDueDate,
+        nodeDueDates: buildNodeDueDates("GITC", firstDueDate)
+      };
+    }
+
+    function renderCreateOwnerField() {
+      const owners = memberOptions();
+      const field = document.getElementById("createOwnerField");
+      field.innerHTML = `
+        <span class="label">指派成员</span>
+        ${owners.length ? `
+          <select id="createOwner">
+            ${owners.map((owner) => `<option value="${owner}" ${owner === createDraft.owner ? "selected" : ""}>${owner}</option>`).join("")}
+          </select>
+        ` : `<input id="createOwner" value="${createDraft.owner}" placeholder="member@kpmg.com" />`}
+      `;
+    }
+
+    function renderCreateDueTable() {
+      const nodes = nodesForType(createDraft.controlType);
+      document.getElementById("createDueTable").innerHTML = `
+        <div class="due-table-head"><span>节点</span><span>预计完成日期</span></div>
+        ${nodes.map((node, index) => `
+          <label class="due-row">
+            <span>
+              <strong>${index + 1}. ${node.label}</strong>
+              <small>${node.phaseLabel} · ${node.type}</small>
+            </span>
+            <input type="date" data-create-node-due="${node.id}" value="${createDraft.nodeDueDates[node.id] || ""}" />
+          </label>
+        `).join("")}
+      `;
+    }
+
+    function renderCreateDialog() {
+      document.getElementById("createTitle").value = createDraft.title;
+      document.getElementById("createType").value = createDraft.controlType;
+      document.getElementById("createFirstDueDate").value = createDraft.firstDueDate;
+      renderCreateOwnerField();
+      renderCreateDueTable();
     }
 
     function normalizeMilestoneActors(control) {
@@ -1591,15 +2130,6 @@
       return (reviewOrder[current] || 0) >= (reviewOrder[threshold] || 0);
     }
 
-    function milestoneActive(control, milestone) {
-      return Boolean(control.milestones?.[milestone]);
-    }
-
-    function milestoneLabel(control, milestone) {
-      if (!milestoneActive(control, milestone)) return milestone;
-      return control.milestoneActors?.[milestone] || userInitials(currentUser);
-    }
-
     function nodeMaterials(control, node, phaseId) {
       return control.materials.filter((item) => (
         item.phaseId === phaseId
@@ -1609,8 +2139,11 @@
     }
 
     function nodeStatus(control, node, phaseId) {
-      if (node.type === "text") {
+      if (node.type === "text" || node.type === "generated_text") {
         return control.nodeResponses[node.id]?.trim() ? NODE_STATUS.COMPLETED : NODE_STATUS.PENDING;
+      }
+      if (node.type === "send_toggle") {
+        return control.nodeResponses[node.id]?.sent ? NODE_STATUS.COMPLETED : NODE_STATUS.PENDING;
       }
       if (node.type.startsWith("upload")) {
         return nodeMaterials(control, node, phaseId).length ? NODE_STATUS.COMPLETED : NODE_STATUS.PENDING;
@@ -1630,7 +2163,7 @@
         phases: {}
       };
 
-      phases.forEach((phase) => {
+      phasesFor(control).forEach((phase) => {
         const phaseProgress = {
           completedNodes: 0,
           totalNodes: 0,
@@ -1670,15 +2203,31 @@
     }
 
     function progressStatus(control) {
-      if (!hasUploadedMaterial(control)) return PROGRESS_STATUS.NOT_STARTED;
-      if (allReviewCommentsCleared(control) && milestoneActive(control, "planning") && milestoneActive(control, "review")) {
+      const progress = progressFor(control);
+      if (progress.allRequiredComplete && allReviewCommentsCleared(control)) {
         return PROGRESS_STATUS.COMPLETED;
       }
-      return PROGRESS_STATUS.IN_PROGRESS;
+      if (hasWorkspaceInput(control, progress)) return PROGRESS_STATUS.IN_PROGRESS;
+      return PROGRESS_STATUS.NOT_STARTED;
     }
 
-    function hasUploadedMaterial(control) {
-      return Array.isArray(control.materials) && control.materials.length > 0;
+    function hasMeaningfulValue(value) {
+      if (typeof value === "string") return value.trim().length > 0;
+      if (typeof value === "boolean") return value;
+      if (typeof value === "number") return true;
+      if (Array.isArray(value)) return value.some(hasMeaningfulValue);
+      if (value && typeof value === "object") return Object.values(value).some(hasMeaningfulValue);
+      return false;
+    }
+
+    function hasWorkspaceInput(control, progress) {
+      if ((progress?.completedNodes || 0) > 0) return true;
+      if (Array.isArray(control.materials) && control.materials.length > 0) return true;
+      if (Object.values(control.nodeResponses || {}).some(hasMeaningfulValue)) return true;
+      if (Object.values(control.extraTextFields || {}).some((fields) => (
+        Array.isArray(fields) && fields.some((field) => hasMeaningfulValue(field.value))
+      ))) return true;
+      return false;
     }
 
     function allReviewCommentsCleared(control) {
@@ -1687,6 +2236,19 @@
 
     function countsByCategory(control, category) {
       return control.materials.filter((item) => item.category === category).length;
+    }
+
+    function supportingMaterialKindLabel(kind) {
+      if (kind === "configuration") return "配置";
+      if (kind === "code") return "代码";
+      if (kind === "test_of_one") return "Test of One";
+      return "";
+    }
+
+    function materialDisplayLabel(item) {
+      const base = MATERIAL_LABELS[item.category] || "材料";
+      const kind = supportingMaterialKindLabel(item.supportingMaterialKind);
+      return kind ? `${base}（${kind}）` : base;
     }
 
     function visibleControls() {
@@ -1753,10 +2315,11 @@
             </div>
             <div class="progress-track"><span style="width:${progress.progressPercent}%"></span></div>
             <div class="phase-mini">
-              <span>TOD ${progress.phases.tod.completedNodes}/${progress.phases.tod.totalNodes}</span>
-              <span>TOE ${progress.phases.toe.completedNodes}/${progress.phases.toe.totalNodes}</span>
+              ${Object.entries(progress.phases).map(([phaseId, phase]) => (
+                `<span>${phaseId.toUpperCase()} ${phase.completedNodes}/${phase.totalNodes}</span>`
+              )).join("")}
             </div>
-            <small>SPP ${countsByCategory(control, "spp")} · 纪要 ${countsByCategory(control, "meeting_minutes")} · 资料 ${countsByCategory(control, "evidence")}</small>
+            <small>制度 ${countsByCategory(control, "policy")} · 纪要 ${countsByCategory(control, "meeting_minutes")} · 支持 ${countsByCategory(control, "supporting_material") || countsByCategory(control, "spp")}</small>
           </button>
         `;
       }).join("") : `
@@ -1776,7 +2339,8 @@
 
       const progress = progressFor(control);
       const status = progressStatus(control);
-      const phase = phases.find((item) => item.id === activePhase) || phases[0];
+      const activePhases = phasesFor(control);
+      const phase = activePhases.find((item) => item.id === activePhase) || activePhases[0];
 
       document.getElementById("detailPanel").innerHTML = `
         <div class="detail-head">
@@ -1790,22 +2354,13 @@
 
         <div class="progress-summary">
           ${meter("总进度", progress.completedNodes, progress.totalNodes)}
-          ${meter("TOD", progress.phases.tod.completedNodes, progress.phases.tod.totalNodes)}
-          ${meter("TOE", progress.phases.toe.completedNodes, progress.phases.toe.totalNodes)}
-        </div>
-
-        <div class="review-row">
-          <label class="field">
-            <span class="label">流程节点</span>
-            <div class="milestone-buttons">
-              <button class="milestone-button ${milestoneActive(control, "planning") ? "active" : ""}" type="button" data-milestone="planning">${milestoneLabel(control, "planning")}</button>
-              <button class="milestone-button ${milestoneActive(control, "review") ? "active" : ""}" type="button" data-milestone="review">${milestoneLabel(control, "review")}</button>
-            </div>
-          </label>
+          ${Object.entries(progress.phases).map(([phaseId, phaseProgress]) => (
+            meter(phaseId.toUpperCase(), phaseProgress.completedNodes, phaseProgress.totalNodes)
+          )).join("")}
         </div>
 
         <div class="phase-tabs">
-          ${phases.map((item) => `<button class="${item.id === activePhase ? "active" : ""}" type="button" data-phase="${item.id}">${item.label}</button>`).join("")}
+          ${activePhases.map((item) => `<button class="${item.id === activePhase ? "active" : ""}" type="button" data-phase="${item.id}">${item.label}</button>`).join("")}
         </div>
 
         <section class="phase-panel">
@@ -1814,7 +2369,6 @@
               <h4>${phase.label}</h4>
               <p>${phase.description}</p>
             </div>
-            <strong>${progress.phases[phase.id].completedNodes}/${progress.phases[phase.id].totalNodes}</strong>
           </div>
           <div class="node-list">
             ${phase.nodes.map((node) => renderNode(control, node, phase.id)).join("")}
@@ -1869,19 +2423,23 @@
               extra: true
             })).join("")}
           ` : ""}
+          ${node.type === "generated_text" ? renderGeneratedNode(control, node) : ""}
+          ${node.type === "send_toggle" ? renderSendToggleNode(control, node) : ""}
           ${node.type.startsWith("upload") ? `
             <div class="node-upload">
+              ${renderSupportKindOptions(control, node)}
               <label class="button">
                 ${uploadLabel(node)}
-                <input type="file" multiple data-upload-node="${node.id}" data-upload-phase="${phaseId}" data-upload-category="${node.category}" />
+                <input type="file" multiple ${node.accept ? `accept="${node.accept}"` : ""} data-upload-node="${node.id}" data-upload-phase="${phaseId}" data-upload-category="${node.category}" />
               </label>
+              ${node.fileHint ? `<p class="node-note">${node.fileHint}</p>` : ""}
               ${materials.length ? `
                 <ul class="material-list">
                   ${materials.map((item) => `
                     <li>
                       <div>
                         <strong>${item.name}</strong>
-                        <span>${MATERIAL_LABELS[item.category]} · ${item.uploadedBy} · ${formatDateTime(item.uploadedAt)} · ${Math.round((item.size || 0) / 1024)} KB</span>
+                        <span>${materialDisplayLabel(item)} · ${item.uploadedBy} · ${formatDateTime(item.uploadedAt)} · ${Math.round((item.size || 0) / 1024)} KB</span>
                       </div>
                       <button class="button subtle" type="button" data-remove-material="${item.id}">移除</button>
                     </li>
@@ -1893,6 +2451,294 @@
           ${node.type === "review" ? `
             <p class="node-note">当前复核状态：${REVIEW_LABELS[control.reviewStatus]}。${node.threshold === REVIEW_STATUS.SIGNED_OFF ? "该节点需要签核。" : "提交复核后该节点完成。"}</p>
           ` : ""}
+        </div>
+      `;
+    }
+
+    function draftFor(control, nodeId) {
+      return draftResponses[control.id]?.[nodeId];
+    }
+
+    function setDraft(control, nodeId, value) {
+      draftResponses[control.id] = {
+        ...(draftResponses[control.id] || {}),
+        [nodeId]: value
+      };
+    }
+
+    const DEFAULT_TABLE_FIELD_COUNT = 3;
+    const DEFAULT_TRANSCRIPTION_FIELD_COUNT = 4;
+
+    function createTestOfOneRow() {
+      return {
+        id: `sample_${Math.random().toString(36).slice(2, 8)}`,
+        values: {}
+      };
+    }
+
+    function createTableField(label = "") {
+      return {
+        id: `field_${Math.random().toString(36).slice(2, 8)}`,
+        label
+      };
+    }
+
+    function initialFieldCountForTableBuilder(node) {
+      return node?.builderKind === "sample_transcription_table"
+        ? DEFAULT_TRANSCRIPTION_FIELD_COUNT
+        : DEFAULT_TABLE_FIELD_COUNT;
+    }
+
+    function createTestOfOneBuilder(fieldCount = DEFAULT_TABLE_FIELD_COUNT) {
+      return {
+        fields: Array.from({ length: fieldCount }, () => createTableField()),
+        rows: [createTestOfOneRow()]
+      };
+    }
+
+    function isTableBuilderNode(node) {
+      return node?.builderKind === "test_of_one_table"
+        || node?.builderKind === "itac_test_of_one_table"
+        || node?.builderKind === "sample_transcription_table";
+    }
+
+    function tableTitleForBuilder(node) {
+      if (node?.builderKind === "sample_transcription_table") return "样本抄写";
+      if (node?.builderKind === "itac_test_of_one_table") return "ITAC Test of One";
+      return "Test of One";
+    }
+
+    function tableGenerateButtonLabel(node) {
+      if (node?.builderKind === "sample_transcription_table") return "生成抄写表格";
+      return "生成 Test of One 表格";
+    }
+
+    function tableBuilderHelp(node) {
+      if (node?.builderKind === "sample_transcription_table") {
+        return "先手动填写样本字段，再按字段逐行录入多个样本，全部填完后点击生成抄写表格。";
+      }
+      if (node?.builderKind === "itac_test_of_one_table") {
+        return "先手动填写 ITAC 样本字段，再填写一个完整样本，生成 Test of One 表格。";
+      }
+      return "先手动填写样本字段，再填写一个完整样本，生成 Test of One 表格。";
+    }
+
+    function shouldAutoGenerateTable(node) {
+      return node?.builderKind === "test_of_one_table"
+        || node?.builderKind === "itac_test_of_one_table";
+    }
+
+    function testOfOneBuilderFor(control, nodeId) {
+      const node = findNode(control, nodeId);
+      testOfOneBuilders[control.id] = testOfOneBuilders[control.id] || {};
+      testOfOneBuilders[control.id][nodeId] = normalizeTestOfOneBuilder(
+        testOfOneBuilders[control.id][nodeId] || createTestOfOneBuilder(initialFieldCountForTableBuilder(node)),
+        node
+      );
+      return testOfOneBuilders[control.id][nodeId];
+    }
+
+    function normalizeTestOfOneBuilder(builder, node) {
+      if (Array.isArray(builder?.fields)) {
+        return {
+          ...builder,
+          fields: builder.fields.length ? builder.fields : [createTableField()],
+          rows: Array.isArray(builder.rows) && builder.rows.length ? builder.rows : [createTestOfOneRow()]
+        };
+      }
+      return createTestOfOneBuilder(initialFieldCountForTableBuilder(node));
+    }
+
+    function activeTableFields(builder) {
+      return (builder.fields || [])
+        .map((field) => ({
+          ...field,
+          label: String(field.label || "").trim()
+        }))
+        .filter((field) => field.label);
+    }
+
+    function buildTestOfOneTable(builder, node) {
+      const fields = activeTableFields(builder);
+      if (!fields.length) return "";
+      const completeRows = (builder.rows || []).filter((row) => (
+        fields.every((field) => String(row.values?.[field.id] || "").trim())
+      ));
+      if (!completeRows.length) return "";
+      const header = `| ${fields.map((field) => field.label).join(" | ")} |`;
+      const divider = `| ${fields.map(() => "---").join(" | ")} |`;
+      const rows = completeRows.map((row) => (
+        `| ${fields.map((field) => String(row.values?.[field.id] || "").trim()).join(" | ")} |`
+      ));
+      return [tableTitleForBuilder(node), "", header, divider, ...rows].join("\n");
+    }
+
+    function parseGeneratedTable(value) {
+      const lines = String(value || "").split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+      const tableStart = lines.findIndex((line) => line.startsWith("|") && line.endsWith("|"));
+      if (tableStart < 0 || tableStart + 1 >= lines.length) return null;
+      const headers = lines[tableStart].slice(1, -1).split("|").map((cell) => cell.trim());
+      const rows = lines.slice(tableStart + 2)
+        .filter((line) => line.startsWith("|") && line.endsWith("|"))
+        .map((line) => line.slice(1, -1).split("|").map((cell) => cell.trim()));
+      if (!headers.length || !rows.length) return null;
+      return {
+        title: tableStart > 0 ? lines.slice(0, tableStart).join(" ") : "",
+        headers,
+        rows
+      };
+    }
+
+    function applyTestOfOneBuilder(control, nodeId, builder, generate = shouldAutoGenerateTable(findNode(control, nodeId))) {
+      testOfOneBuilders[control.id] = {
+        ...(testOfOneBuilders[control.id] || {}),
+        [nodeId]: builder
+      };
+      if (generate) {
+        setDraft(control, nodeId, buildTestOfOneTable(builder, findNode(control, nodeId)));
+      }
+    }
+
+    function generateTableDraft(control, nodeId) {
+      const node = findNode(control, nodeId);
+      const builder = testOfOneBuilderFor(control, nodeId);
+      const table = buildTestOfOneTable(builder, node);
+      if (!table) {
+        showToast("请先填写至少一个完整样本。");
+        return;
+      }
+      setDraft(control, nodeId, table);
+      showToast(`${tableTitleForBuilder(node)}表格已生成，Save 后计入进度。`);
+    }
+
+    function renderTestOfOneBuilder(control, node) {
+      const builder = testOfOneBuilderFor(control, node.id);
+      const fields = activeTableFields(builder);
+      return `
+        <div class="test-one-builder">
+          <div class="test-one-fields">
+            <span>样本字段</span>
+            <div class="field-name-list">
+              ${builder.fields.map((field, fieldIndex) => `
+                <div class="field-name-row">
+                  <span>字段 ${fieldIndex + 1}</span>
+                  <input type="text" value="${escapeHtml(field.label || "")}" placeholder="手动填写字段名" data-table-field-label="${field.id}" data-table-field-node="${node.id}" />
+                  <button class="button subtle" type="button" data-remove-table-field="${field.id}" data-table-field-node="${node.id}">移除</button>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+          ${fields.length ? `
+            <div class="test-one-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>样本</th>
+                    ${fields.map((field) => `<th>${escapeHtml(field.label)}</th>`).join("")}
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${builder.rows.map((row, rowIndex) => `
+                    <tr>
+                      <th>样本 ${rowIndex + 1}</th>
+                      ${fields.map((field) => `
+                        <td>
+                          <input type="text" value="${escapeHtml(row.values?.[field.id] || "")}" placeholder="${escapeHtml(field.label)}" data-test-one-cell="${node.id}" data-test-one-row="${row.id}" data-test-one-field-id="${field.id}" />
+                        </td>
+                      `).join("")}
+                      <td><button class="button subtle" type="button" data-remove-test-one-row="${row.id}" data-test-one-node="${node.id}">移除</button></td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            </div>
+          ` : `<p class="empty-line">先填写至少一个样本字段，系统会在下方生成录入表。</p>`}
+          <div class="test-one-actions">
+            <button class="button subtle" type="button" data-add-table-field="${node.id}">新增字段</button>
+            <button class="button subtle" type="button" data-add-test-one-row="${node.id}">新增样本</button>
+            <button class="button primary" type="button" data-generate-test-one-table="${node.id}">${tableGenerateButtonLabel(node)}</button>
+            <span>${tableBuilderHelp(node)}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderGeneratedTableOutput(control, node, value) {
+      const fieldKey = node.id;
+      const review = control.fieldReviews?.[fieldKey] || null;
+      const menuOpen = openTextMenuKey === fieldKey;
+      const reviewOpen = openReviewKey === fieldKey;
+      const parsedTable = parseGeneratedTable(value);
+      return `
+        <div class="generated-table-output">
+          <div class="text-box-toolbar">
+            <span>${escapeHtml(parsedTable?.title || tableTitleForBuilder(node))}</span>
+            <div class="text-menu-wrap">
+              <button class="text-menu-button" type="button" data-text-menu="${fieldKey}" title="更多操作">...</button>
+              ${review ? `<button class="comment-dot ${review.status}" type="button" data-open-review="${fieldKey}" title="${reviewStateLabel(review.status)}" aria-label="${reviewStateLabel(review.status)}"></button>` : ""}
+              ${menuOpen ? `
+                <div class="text-menu">
+                  <button type="button" data-add-review="${fieldKey}">添加复核意见</button>
+                </div>
+              ` : ""}
+            </div>
+          </div>
+          ${parsedTable ? `
+            <div class="generated-table-wrap">
+              <table class="generated-table">
+                <thead>
+                  <tr>${parsedTable.headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("")}</tr>
+                </thead>
+                <tbody>
+                  ${parsedTable.rows.map((row) => `
+                    <tr>
+                      ${parsedTable.headers.map((_, cellIndex) => `<td>${escapeHtml(row[cellIndex] || "")}</td>`).join("")}
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            </div>
+          ` : `<p class="empty-line">生成后将在这里显示实际表格。</p>`}
+          ${review && reviewOpen ? renderReviewThread(fieldKey, review) : ""}
+        </div>
+      `;
+    }
+
+    function renderGeneratedNode(control, node) {
+      const draft = draftFor(control, node.id);
+      const value = draft ?? control.nodeResponses[node.id] ?? "";
+      return `
+        <div class="generated-node">
+          <div class="generated-actions">
+            ${isTableBuilderNode(node)
+              ? `<span>按样本字段填表生成${tableTitleForBuilder(node)}</span>`
+              : `<button class="button subtle" type="button" data-regenerate-node="${node.id}">重新生成</button>`}
+            ${draft !== undefined ? `<span>未保存草稿</span>` : ""}
+          </div>
+          ${isTableBuilderNode(node) ? renderTestOfOneBuilder(control, node) : ""}
+          ${isTableBuilderNode(node)
+            ? renderGeneratedTableOutput(control, node, value)
+            : renderTextBox(control, {
+                nodeId: node.id,
+                fieldKey: node.id,
+                value,
+                placeholder: node.placeholder || "",
+                draft: true
+              })}
+        </div>
+      `;
+    }
+
+    function renderSendToggleNode(control, node) {
+      const state = control.nodeResponses[node.id] || {};
+      const sent = Boolean(state.sent);
+      return `
+        <div class="send-node">
+          <button class="send-button ${sent ? "active" : ""}" type="button" data-send-node="${node.id}">
+            ${sent ? state.sentBy || "SENT" : "Send"}
+          </button>
+          <span>${sent ? `已发送 · ${formatDateTime(state.sentAt)}` : "未发送"}</span>
         </div>
       `;
     }
@@ -1916,7 +2762,7 @@
             </div>
           </div>
           <textarea
-            ${field.extra ? `data-extra-response="${field.extraId}" data-extra-node="${field.nodeId}"` : `data-node-response="${field.nodeId}"`}
+            ${field.draft ? `data-draft-response="${field.nodeId}"` : field.extra ? `data-extra-response="${field.extraId}" data-extra-node="${field.nodeId}"` : `data-node-response="${field.nodeId}"`}
             placeholder="${escapeHtml(field.placeholder)}"
           >${escapeHtml(field.value)}</textarea>
           ${review && reviewOpen ? renderReviewThread(field.fieldKey, review) : ""}
@@ -1951,10 +2797,114 @@
       return "待回复";
     }
 
+    function allNodesFor(control) {
+      return phasesFor(control).flatMap((phase) => phase.nodes.map((node) => ({
+        ...node,
+        phaseId: phase.id
+      })));
+    }
+
+    function findNode(control, nodeId) {
+      return allNodesFor(control).find((node) => node.id === nodeId) || null;
+    }
+
+    function generatedTargetsForUploadNode(control, uploadNodeId) {
+      return allNodesFor(control).filter((node) => (
+        node.type === "generated_text" && node.dependsOnNodeId === uploadNodeId
+      ));
+    }
+
+    function materialSummary(items = []) {
+      if (!items.length) return "暂无材料";
+      return items.map((item) => `${item.name || "未命名材料"}${item.size ? ` (${Math.round(item.size / 1024)} KB)` : ""}`).join("、");
+    }
+
+    const WORD_FILE_MIME_TYPES = new Set([
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ]);
+
+    function isWordUploadNode(node) {
+      return node?.acceptedFileKind === "word";
+    }
+
+    function isWordFile(file) {
+      const lowerName = String(file?.name || "").toLowerCase();
+      return lowerName.endsWith(".doc")
+        || lowerName.endsWith(".docx")
+        || WORD_FILE_MIME_TYPES.has(file?.type);
+    }
+
+    function buildGeneratedText(control, node, materials = []) {
+      const title = control?.title || "当前测试点";
+      const source = materialSummary(materials);
+      const generatedAt = formatDateTime(new Date().toISOString());
+
+      if (node.generationKind === "design") {
+        return `Design 草稿\n测试点：${title}\n依据制度：${source}\n\n系统根据上传制度识别控制目标、关键控制活动、控制频率、责任人与证据要求。请复核制度条款是否完整覆盖该 GITC 控制设计。`;
+      }
+      if (node.generationKind === "implementation") {
+        if (node.id.startsWith("itac-")) {
+          return `Implementation 草稿\n测试点：${title}\n依据会议纪要：${source}\n\n系统根据会议纪要整理控制执行人、控制频率、关键配置或代码对象、执行证据来源和实施结论。请复核访谈内容是否足以支持该 ITAC 已按设计实施。`;
+        }
+        return `Implementation 草稿\n测试点：${title}\n依据会议纪要：${source}\n\n系统根据会议纪要整理控制执行方式、访谈对象、执行频率和系统支持情况。请确认访谈结论是否支持控制已按设计实施。`;
+      }
+      if (node.generationKind === "test_of_one") {
+        return "";
+      }
+      if (node.generationKind === "sampling") {
+        return `抽样样本草稿\n测试点：${title}\n依据样本池：${source}\n\n系统模拟抽样结果：Sample-01、Sample-08、Sample-15、Sample-22、Sample-30。\n生成时间：${generatedAt}\n请复核样本池期间、总体完整性和样本数量。`;
+      }
+      if (node.generationKind === "transcription") {
+        if (node.builderKind === "sample_transcription_table") return "";
+        return `测试抄写草稿\n测试点：${title}\n依据客户返回材料：${source}\n\n系统根据客户返回的样本支持性材料模拟完成抄写，整理每个样本的控制属性、支持证据和初步测试结果。请复核抄写内容与附件是否一致。`;
+      }
+      return `自动生成草稿\n测试点：${title}\n依据材料：${source}\n生成时间：${generatedAt}`;
+    }
+
+    function regenerateGeneratedNode(control, node) {
+      const sourceMaterials = control.materials.filter((item) => item.nodeId === node.dependsOnNodeId);
+      if (!sourceMaterials.length) {
+        showToast("请先上传该节点所需材料。");
+        return false;
+      }
+      setDraft(control, node.id, buildGeneratedText(control, node, sourceMaterials));
+      return true;
+    }
+
     function uploadLabel(node) {
+      if (node.actionLabel) return node.actionLabel;
       if (node.type === "upload_spp") return "上传 SPP";
       if (node.type === "upload_minutes") return "上传纪要";
       return "上传资料";
+    }
+
+    function supportKindKey(control, node) {
+      return `${control.id}:${node.id}`;
+    }
+
+    function supportingMaterialKindForNode(control, node) {
+      if (node.supportKindOptions?.length) {
+        return supportKindSelections[supportKindKey(control, node)]
+          || node.defaultSupportingMaterialKind
+          || node.supportKindOptions[0].value;
+      }
+      return node.defaultSupportingMaterialKind || "";
+    }
+
+    function renderSupportKindOptions(control, node) {
+      if (!node.supportKindOptions?.length) return "";
+      const activeKind = supportingMaterialKindForNode(control, node);
+      return `
+        <div class="upload-kind">
+          ${node.supportKindOptions.map((option) => `
+            <label class="${activeKind === option.value ? "active" : ""}">
+              <input type="radio" name="${control.id}-${node.id}-support-kind" value="${option.value}" ${activeKind === option.value ? "checked" : ""} data-support-kind-node="${node.id}" />
+              <span>${option.label}</span>
+            </label>
+          `).join("")}
+        </div>
+      `;
     }
 
     function escapeHtml(value) {
@@ -2000,8 +2950,86 @@
       renderAll();
     });
 
+    document.getElementById("createControlForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const title = createDraft.title.trim();
+      const owner = createDraft.owner.trim();
+      if (!title) {
+        showToast("请填写测试点名称。");
+        return;
+      }
+      if (!owner) {
+        showToast("请先指派项目组成员。");
+        return;
+      }
+      if (!createDraft.firstDueDate) {
+        showToast("请先选择第一个节点预计完成日期。");
+        return;
+      }
+
+      const nodeDueDates = nodesForType(createDraft.controlType).reduce((result, node) => ({
+        ...result,
+        [node.id]: createDraft.nodeDueDates[node.id] || ""
+      }), {});
+      const nextControl = {
+        id: nextControlId(createDraft.controlType),
+        title,
+        controlType: createDraft.controlType,
+        owner,
+        assigneeEmail: owner,
+        auditPhase: "control-test",
+        taskStatus: "todo",
+        blockers: [],
+        nodeResponses: {},
+        nodeDueDates,
+        materials: [],
+        milestones: {
+          planning: false,
+          review: false
+        },
+        milestoneActors: {
+          planning: "",
+          review: ""
+        },
+        extraTextFields: {},
+        fieldReviews: {},
+        reviewStatus: REVIEW_STATUS.NOT_SUBMITTED,
+        reviewComment: "",
+        updatedAt: new Date().toISOString()
+      };
+      controls.unshift(nextControl);
+      selectedId = nextControl.id;
+      activePhase = "tod";
+      filters = { owner: "", type: "", status: "", actionOnly: false };
+      persist();
+      document.getElementById("createControlModal").classList.add("hidden");
+      renderAll();
+      showToast("测试点已创建。");
+    });
+
     document.addEventListener("change", (event) => {
       const target = event.target;
+      if (target.id === "createType") {
+        createDraft.controlType = target.value === "ITAC" ? "ITAC" : "GITC";
+        createDraft.nodeDueDates = buildNodeDueDates(createDraft.controlType, createDraft.firstDueDate || todayDate());
+        renderCreateDialog();
+        return;
+      }
+      if (target.id === "createFirstDueDate") {
+        createDraft.firstDueDate = target.value;
+        createDraft.nodeDueDates = buildNodeDueDates(createDraft.controlType, target.value);
+        renderCreateDueTable();
+        return;
+      }
+      if (target.id === "createOwner") {
+        createDraft.owner = target.value;
+        return;
+      }
+      if (target.matches("[data-create-node-due]")) {
+        createDraft.nodeDueDates[target.dataset.createNodeDue] = target.value;
+        return;
+      }
+
       if (target.id === "ownerFilter") filters.owner = target.value;
       if (target.id === "typeFilter") filters.type = target.value;
       if (target.id === "statusFilter") filters.status = target.value;
@@ -2015,31 +3043,72 @@
       const control = selectedControl();
       if (!control) return;
 
+      if (target.matches("[data-table-field-label]")) {
+        renderDetail();
+        return;
+      }
+
+      if (target.matches("[data-support-kind-node]")) {
+        const uploadNode = findNode(control, target.dataset.supportKindNode);
+        if (uploadNode) {
+          supportKindSelections[supportKindKey(control, uploadNode)] = target.value;
+        }
+        renderDetail();
+        return;
+      }
+
       if (target.matches("[data-upload-node]")) {
-        const files = [...target.files];
-        files.forEach((file) => {
-          control.materials.unshift({
-            id: `mat_${Math.random().toString(36).slice(2, 9)}`,
-            category: target.dataset.uploadCategory,
-            phaseId: target.dataset.uploadPhase,
-            nodeId: target.dataset.uploadNode,
-            name: file.name,
-            fileType: file.type,
-            size: file.size,
-            uploadedBy: currentUser,
-            uploadedAt: new Date().toISOString(),
-            status: "submitted"
-          });
+        const uploadNode = findNode(control, target.dataset.uploadNode);
+        const selectedFiles = [...target.files];
+        const files = isWordUploadNode(uploadNode)
+          ? selectedFiles.filter(isWordFile)
+          : selectedFiles;
+        if (files.length !== selectedFiles.length) {
+          showToast(`${uploadNode?.label || "该节点"}仅支持 Word 文件（.doc/.docx）。`);
+        }
+        if (!files.length) {
+          target.value = "";
+          return;
+        }
+        const uploadedMaterials = files.map((file) => ({
+          id: `mat_${Math.random().toString(36).slice(2, 9)}`,
+          category: target.dataset.uploadCategory,
+          supportingMaterialKind: supportingMaterialKindForNode(control, uploadNode),
+          phaseId: target.dataset.uploadPhase,
+          nodeId: target.dataset.uploadNode,
+          name: file.name,
+          fileType: file.type,
+          size: file.size,
+          uploadedBy: currentUser,
+          uploadedAt: new Date().toISOString(),
+          status: "submitted"
+        }));
+        uploadedMaterials.forEach((materialItem) => control.materials.unshift(materialItem));
+        generatedTargetsForUploadNode(control, target.dataset.uploadNode).forEach((node) => {
+          if (isTableBuilderNode(node)) {
+            testOfOneBuilderFor(control, node.id);
+          } else {
+            setDraft(control, node.id, buildGeneratedText(control, node, uploadedMaterials));
+          }
         });
         control.updatedAt = new Date().toISOString();
         target.value = "";
         persist();
         renderAll();
-        if (files.length) showToast(`已记录 ${files.length} 个材料。`);
+        if (files.length) showToast(`已记录 ${files.length} 个材料，相关草稿已生成，Save 后计入进度。`);
       }
     });
 
     document.addEventListener("input", (event) => {
+      if (event.target.id === "createTitle") {
+        createDraft.title = event.target.value;
+        return;
+      }
+      if (event.target.id === "createOwner") {
+        createDraft.owner = event.target.value;
+        return;
+      }
+
       const control = selectedControl();
       if (!control) return;
 
@@ -2048,6 +3117,55 @@
         control.updatedAt = new Date().toISOString();
         renderStats();
         renderList();
+        return;
+      }
+
+      if (event.target.matches("[data-draft-response]")) {
+        setDraft(control, event.target.dataset.draftResponse, event.target.value);
+        control.updatedAt = new Date().toISOString();
+        return;
+      }
+
+      if (event.target.matches("[data-table-field-label]")) {
+        const nodeId = event.target.dataset.tableFieldNode;
+        const builder = testOfOneBuilderFor(control, nodeId);
+        const nextBuilder = {
+          ...builder,
+          fields: builder.fields.map((field) => (
+            field.id === event.target.dataset.tableFieldLabel
+              ? { ...field, label: event.target.value }
+              : field
+          ))
+        };
+        applyTestOfOneBuilder(control, nodeId, nextBuilder);
+        const output = document.querySelector(`textarea[data-draft-response="${nodeId}"]`);
+        const node = findNode(control, nodeId);
+        if (output && shouldAutoGenerateTable(node)) output.value = buildTestOfOneTable(nextBuilder, node);
+        return;
+      }
+
+      if (event.target.matches("[data-test-one-cell]")) {
+        const nodeId = event.target.dataset.testOneCell;
+        const builder = testOfOneBuilderFor(control, nodeId);
+        const rows = builder.rows.map((row) => (
+          row.id === event.target.dataset.testOneRow
+            ? {
+                ...row,
+                values: {
+                  ...row.values,
+                  [event.target.dataset.testOneFieldId]: event.target.value
+                }
+              }
+            : row
+        ));
+        const nextBuilder = {
+          ...builder,
+          rows
+        };
+        applyTestOfOneBuilder(control, nodeId, nextBuilder);
+        const output = document.querySelector(`textarea[data-draft-response="${nodeId}"]`);
+        const node = findNode(control, nodeId);
+        if (output && shouldAutoGenerateTable(node)) output.value = buildTestOfOneTable(nextBuilder, node);
         return;
       }
 
@@ -2085,6 +3203,20 @@
     });
 
     document.addEventListener("click", (event) => {
+      if (event.target.id === "openCreateControl") {
+        resetCreateDraft();
+        renderCreateDialog();
+        document.getElementById("createControlModal").classList.remove("hidden");
+        return;
+      }
+      if (
+        event.target.id === "closeCreateControl"
+        || event.target.id === "cancelCreateControl"
+      ) {
+        document.getElementById("createControlModal").classList.add("hidden");
+        return;
+      }
+
       const openReviewButton = event.target.closest("[data-open-review]");
       if (openReviewButton) {
         const fieldKey = openReviewButton.dataset.openReview;
@@ -2102,6 +3234,121 @@
         openReviewKey = "";
         openReplyKey = "";
         renderDetail();
+        return;
+      }
+
+      const generateTableButton = event.target.closest("[data-generate-test-one-table]");
+      if (generateTableButton) {
+        const control = selectedControl();
+        if (!control) return;
+        generateTableDraft(control, generateTableButton.dataset.generateTestOneTable);
+        renderDetail();
+        return;
+      }
+
+      const addTableFieldButton = event.target.closest("[data-add-table-field]");
+      if (addTableFieldButton) {
+        const control = selectedControl();
+        if (!control) return;
+        const nodeId = addTableFieldButton.dataset.addTableField;
+        const builder = testOfOneBuilderFor(control, nodeId);
+        applyTestOfOneBuilder(control, nodeId, {
+          ...builder,
+          fields: [...builder.fields, createTableField()]
+        });
+        renderDetail();
+        return;
+      }
+
+      const removeTableFieldButton = event.target.closest("[data-remove-table-field]");
+      if (removeTableFieldButton) {
+        const control = selectedControl();
+        if (!control) return;
+        const nodeId = removeTableFieldButton.dataset.tableFieldNode;
+        const fieldId = removeTableFieldButton.dataset.removeTableField;
+        const builder = testOfOneBuilderFor(control, nodeId);
+        const fields = builder.fields.filter((field) => field.id !== fieldId);
+        const rows = builder.rows.map((row) => {
+          const nextValues = { ...(row.values || {}) };
+          delete nextValues[fieldId];
+          return {
+            ...row,
+            values: nextValues
+          };
+        });
+        applyTestOfOneBuilder(control, nodeId, {
+          ...builder,
+          fields: fields.length ? fields : [createTableField()],
+          rows
+        });
+        renderDetail();
+        return;
+      }
+
+      const addTestOneRowButton = event.target.closest("[data-add-test-one-row]");
+      if (addTestOneRowButton) {
+        const control = selectedControl();
+        if (!control) return;
+        const nodeId = addTestOneRowButton.dataset.addTestOneRow;
+        const builder = testOfOneBuilderFor(control, nodeId);
+        applyTestOfOneBuilder(control, nodeId, {
+          ...builder,
+          rows: [...builder.rows, createTestOfOneRow()]
+        });
+        renderDetail();
+        return;
+      }
+
+      const removeTestOneRowButton = event.target.closest("[data-remove-test-one-row]");
+      if (removeTestOneRowButton) {
+        const control = selectedControl();
+        if (!control) return;
+        const nodeId = removeTestOneRowButton.dataset.testOneNode;
+        const builder = testOfOneBuilderFor(control, nodeId);
+        const rows = builder.rows.filter((row) => row.id !== removeTestOneRowButton.dataset.removeTestOneRow);
+        applyTestOfOneBuilder(control, nodeId, {
+          ...builder,
+          rows: rows.length ? rows : [createTestOfOneRow()]
+        });
+        renderDetail();
+        return;
+      }
+
+      const regenerateButton = event.target.closest("[data-regenerate-node]");
+      if (regenerateButton) {
+        const control = selectedControl();
+        const node = control ? findNode(control, regenerateButton.dataset.regenerateNode) : null;
+        if (control && node && regenerateGeneratedNode(control, node)) {
+          control.updatedAt = new Date().toISOString();
+          renderAll();
+          showToast("已重新生成草稿，Save 后计入进度。");
+        }
+        return;
+      }
+
+      const sendButton = event.target.closest("[data-send-node]");
+      if (sendButton) {
+        const control = selectedControl();
+        if (!control) return;
+        const nodeId = sendButton.dataset.sendNode;
+        const current = control.nodeResponses?.[nodeId];
+        const nextSent = !current?.sent;
+        control.nodeResponses = control.nodeResponses || {};
+        control.nodeResponses[nodeId] = nextSent
+          ? {
+              sent: true,
+              sentBy: userInitials(currentUser),
+              sentAt: new Date().toISOString()
+            }
+          : {
+              sent: false,
+              sentBy: "",
+              sentAt: ""
+            };
+        control.updatedAt = new Date().toISOString();
+        persist();
+        renderAll();
+        showToast(nextSent ? "样本已标记为发送。" : "样本发送标记已取消。");
         return;
       }
 
@@ -2196,34 +3443,10 @@
         openTextMenuKey = "";
         openReviewKey = "";
         openReplyKey = "";
+        draftResponses = {};
+        testOfOneBuilders = {};
+        supportKindSelections = {};
         renderAll();
-        return;
-      }
-
-      const milestoneButton = event.target.closest("[data-milestone]");
-      if (milestoneButton) {
-        const control = selectedControl();
-        const milestone = milestoneButton.dataset.milestone;
-        control.milestones = {
-          planning: Boolean(control.milestones?.planning),
-          review: Boolean(control.milestones?.review)
-        };
-        control.milestoneActors = {
-          planning: control.milestoneActors?.planning || "",
-          review: control.milestoneActors?.review || ""
-        };
-        const nextValue = !control.milestones[milestone];
-        control.milestones[milestone] = nextValue;
-        control.milestoneActors[milestone] = nextValue ? userInitials(currentUser) : "";
-        if (milestone === "review") {
-          control.reviewStatus = nextValue
-            ? REVIEW_STATUS.SIGNED_OFF
-            : REVIEW_STATUS.NOT_SUBMITTED;
-        }
-        control.updatedAt = new Date().toISOString();
-        persist();
-        renderAll();
-        showToast(`${milestone === "planning" ? "planning" : "review"} 已${nextValue ? "确认" : "取消"}。`);
         return;
       }
 
@@ -2250,6 +3473,12 @@
 
       if (event.target.id === "saveButton") {
         const control = selectedControl();
+        const drafts = draftResponses[control.id] || {};
+        control.nodeResponses = {
+          ...control.nodeResponses,
+          ...drafts
+        };
+        delete draftResponses[control.id];
         control.updatedAt = new Date().toISOString();
         persist();
         renderAll();
@@ -2262,6 +3491,9 @@
         if (!controls.some((item) => item.id === selectedId)) {
           selectedId = controls[0]?.id || "";
         }
+        draftResponses = {};
+        testOfOneBuilders = {};
+        supportKindSelections = {};
         openTextMenuKey = "";
         openReviewKey = "";
         openReplyKey = "";

@@ -26,9 +26,6 @@ export function Sidebar({
         <div>
           <h1>DeepSleep</h1>
           <p>{currentProject ? (currentProject.clientName || currentProject.name) : "Engagement Platform"}</p>
-          {currentProject?.clientName ? (
-            <p className="sidebar-subtitle">{currentProject.name}</p>
-          ) : null}
         </div>
       </section>
 

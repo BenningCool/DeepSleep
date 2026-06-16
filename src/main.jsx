@@ -173,6 +173,37 @@ function App() {
     setActiveView("workspace");
   }
 
+  function handleCreateWorkspaceControl(payload) {
+    const controlType = String(payload.controlType || "").toUpperCase();
+    const createdTask = {
+      id: nextTaskId(tasks),
+      title: payload.title,
+      description: `${controlType} 测试点，由工作台新建。`,
+      priority: "P1",
+      platform: "PC 端",
+      product: currentProject?.name || currentProject?.clientName || "DeepSleep",
+      owner: payload.owner,
+      due: payload.firstDueDate,
+      status: "todo",
+      comments: [],
+      projectId: currentProjectId,
+      auditPhase: "control-test",
+      auditDomain: controlType.toLowerCase(),
+      scopeGenerated: false,
+      scopeMeta: {
+        auditDomain: controlType.toLowerCase(),
+        source: "workspace"
+      },
+      contributorGroup: resolveTaskContributorGroup(
+        { owner: payload.owner },
+        currentProject?.specialistTeams
+      )
+    };
+
+    setTasks((current) => [createdTask, ...current]);
+    return createdTask;
+  }
+
   function goToBoard(controlId = "") {
     setFocusControlId(controlId);
     setActiveView("board");
@@ -400,6 +431,7 @@ function App() {
           project={currentProject}
           tasks={projectTasks}
           focusControlId={focusControlId}
+          onCreateControlTask={handleCreateWorkspaceControl}
           onToast={setToast}
         />
       );
