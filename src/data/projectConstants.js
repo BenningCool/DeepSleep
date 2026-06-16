@@ -1,6 +1,6 @@
 export const TEAMS = [
-  { id: "ita", label: "ITA", hint: "IT Audit" },
-  { id: "audit", label: "Audit", hint: "Financial Statement Audit" }
+  { id: "ita", label: "ITA team", hint: "IT Audit" },
+  { id: "audit", label: "Audit team", hint: "Financial Statement Audit" }
 ];
 
 export const ENGAGEMENT_TYPES = [

@@ -6,10 +6,10 @@ const AUDIT_COORDINATION_PHASES = new Set([
 ]);
 
 export const CONTRIBUTOR_GROUP_LABELS = {
-  audit: "Audit 主责",
-  ita: "ITA 组",
-  tax: "Tax 组",
-  frm: "FRM 组"
+  audit: "Audit team",
+  ita: "ITA team",
+  tax: "Tax team",
+  frm: "FRM team"
 };
 
 export function labelOfContributorGroup(id) {

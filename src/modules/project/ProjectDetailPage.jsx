@@ -220,7 +220,9 @@ export function ProjectDetailPage({
             <div className="panel-toolbar">
               <div>
                 <h3>Specialist 团队</h3>
-                <p className="panel-note">Audit 跨组协作 · 共 {specialistTeams.length} 个专家组（可在成员管理中增删改）</p>
+                <p className="panel-note">
+                  Audit team 跨组协作 · 已启用 {specialistTeams.map((t) => labelOfSpecialistTeam(t.team)).join("、")}（Lead 受邀后在成员管理补充 Specialist team staff）
+                </p>
               </div>
               <button className="button" type="button" onClick={onOpenMembers}>
                 管理 Specialist

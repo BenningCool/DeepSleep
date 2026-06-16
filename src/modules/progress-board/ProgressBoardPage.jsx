@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CONTRIBUTOR_FILTER_OPTIONS,
+  DRAWER_PREREQUISITE_LABELS,
   KPI_LABELS,
   labelOfProgressStatus
 } from "../../data/progressLabels";
@@ -17,7 +18,7 @@ import {
   getControlProgressDetail,
   getControlProgressSnapshot
 } from "../../services/workspaceProgressService";
-import { MiniDependencyGraph } from "./MiniDependencyGraph";
+import { ProgressAttentionPanel } from "./ProgressAttentionPanel";
 
 function KpiCard({ label, value }) {
   return (
@@ -40,6 +41,7 @@ export function ProgressBoardPage({
   focusControlId = ""
 }) {
   const [groupFilter, setGroupFilter] = useState("");
+  const [controlTypeTab, setControlTypeTab] = useState("GITC");
   const [selectedId, setSelectedId] = useState(focusControlId);
   const [refreshToken, setRefreshToken] = useState(0);
 
@@ -73,11 +75,6 @@ export function ProgressBoardPage({
     [filteredControls]
   );
 
-  const blockedControls = useMemo(
-    () => filteredControls.filter((control) => control.blockers?.length),
-    [filteredControls]
-  );
-
   const selectedControl = useMemo(
     () => filteredControls.find((control) => control.id === selectedId) || null,
     [filteredControls, selectedId]
@@ -95,6 +92,97 @@ export function ProgressBoardPage({
       title: taskMap[id]?.title || id
     }));
   }, [selectedControl, taskMap]);
+
+  const gitcControls = useMemo(
+    () => filteredControls.filter((control) => control.controlType === "GITC"),
+    [filteredControls]
+  );
+
+  const itacControls = useMemo(
+    () => filteredControls.filter((control) => control.controlType === "ITAC"),
+    [filteredControls]
+  );
+
+  const otherControls = useMemo(
+    () => filteredControls.filter(
+      (control) => control.controlType !== "GITC" && control.controlType !== "ITAC"
+    ),
+    [filteredControls]
+  );
+
+  const controlTypeTabs = useMemo(() => {
+    const tabs = [
+      { id: "GITC", label: "GITC", count: gitcControls.length },
+      { id: "ITAC", label: "ITAC", count: itacControls.length }
+    ];
+    if (otherControls.length) {
+      tabs.push({ id: "OTHER", label: "其他", count: otherControls.length });
+    }
+    return tabs;
+  }, [gitcControls.length, itacControls.length, otherControls.length]);
+
+  const activeTypeControls = useMemo(() => {
+    if (controlTypeTab === "ITAC") return itacControls;
+    if (controlTypeTab === "OTHER") return otherControls;
+    return gitcControls;
+  }, [controlTypeTab, gitcControls, itacControls, otherControls]);
+
+  useEffect(() => {
+    if (controlTypeTab === "OTHER" && !otherControls.length) {
+      setControlTypeTab("GITC");
+    }
+  }, [controlTypeTab, otherControls.length]);
+
+  function renderControlTable(controls, emptyText) {
+    if (!controls.length) {
+      return (
+        <div className="empty-state compact">
+          <p>{emptyText}</p>
+        </div>
+      );
+    }
+
+    return (
+      <table className="progress-table">
+        <thead>
+          <tr>
+            <th>控制点</th>
+            <th>负责人</th>
+            <th>负责组</th>
+            <th>状态</th>
+            <th>进度</th>
+            <th>阶段</th>
+          </tr>
+        </thead>
+        <tbody>
+          {controls.map((control) => (
+            <tr
+              key={control.id}
+              className={selectedId === control.id ? "active" : ""}
+              onClick={() => setSelectedId(control.id)}
+            >
+              <td>
+                <span className={`control-type inline ${control.controlType.toLowerCase()}`}>
+                  {control.controlType}
+                </span>
+                <span className="progress-control-title">{control.title}</span>
+                <small>{control.id}</small>
+              </td>
+              <td>{control.owner}</td>
+              <td>{labelOfContributorGroup(control.contributorGroup)}</td>
+              <td>
+                <span className={`progress-pill ${statusClass(control.progressStatus)}`}>
+                  {labelOfProgressStatus(control.progressStatus)}
+                </span>
+              </td>
+              <td>{control.progressPercent}%</td>
+              <td>{labelOfAuditPhase(control.auditPhase)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
 
   function refresh() {
     setRefreshToken((value) => value + 1);
@@ -151,76 +239,38 @@ export function ProgressBoardPage({
         </section>
       ) : null}
 
-      {blockedControls.length ? (
-        <section className="progress-blocked-panel">
-          <h3>逾期/阻塞关注</h3>
-          <ul className="progress-blocked-list">
-            {blockedControls.map((control) => (
-              <li key={control.id}>
-                <button type="button" className="blocked-item" onClick={() => setSelectedId(control.id)}>
-                  <strong>{control.title}（{control.id}）</strong>
-                  <span>
-                    被阻塞：等待 {control.blockers.map((id) => (
-                      `「${taskMap[id]?.title || id}」（${id}）`
-                    )).join("、")} 完成
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      {blockedControls.length ? (
-        <section className="progress-graph-panel">
-          <h3>阻塞链预览</h3>
-          <MiniDependencyGraph
-            controls={blockedControls}
-            taskMap={taskMap}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-          />
-        </section>
-      ) : null}
+      <ProgressAttentionPanel
+        controls={filteredControls}
+        taskMap={taskMap}
+        projectStartDate={project?.startDate || ""}
+        selectedId={selectedId}
+        onSelect={setSelectedId}
+      />
 
       <div className="progress-main-grid">
         <section className="progress-table-panel">
-          <h3>控制点列表</h3>
-          {filteredControls.length ? (
-            <table className="progress-table">
-              <thead>
-                <tr>
-                  <th>类型</th>
-                  <th>控制点</th>
-                  <th>负责人</th>
-                  <th>负责组</th>
-                  <th>状态</th>
-                  <th>进度</th>
-                  <th>阶段</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredControls.map((control) => (
-                  <tr
-                    key={control.id}
-                    className={selectedId === control.id ? "active" : ""}
-                    onClick={() => setSelectedId(control.id)}
+          <div className="progress-table-head">
+            <h3>控制点列表</h3>
+            {filteredControls.length ? (
+              <div className="progress-type-tabs">
+                {controlTypeTabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    className={`filter-chip ${controlTypeTab === tab.id ? "active" : ""}`}
+                    onClick={() => setControlTypeTab(tab.id)}
                   >
-                    <td>{control.controlType}</td>
-                    <td>{control.title}</td>
-                    <td>{control.owner}</td>
-                    <td>{labelOfContributorGroup(control.contributorGroup)}</td>
-                    <td>
-                      <span className={`progress-pill ${statusClass(control.progressStatus)}`}>
-                        {labelOfProgressStatus(control.progressStatus)}
-                      </span>
-                    </td>
-                    <td>{control.progressPercent}%</td>
-                    <td>{labelOfAuditPhase(control.auditPhase)}</td>
-                  </tr>
+                    {tab.label} · {tab.count}
+                  </button>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            ) : null}
+          </div>
+          {filteredControls.length ? (
+            renderControlTable(
+              activeTypeControls,
+              `当前筛选下暂无 ${controlTypeTab === "OTHER" ? "其他" : controlTypeTab} 控制点。`
+            )
           ) : (
             <div className="empty-state compact">
               <p>暂无控制点，请先生成 Scope。</p>
@@ -258,8 +308,23 @@ export function ProgressBoardPage({
               </div>
 
               {blockerTitles.length ? (
-                <div className="workspace-blocker">
-                  被阻塞：{blockerTitles.map((item) => `「${item.title}」（${item.id}）`).join("、")}
+                <div className="progress-prerequisite-block">
+                  <h4>{DRAWER_PREREQUISITE_LABELS.title}</h4>
+                  <ul className="progress-prerequisite-list">
+                    {blockerTitles.map((item) => (
+                      <li key={item.id}>
+                        <strong>{item.title}</strong>
+                        <span>{item.id} · 看板 {columnTitle(taskMap[item.id]?.status)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    className="button subtle"
+                    type="button"
+                    onClick={() => onGoBoard(blockerTitles[0].id)}
+                  >
+                    {DRAWER_PREREQUISITE_LABELS.goBoard}
+                  </button>
                 </div>
               ) : null}
 

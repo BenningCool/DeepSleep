@@ -21,6 +21,11 @@ export function labelOfSpecialistTeam(id) {
   return SPECIALIST_TEAMS.find((item) => item.id === id)?.label || id;
 }
 
+export function labelOfSpecialistTeamStaff(id) {
+  const shortLabels = { ita: "ITA", tax: "Tax", frm: "FRM" };
+  return shortLabels[id] || String(labelOfSpecialistTeam(id)).replace(/ team$/i, "");
+}
+
 export function labelOfSpecialistLeadRole(id) {
   return SPECIALIST_LEAD_ROLES.find((item) => item.id === id)?.label || id;
 }

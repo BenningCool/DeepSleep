@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { labelOfRole } from "../../data/projectConstants";
 import { notifyMockInvites } from "./inviteService";
 import {
@@ -23,6 +23,7 @@ import {
 import {
   labelOfSpecialistLeadRole,
   labelOfSpecialistTeam,
+  labelOfSpecialistTeamStaff,
   SPECIALIST_LEAD_ROLES,
   SPECIALIST_TEAMS
 } from "./specialistConstants";
@@ -55,11 +56,22 @@ function InviteCard({ title, email, invite, onCopy }) {
 export function ProjectMembersPage({
   projectId,
   refreshToken = 0,
+  focusSpecialistTeamId = "",
   onBack,
   onToast,
   onProjectChange
 }) {
   const project = useMemo(() => getProject(projectId), [projectId, refreshToken]);
+
+  const specialistTeamsForStaff = useMemo(() => {
+    const teams = project?.specialistTeams || [];
+    if (focusSpecialistTeamId) {
+      return teams.filter((team) => team.id === focusSpecialistTeamId);
+    }
+    return teams;
+  }, [project?.specialistTeams, focusSpecialistTeamId]);
+
+  const showTeamStaffLabel = specialistTeamsForStaff.length > 1;
 
   const [memberForm, setMemberForm] = useState({
     partnerEmail: "",
@@ -71,6 +83,7 @@ export function ProjectMembersPage({
   const [specialistForm, setSpecialistForm] = useState(specialistsToForm([]));
   const [specialistStaffForms, setSpecialistStaffForms] = useState({});
   const [saving, setSaving] = useState(false);
+  const specialistStaffRefs = useRef({});
 
   useEffect(() => {
     if (!project) return;
@@ -86,6 +99,13 @@ export function ProjectMembersPage({
     });
     setSpecialistStaffForms(staffForms);
   }, [project]);
+
+  useEffect(() => {
+    if (!focusSpecialistTeamId) return;
+    const node = specialistStaffRefs.current[focusSpecialistTeamId];
+    if (!node) return;
+    node.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [focusSpecialistTeamId, project]);
 
   if (!project) {
     return (
@@ -243,7 +263,7 @@ export function ProjectMembersPage({
     try {
       const result = updateSpecialistStaff(projectId, teamId, staffEmails);
       if (!result) {
-        onToast("Specialist Staff 更新失败。");
+        onToast("Specialist team staff 更新失败。");
         return;
       }
 
@@ -255,6 +275,10 @@ export function ProjectMembersPage({
   }
 
   const activeCount = project.members.filter((member) => member.status === "active").length;
+
+  const focusedTeam = (project.specialistTeams || []).find(
+    (team) => team.id === focusSpecialistTeamId
+  );
 
   return (
     <section className="page-shell">
@@ -269,120 +293,110 @@ export function ProjectMembersPage({
         </div>
       </header>
 
-      <div className="members-layout">
-        <section className="detail-panel members-editor">
-          <h3>编辑核心成员</h3>
-          <p className="panel-note">
-            Partner 不可与 Manager / In-charge 重复。Manager 与 In-charge 可相同。
+      {focusedTeam ? (
+        <div className="members-lead-callout">
+          <strong>Specialist Lead 入职</strong>
+          <p>
+            您以 {labelOfSpecialistTeam(focusedTeam.team)} · {labelOfSpecialistLeadRole(focusedTeam.leadRole)} 身份加入。
+            请在下方 <strong>Specialist team staff</strong> 区域补充本组 Staff。
           </p>
+        </div>
+      ) : null}
 
-          <div className="form-grid two-col compact">
-            <label className="field">
-              <span className="label">Partner *</span>
-              <input
-                type="email"
-                value={memberForm.partnerEmail}
-                onChange={(e) => updateMemberField("partnerEmail", e.target.value)}
-                placeholder="partner@kpmg.com"
-              />
-            </label>
-            <label className="field">
-              <span className="label">Manager *</span>
-              <input
-                type="email"
-                value={memberForm.managerEmail}
-                onChange={(e) => updateMemberField("managerEmail", e.target.value)}
-                placeholder="manager@kpmg.com"
-              />
-            </label>
-            <label className="field">
-              <span className="label">In-charge *</span>
-              <input
-                type="email"
-                value={memberForm.inChargeEmail}
-                onChange={(e) => updateMemberField("inChargeEmail", e.target.value)}
-                placeholder="incharge@kpmg.com"
-              />
-            </label>
-            <label className="field">
-              <span className="label">Senior Manager</span>
-              <input
-                type="email"
-                value={memberForm.smEmail}
-                onChange={(e) => updateMemberField("smEmail", e.target.value)}
-                placeholder="可选"
-              />
-            </label>
-          </div>
+      <div className="members-page-grid">
+        <div className="members-edit-column">
+          <section className="detail-panel members-editor">
+            <h3>编辑核心成员</h3>
+            <p className="panel-note">
+              Partner 不可与 Manager / In-charge 重复。Manager 与 In-charge 可相同。
+            </p>
 
-          <div className="staff-block">
-            <div className="staff-head">
-              <span className="label">Staff</span>
-              <button className="button subtle" type="button" onClick={addStaffRow}>
-                + 添加 Staff
-              </button>
-            </div>
-            {memberForm.staffEmails.map((email, index) => (
-              <div className="staff-row" key={`staff-edit-${index}`}>
+            <div className="form-grid two-col compact">
+              <label className="field">
+                <span className="label">Partner *</span>
                 <input
                   type="email"
-                  value={email}
-                  onChange={(e) => updateStaff(index, e.target.value)}
-                  placeholder="staff@kpmg.com"
+                  value={memberForm.partnerEmail}
+                  onChange={(e) => updateMemberField("partnerEmail", e.target.value)}
+                  placeholder="partner@kpmg.com"
                 />
-                {memberForm.staffEmails.length > 1 ? (
-                  <button
-                    className="button icon"
-                    type="button"
-                    aria-label="删除"
-                    onClick={() => removeStaffRow(index)}
-                  >
-                    ×
-                  </button>
-                ) : null}
+              </label>
+              <label className="field">
+                <span className="label">Manager *</span>
+                <input
+                  type="email"
+                  value={memberForm.managerEmail}
+                  onChange={(e) => updateMemberField("managerEmail", e.target.value)}
+                  placeholder="manager@kpmg.com"
+                />
+              </label>
+              <label className="field">
+                <span className="label">In-charge *</span>
+                <input
+                  type="email"
+                  value={memberForm.inChargeEmail}
+                  onChange={(e) => updateMemberField("inChargeEmail", e.target.value)}
+                  placeholder="incharge@kpmg.com"
+                />
+              </label>
+              <label className="field">
+                <span className="label">Senior Manager</span>
+                <input
+                  type="email"
+                  value={memberForm.smEmail}
+                  onChange={(e) => updateMemberField("smEmail", e.target.value)}
+                  placeholder="可选"
+                />
+              </label>
+            </div>
+
+            <div className="staff-block">
+              <div className="staff-head">
+                <span className="label">Staff</span>
+                <button className="button subtle" type="button" onClick={addStaffRow}>
+                  + 添加 Staff
+                </button>
               </div>
-            ))}
-          </div>
-
-          <div className="panel-footer-actions">
-            <button
-              className="button primary"
-              type="button"
-              disabled={saving}
-              onClick={handleSaveMembers}
-            >
-              {saving ? "保存中..." : "保存核心成员"}
-            </button>
-          </div>
-        </section>
-
-        <section className="detail-panel">
-          <h3>核心成员邀请</h3>
-          <p className="panel-note">演示模式：复制中英双语邀请链接分享给成员。</p>
-          <div className="invite-grid single-col">
-            {project.members
-              .filter((member) => member.status === "active")
-              .map((member) => (
-                <InviteCard
-                  key={member.id}
-                  title={labelOfRole(member.role)}
-                  email={member.email}
-                  invite={formatMemberInviteMessage(project, member)}
-                  onCopy={handleCopy}
-                />
+              {memberForm.staffEmails.map((email, index) => (
+                <div className="staff-row" key={`staff-edit-${index}`}>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => updateStaff(index, e.target.value)}
+                    placeholder="staff@kpmg.com"
+                  />
+                  {memberForm.staffEmails.length > 1 ? (
+                    <button
+                      className="button icon"
+                      type="button"
+                      aria-label="删除"
+                      onClick={() => removeStaffRow(index)}
+                    >
+                      ×
+                    </button>
+                  ) : null}
+                </div>
               ))}
-          </div>
-        </section>
-      </div>
+            </div>
 
-      {isAudit ? (
-        <>
-          <div className="members-layout">
+            <div className="panel-footer-actions">
+              <button
+                className="button primary"
+                type="button"
+                disabled={saving}
+                onClick={handleSaveMembers}
+              >
+                {saving ? "保存中..." : "保存核心成员"}
+              </button>
+            </div>
+          </section>
+
+          {isAudit ? (
             <section className="detail-panel members-editor">
               <h3>Specialist 团队</h3>
               <p className="panel-note">
-                创建后可随时增删改：勾选/取消 ITA、Tax、FRM 专家组，修改 Lead 角色与邮箱后点击保存。
-                更换 Lead 邮箱将清空该组 Staff 并生成新邀请链接。
+                仅 Audit team 项目可配置。勾选 ITA / Tax / FRM 专家组并指定 Lead；
+                Lead 接受邀请后在本页补充 Specialist team staff。
               </p>
 
               <div className="specialist-grid compact">
@@ -442,96 +456,148 @@ export function ProjectMembersPage({
                 </button>
               </div>
             </section>
+          ) : null}
 
-            <section className="detail-panel">
-              <h3>Specialist Lead 邀请</h3>
-              <div className="invite-grid single-col">
-                {(project.specialistTeams || []).map((team) => (
+          {isAudit && specialistTeamsForStaff.length ? (
+            <section
+              className="detail-panel members-editor specialist-staff-panel"
+              id="specialist-team-staff"
+            >
+              <h3>Specialist team staff</h3>
+              <p className="panel-note">
+                {focusedTeam
+                  ? `请为 ${labelOfSpecialistTeamStaff(focusedTeam.team)} 补充 Staff；保存后将生成邀请链接。`
+                  : "Audit team 项目已勾选的专家组（ITA / Tax / FRM）均可在此补充 Staff。各组 Lead 接受邀请后进入本页填写；项目管理员也可代填。"}
+              </p>
+
+              {specialistTeamsForStaff.map((team) => (
+                <div
+                  key={`staff-${team.id}`}
+                  id={`specialist-staff-${team.id}`}
+                  ref={(node) => {
+                    specialistStaffRefs.current[team.id] = node;
+                  }}
+                  className={`specialist-staff-group ${
+                    focusSpecialistTeamId === team.id ? "focused-specialist" : ""
+                  }`}
+                >
+                  <div className="staff-block">
+                    <div className="staff-head">
+                      <span className="label">
+                        {showTeamStaffLabel
+                          ? `${labelOfSpecialistTeamStaff(team.team)} Staff`
+                          : "Staff"}
+                      </span>
+                      <button
+                        className="button subtle"
+                        type="button"
+                        onClick={() => addSpecialistStaffRow(team.id)}
+                      >
+                        + 添加 Staff
+                      </button>
+                    </div>
+                    {(specialistStaffForms[team.id] || [""]).map((email, index) => (
+                      <div className="staff-row" key={`${team.id}-staff-${index}`}>
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => updateSpecialistStaffRow(team.id, index, e.target.value)}
+                          placeholder="staff@firm.com"
+                        />
+                        {(specialistStaffForms[team.id] || [""]).length > 1 ? (
+                          <button
+                            className="button icon"
+                            type="button"
+                            aria-label="删除"
+                            onClick={() => removeSpecialistStaffRow(team.id, index)}
+                          >
+                            ×
+                          </button>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="panel-footer-actions">
+                    <button
+                      className="button primary"
+                      type="button"
+                      disabled={saving}
+                      onClick={() => handleSaveSpecialistStaff(team.id)}
+                    >
+                      {saving ? "保存中..." : `保存 ${labelOfSpecialistTeamStaff(team.team)} Staff`}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </section>
+          ) : null}
+        </div>
+
+        <div className="members-invite-column">
+          <section className="detail-panel">
+            <h3>核心成员邀请</h3>
+            <p className="panel-note">演示模式：复制中英双语邀请链接分享给成员。</p>
+            <div className="invite-grid single-col">
+              {project.members
+                .filter((member) => member.status === "active")
+                .map((member) => (
                   <InviteCard
-                    key={team.id}
-                    title={`${labelOfSpecialistTeam(team.team)} · ${labelOfSpecialistLeadRole(team.leadRole)}`}
-                    email={team.leadEmail}
-                    invite={formatSpecialistLeadInviteMessage(project, team)}
+                    key={member.id}
+                    title={labelOfRole(member.role)}
+                    email={member.email}
+                    invite={formatMemberInviteMessage(project, member)}
                     onCopy={handleCopy}
                   />
                 ))}
-              </div>
-            </section>
-          </div>
+            </div>
+          </section>
 
-          {(project.specialistTeams || []).map((team) => (
-            <div className="members-layout" key={`staff-${team.id}`}>
-              <section className="detail-panel members-editor">
-                <h3>{labelOfSpecialistTeam(team.team)} Staff</h3>
-                <p className="panel-note">
-                  管理员可代填，或由 Lead 通过邀请链接自行补充。
-                </p>
-
-                <div className="staff-block">
-                  <div className="staff-head">
-                    <span className="label">Staff</span>
-                    <button
-                      className="button subtle"
-                      type="button"
-                      onClick={() => addSpecialistStaffRow(team.id)}
-                    >
-                      + 添加 Staff
-                    </button>
-                  </div>
-                  {(specialistStaffForms[team.id] || [""]).map((email, index) => (
-                    <div className="staff-row" key={`${team.id}-staff-${index}`}>
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => updateSpecialistStaffRow(team.id, index, e.target.value)}
-                        placeholder="staff@firm.com"
-                      />
-                      {(specialistStaffForms[team.id] || [""]).length > 1 ? (
-                        <button
-                          className="button icon"
-                          type="button"
-                          aria-label="删除"
-                          onClick={() => removeSpecialistStaffRow(team.id, index)}
-                        >
-                          ×
-                        </button>
-                      ) : null}
-                    </div>
+          {isAudit ? (
+            <>
+              <section className="detail-panel">
+                <h3>Specialist Lead 邀请</h3>
+                <div className="invite-grid single-col">
+                  {(project.specialistTeams || []).map((team) => (
+                    <InviteCard
+                      key={team.id}
+                      title={`${labelOfSpecialistTeam(team.team)} · ${labelOfSpecialistLeadRole(team.leadRole)}`}
+                      email={team.leadEmail}
+                      invite={formatSpecialistLeadInviteMessage(project, team)}
+                      onCopy={handleCopy}
+                    />
                   ))}
                 </div>
-
-                <div className="panel-footer-actions">
-                  <button
-                    className="button primary"
-                    type="button"
-                    disabled={saving}
-                    onClick={() => handleSaveSpecialistStaff(team.id)}
-                  >
-                    {saving ? "保存中..." : `保存 ${labelOfSpecialistTeam(team.team)} Staff`}
-                  </button>
-                </div>
               </section>
 
-              <section className="detail-panel">
-                <h3>{labelOfSpecialistTeam(team.team)} Staff 邀请</h3>
-                <div className="invite-grid single-col">
-                  {(team.staff || [])
-                    .filter((member) => member.status === "active")
-                    .map((member) => (
-                      <InviteCard
-                        key={member.id}
-                        title={`${labelOfSpecialistTeam(team.team)} Staff`}
-                        email={member.email}
-                        invite={formatSpecialistStaffInviteMessage(project, team, member)}
-                        onCopy={handleCopy}
-                      />
-                    ))}
-                </div>
-              </section>
-            </div>
-          ))}
-        </>
-      ) : null}
+              {(project.specialistTeams || []).length ? (
+                <section className="detail-panel">
+                  <h3>Specialist team staff 邀请</h3>
+                  <p className="panel-note">按已勾选专家组分别生成 Staff 邀请链接。</p>
+                  {(project.specialistTeams || []).map((team) => (
+                    <div className="specialist-invite-group" key={`staff-invite-${team.id}`}>
+                      <h4>{labelOfSpecialistTeam(team.team)}</h4>
+                      <div className="invite-grid single-col">
+                        {(team.staff || [])
+                          .filter((member) => member.status === "active")
+                          .map((member) => (
+                            <InviteCard
+                              key={member.id}
+                              title={`${labelOfSpecialistTeam(team.team)} Staff`}
+                              email={member.email}
+                              invite={formatSpecialistStaffInviteMessage(project, team, member)}
+                              onCopy={handleCopy}
+                            />
+                          ))}
+                      </div>
+                    </div>
+                  ))}
+                </section>
+              ) : null}
+            </>
+          ) : null}
+        </div>
+      </div>
     </section>
   );
 }

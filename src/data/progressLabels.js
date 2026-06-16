@@ -17,12 +17,26 @@ export const KPI_LABELS = {
   delay: "逾期/阻塞"
 };
 
+export const ATTENTION_LABELS = {
+  panelTitle: "需关注事项",
+  panelLead: "仅汇总计划逾期与长期未启动的控制点，便于安排跟进优先级。",
+  overdueTitle: "计划逾期",
+  staleTitle: "长期未开始",
+  dueLabel: "计划完成日",
+  overdueDaysPrefix: "已逾期 "
+};
+
+export const DRAWER_PREREQUISITE_LABELS = {
+  title: "前置程序未完成",
+  goBoard: "去看板处理前置"
+};
+
 export const CONTRIBUTOR_FILTER_OPTIONS = [
   { id: "", label: "全部" },
-  { id: "audit", label: "Audit 主责" },
-  { id: "ita", label: "ITA 组" },
-  { id: "tax", label: "Tax 组" },
-  { id: "frm", label: "FRM 组" }
+  { id: "audit", label: "Audit team" },
+  { id: "ita", label: "ITA team" },
+  { id: "tax", label: "Tax team" },
+  { id: "frm", label: "FRM team" }
 ];
 
 export function labelOfProgressStatus(status) {

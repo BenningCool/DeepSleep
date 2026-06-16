@@ -1510,6 +1510,107 @@ button {
   align-items: start;
 }
 
+.members-page-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.members-edit-column,
+.members-invite-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.members-invite-column {
+  position: sticky;
+  top: 16px;
+}
+
+.members-lead-callout {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border: 1px solid #b8d4ff;
+  border-radius: var(--radius);
+  background: #f4f8ff;
+}
+
+.members-lead-callout strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.members-lead-callout p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.members-editor.focused-specialist,
+.specialist-staff-group.focused-specialist {
+  border-color: #0052cc;
+  box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.12);
+}
+
+.specialist-staff-panel h3 {
+  margin-bottom: 8px;
+}
+
+.specialist-staff-group {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.specialist-staff-group:first-of-type {
+  margin-top: 12px;
+  padding-top: 0;
+  border-top: none;
+}
+
+.specialist-staff-group h4 {
+  margin: 0 0 10px;
+  font-size: 14px;
+}
+
+.specialist-invite-group + .specialist-invite-group {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.specialist-invite-group h4 {
+  margin: 0 0 10px;
+  font-size: 14px;
+}
+
+.progress-table-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.progress-table-head h3 {
+  margin: 0;
+}
+
+.progress-type-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.attention-overdue-item.stale {
+  border-color: #d6e4ff;
+  background: #f8fbff;
+}
+
 .members-editor {
   position: sticky;
   top: 16px;
@@ -1935,8 +2036,13 @@ button {
     grid-template-columns: 1fr;
   }
 
-  .members-layout {
+  .members-layout,
+  .members-page-grid {
     grid-template-columns: 1fr;
+  }
+
+  .members-invite-column {
+    position: static;
   }
 
   .members-editor {
@@ -2260,6 +2366,7 @@ button {
 }
 
 .progress-blocked-panel,
+.progress-attention-panel,
 .progress-graph-panel,
 .progress-table-panel,
 .progress-drawer-panel {
@@ -2290,6 +2397,214 @@ button {
 .blocked-item strong {
   display: block;
   margin-bottom: 4px;
+}
+
+.attention-panel-head h3 {
+  margin: 0 0 4px;
+}
+
+.attention-section + .attention-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.attention-section h4 {
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.attention-group-list,
+.attention-overdue-list,
+.progress-prerequisite-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.attention-group {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-left: 4px solid #f5a623;
+  border-radius: var(--radius);
+  background: #fffdf8;
+}
+
+.attention-prereq-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.attention-prereq-main strong {
+  display: block;
+  margin: 6px 0 4px;
+  font-size: 15px;
+}
+
+.attention-prereq-main strong small,
+.attention-dependent-title small,
+.attention-overdue-item small {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.attention-prereq-main p,
+.attention-overdue-item p,
+.attention-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.attention-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fff1d6;
+  color: #8a6116;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.attention-tag.muted {
+  background: #eef2f8;
+  color: #5e6c84;
+}
+
+.attention-impact {
+  margin: 10px 0 8px;
+  font-size: 12px;
+  color: #5e6c84;
+}
+
+.attention-dependent-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.attention-dependent,
+.attention-overdue-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  text-align: left;
+}
+
+.attention-dependent.active,
+.attention-overdue-item.active {
+  border-color: #0052cc;
+  background: #f4f8ff;
+}
+
+.attention-dependent-title {
+  flex: 1;
+  margin: 0 8px;
+  font-size: 13px;
+}
+
+.progress-pill.compact {
+  padding: 2px 8px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.attention-hint {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #ead7b8;
+}
+
+.attention-overdue-item strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.progress-prerequisite-block {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid #ead7b8;
+  border-radius: var(--radius);
+  background: #fffdf8;
+}
+
+.progress-prerequisite-block h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.progress-prerequisite-list li {
+  display: grid;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.progress-prerequisite-list li strong {
+  font-size: 13px;
+}
+
+.progress-prerequisite-list li span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.progress-table tbody tr.active {
+  background: #f4f8ff;
+}
+
+.progress-control-sections {
+  display: grid;
+  gap: 18px;
+}
+
+.progress-control-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.progress-control-group-head h4 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.progress-control-group-head span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.control-type.inline {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 2px 8px;
+  font-size: 11px;
+}
+
+.progress-control-title {
+  display: block;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.progress-table td small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .progress-main-grid {

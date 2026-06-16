@@ -14,7 +14,6 @@ import { resolveTaskContributorGroup } from "./modules/project/contributorGroup"
 import { ProjectDetailPage } from "./modules/project/ProjectDetailPage";
 import { ProjectMembersPage } from "./modules/project/ProjectMembersPage";
 import { ProjectsHomePage } from "./modules/project/ProjectsHomePage";
-import { SpecialistStaffPage } from "./modules/project/SpecialistStaffPage";
 import { WorkspacePage } from "./modules/workspace/WorkspacePage";
 import {
   deleteProject,
@@ -141,8 +140,8 @@ function App() {
 
     if (context.type === "specialist_lead") {
       setSpecialistTeamId(context.specialistTeam.id);
-      setActiveView("specialist-staff");
-      setToast(`欢迎，请补充 ${context.specialistTeam.team.toUpperCase()} 组 Staff。`);
+      setActiveView("members");
+      setToast("欢迎，请在成员管理中补充 Specialist team staff。");
     } else {
       setActiveView("detail");
       setToast("已通过邀请链接打开项目。");
@@ -378,6 +377,7 @@ function App() {
         <ProjectMembersPage
           projectId={currentProjectId}
           refreshToken={detailTick}
+          focusSpecialistTeamId={specialistTeamId}
           onBack={goHome}
           onToast={setToast}
           onProjectChange={() => setDetailTick((value) => value + 1)}
@@ -407,11 +407,11 @@ function App() {
 
     if (activeView === "specialist-staff" && specialistTeamId) {
       return (
-        <SpecialistStaffPage
+        <ProjectMembersPage
           projectId={currentProjectId}
-          specialistTeamId={specialistTeamId}
           refreshToken={detailTick}
-          onDone={() => setActiveView("detail")}
+          focusSpecialistTeamId={specialistTeamId}
+          onBack={goHome}
           onToast={setToast}
           onProjectChange={() => setDetailTick((value) => value + 1)}
         />
