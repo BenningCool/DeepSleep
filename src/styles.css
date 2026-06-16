@@ -2087,6 +2087,40 @@ button {
   font-size: 13px;
 }
 
+.workspace-milestone-section {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.workspace-milestone-section > span {
+  color: var(--subtle);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.workspace-milestone-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.workspace-milestone-button {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+  color: var(--subtle);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.workspace-milestone-button.active {
+  border-color: #72c892;
+  background: var(--green-soft);
+  color: var(--green);
+}
+
 .workspace-review-row {
   display: grid;
   grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
@@ -2173,6 +2207,15 @@ button {
   color: var(--subtle);
   font-size: 12px;
   line-height: 1.5;
+}
+
+.workspace-phase-head strong {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
 }
 
 .workspace-node-list {

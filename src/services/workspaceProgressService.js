@@ -36,12 +36,7 @@ export const NODE_STATUS = {
 export const MATERIAL_CATEGORY = {
   SPP: "spp",
   MEETING_MINUTES: "meeting_minutes",
-  EVIDENCE: "evidence",
-  POLICY: "policy",
-  SUPPORTING_MATERIAL: "supporting_material",
-  REQUIREMENT_LIST: "requirement_list",
-  SAMPLE_POOL: "sample_pool",
-  RETURNED_SAMPLE_SUPPORT: "returned_sample_support"
+  EVIDENCE: "evidence"
 };
 
 const DEFAULT_TEST_CONTENT = {
@@ -56,35 +51,13 @@ const DEFAULT_MILESTONES = {
   review: false
 };
 
-const WORD_FILE_ACCEPT = ".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-
 export const FIELD_REVIEW_STATUS = {
   OPEN: "open",
   REPLIED: "replied",
   ACCEPTED: "accepted"
 };
 
-const RAWTC_FACTORS = [
-  { id: "substantive_not_sufficient", label: "Substantive procedures alone will not be sufficient" },
-  { id: "transaction_changes", label: "交易数量或性质发生变化" },
-  { id: "history_of_errors", label: "相关科目存在历史错报" },
-  { id: "prior_deficiencies", label: "以前年度或相关测试发现缺陷" },
-  { id: "complex_control", label: "控制性质复杂" },
-  { id: "infrequent_operation", label: "控制运行频率较低" },
-  { id: "other_controls_reliance", label: "依赖其他控制的有效性" },
-  { id: "operator_competence", label: "控制执行人或监控人胜任能力存在疑虑" },
-  { id: "key_personnel_change", label: "关键控制人员发生变化" },
-  { id: "significant_judgement", label: "控制运行涉及重大判断" },
-  { id: "process_change", label: "控制或流程运行方式发生变化" },
-  { id: "information_reliability", label: "控制依赖信息的可靠性重要" }
-];
-
-const CONTROL_ATTRIBUTE_ROWS = [
-  { id: "attribute-a", label: "Attribute A" },
-  { id: "attribute-b", label: "Attribute B" }
-];
-
-const DEFAULT_WORKSPACE_PHASES = [
+export const WORKSPACE_PHASES = [
   {
     id: "tod",
     label: "TOD",
@@ -174,195 +147,6 @@ const DEFAULT_WORKSPACE_PHASES = [
     ]
   }
 ];
-
-const GITC_WORKSPACE_PHASES = [
-  {
-    id: "tod",
-    label: "TOD",
-    description: "GITC 设计有效性：上传制度、生成 Design、记录访谈实施情况并完成 Test of One。",
-    nodes: [
-      {
-        id: "gitc-tod-policy",
-        label: "上传制度",
-        type: "upload_policy",
-        required: true,
-        category: MATERIAL_CATEGORY.POLICY,
-        actionLabel: "上传制度",
-        accept: WORD_FILE_ACCEPT,
-        acceptedFileKind: "word",
-        fileHint: "仅支持 Word（.doc/.docx）"
-      },
-      {
-        id: "gitc-tod-design",
-        label: "自动生成 Design",
-        type: "generated_text",
-        required: true,
-        dependsOnNodeId: "gitc-tod-policy",
-        generationKind: "design",
-        placeholder: "上传制度后自动生成 Design 草稿，保存后计入完成度。"
-      },
-      {
-        id: "gitc-tod-minutes",
-        label: "上传会议纪要",
-        type: "upload_minutes",
-        required: true,
-        category: MATERIAL_CATEGORY.MEETING_MINUTES,
-        actionLabel: "上传纪要"
-      },
-      {
-        id: "gitc-tod-implementation",
-        label: "自动生成 Implementation",
-        type: "generated_text",
-        required: true,
-        dependsOnNodeId: "gitc-tod-minutes",
-        generationKind: "implementation",
-        placeholder: "上传会议纪要后自动生成 Implementation 草稿，保存后计入完成度。"
-      },
-      {
-        id: "gitc-tod-supporting-material",
-        label: "上传支持性材料",
-        type: "upload_supporting_material",
-        required: true,
-        category: MATERIAL_CATEGORY.SUPPORTING_MATERIAL,
-        actionLabel: "上传支持性材料"
-      },
-      {
-        id: "gitc-tod-test-of-one",
-        label: "填写 Test of One 样本表",
-        type: "generated_text",
-        required: true,
-        dependsOnNodeId: "gitc-tod-supporting-material",
-        generationKind: "test_of_one",
-        builderKind: "test_of_one_table",
-        placeholder: "手动填写样本字段和样本信息后生成 Test of One 表格，保存后计入完成度。"
-      }
-    ]
-  },
-  {
-    id: "toe",
-    label: "TOE",
-    description: "GITC 运行有效性：上传需求和样本池，生成抽样样本，发送并完成抄写。",
-    nodes: [
-      {
-        id: "gitc-toe-requirement-list",
-        label: "上传需求清单",
-        type: "upload_requirement_list",
-        required: true,
-        category: MATERIAL_CATEGORY.REQUIREMENT_LIST,
-        actionLabel: "上传需求清单"
-      },
-      {
-        id: "gitc-toe-sample-pool",
-        label: "上传客户提供的样本池",
-        type: "upload_sample_pool",
-        required: true,
-        category: MATERIAL_CATEGORY.SAMPLE_POOL,
-        actionLabel: "上传样本池"
-      },
-      {
-        id: "gitc-toe-sampling",
-        label: "自动抽样生成抽样样本",
-        type: "generated_text",
-        required: true,
-        dependsOnNodeId: "gitc-toe-sample-pool",
-        generationKind: "sampling",
-        placeholder: "上传样本池后自动生成抽样样本，保存后计入完成度。"
-      },
-      {
-        id: "gitc-toe-send-sample",
-        label: "是否发送样本",
-        type: "send_toggle",
-        required: true
-      },
-      {
-        id: "gitc-toe-returned-sample-support",
-        label: "上传客户返回的样本支持性材料",
-        type: "upload_returned_sample_support",
-        required: true,
-        category: MATERIAL_CATEGORY.RETURNED_SAMPLE_SUPPORT,
-        actionLabel: "上传返回材料"
-      },
-      {
-        id: "gitc-toe-transcription",
-        label: "填写样本抄写表",
-        type: "generated_text",
-        required: true,
-        dependsOnNodeId: "gitc-toe-returned-sample-support",
-        generationKind: "transcription",
-        builderKind: "sample_transcription_table",
-        placeholder: "手动填写样本字段并录入多个样本后，点击生成抄写表格，保存后计入完成度。"
-      }
-    ]
-  }
-];
-
-const ITAC_WORKSPACE_PHASES = [
-  {
-    id: "tod",
-    label: "TOD",
-    description: "ITAC 测试执行：上传会议纪要，生成 Implementation，记录配置/代码支持材料并完成 Test of One 样本表。",
-    nodes: [
-      {
-        id: "itac-tod-minutes",
-        label: "上传会议纪要",
-        type: "upload_minutes",
-        required: true,
-        category: MATERIAL_CATEGORY.MEETING_MINUTES,
-        actionLabel: "上传纪要"
-      },
-      {
-        id: "itac-tod-implementation",
-        label: "自动生成 Implementation",
-        type: "generated_text",
-        required: true,
-        dependsOnNodeId: "itac-tod-minutes",
-        generationKind: "implementation",
-        placeholder: "上传会议纪要后自动生成 Implementation 草稿，保存后计入完成度。"
-      },
-      {
-        id: "itac-tod-supporting-material",
-        label: "上传配置/代码支持性材料",
-        type: "upload_supporting_material",
-        required: true,
-        category: MATERIAL_CATEGORY.SUPPORTING_MATERIAL,
-        actionLabel: "上传支持性材料",
-        supportKindOptions: [
-          { value: "configuration", label: "配置" },
-          { value: "code", label: "代码" }
-        ],
-        defaultSupportingMaterialKind: "configuration"
-      },
-      {
-        id: "itac-tod-test-of-one-support",
-        label: "上传 Test of One 支持性材料",
-        type: "upload_test_of_one_support",
-        required: true,
-        category: MATERIAL_CATEGORY.SUPPORTING_MATERIAL,
-        actionLabel: "上传 Test of One 支持材料",
-        defaultSupportingMaterialKind: "test_of_one"
-      },
-      {
-        id: "itac-tod-test-of-one",
-        label: "填写 Test of One 样本表",
-        type: "generated_text",
-        required: true,
-        dependsOnNodeId: "itac-tod-test-of-one-support",
-        generationKind: "test_of_one",
-        builderKind: "itac_test_of_one_table",
-        placeholder: "手动填写样本字段并填写样本信息后生成 Test of One 表格，保存后计入完成度。"
-      }
-    ]
-  }
-];
-
-export const WORKSPACE_PHASES = DEFAULT_WORKSPACE_PHASES;
-
-export function getWorkspacePhases(controlType = "") {
-  const normalized = String(controlType).toUpperCase();
-  if (normalized === "ITAC") return ITAC_WORKSPACE_PHASES;
-  if (normalized === "GITC") return GITC_WORKSPACE_PHASES;
-  return DEFAULT_WORKSPACE_PHASES;
-}
 
 const REVIEW_ORDER = {
   [REVIEW_STATUS.NOT_SUBMITTED]: 0,
@@ -495,7 +279,6 @@ function normalizeMaterial(material = {}) {
   return {
     id: material.id || `mat_${Math.random().toString(36).slice(2, 9)}`,
     category: material.category || MATERIAL_CATEGORY.EVIDENCE,
-    supportingMaterialKind: material.supportingMaterialKind || "",
     phaseId: material.phaseId || material.phase || "general",
     nodeId: material.nodeId || "",
     name: material.name || "未命名材料",
@@ -562,18 +345,6 @@ function normalizeFieldReviews(fieldReviews = {}) {
   }, {});
 }
 
-function normalizeNodeDueDates(nodeDueDates = {}) {
-  if (!nodeDueDates || typeof nodeDueDates !== "object" || Array.isArray(nodeDueDates)) {
-    return {};
-  }
-
-  return Object.entries(nodeDueDates).reduce((result, [nodeId, dueDate]) => {
-    const normalized = String(dueDate || "").trim();
-    if (normalized) result[nodeId] = normalized;
-    return result;
-  }, {});
-}
-
 function normalizeRecord(controlId, record = {}) {
   const safe = record || {};
   const milestones = normalizeMilestones(safe.milestones);
@@ -592,7 +363,6 @@ function normalizeRecord(controlId, record = {}) {
     milestoneActors: normalizeMilestoneActors(safe.milestoneActors, milestones),
     extraTextFields: normalizeExtraTextFields(safe.extraTextFields),
     fieldReviews: normalizeFieldReviews(safe.fieldReviews),
-    nodeDueDates: normalizeNodeDueDates(safe.nodeDueDates),
     reviewStatus: safe.reviewStatus || REVIEW_STATUS.NOT_SUBMITTED,
     reviewComment: safe.reviewComment || "",
     updatedAt: safe.updatedAt || nowIso()
@@ -614,92 +384,13 @@ function hasTextForNode(record, node) {
   return Boolean(textValueForNode(record, node).trim());
 }
 
-function responseValue(record, key) {
-  return record.nodeResponses?.[key];
-}
-
-function structuredFieldKey(node, field) {
-  return `${node.id}.${field.id}`;
-}
-
-function hasTextValue(value) {
-  return typeof value === "string" && value.trim().length > 0;
-}
-
-function hasAnyMatrixCell(rowValue = {}) {
-  if (!rowValue || typeof rowValue !== "object" || Array.isArray(rowValue)) return false;
-  return Object.values(rowValue).some((cellValue) => {
-    if (typeof cellValue === "boolean") return cellValue;
-    if (typeof cellValue === "number") return true;
-    if (typeof cellValue === "string") return cellValue.trim().length > 0;
-    if (Array.isArray(cellValue)) return cellValue.length > 0;
-    return cellValue && typeof cellValue === "object" && Object.keys(cellValue).length > 0;
-  });
-}
-
-function isFieldComplete(record, node, field) {
-  const value = responseValue(record, structuredFieldKey(node, field));
-
-  if (field.type === "matrix") {
-    if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-    const requiredRows = Array.isArray(field.rows) && field.rows.length ? field.rows : [];
-    if (!requiredRows.length) return Object.values(value).some(hasAnyMatrixCell);
-    return requiredRows.every((row) => hasAnyMatrixCell(value[row.id]));
-  }
-
-  if (field.type === "checkbox_group") {
-    return Array.isArray(value) && value.length > 0;
-  }
-
-  if (field.type === "checkbox") {
-    return value === true;
-  }
-
-  if (field.type === "date_range") {
-    return Boolean(value?.start && value?.end);
-  }
-
-  if (field.type === "yes_no" || field.type === "select" || field.type === "text" || field.type === "textarea") {
-    return hasTextValue(value);
-  }
-
-  return Boolean(value);
-}
-
-function isStructuredNodeComplete(record, node) {
-  const fields = Array.isArray(node.fields) ? node.fields : [];
-  const requiredFieldIds = Array.isArray(node.requiredFields)
-    ? node.requiredFields
-    : fields.filter((field) => field.required !== false).map((field) => field.id);
-  const requiredFields = fields.filter((field) => requiredFieldIds.includes(field.id));
-
-  if (!requiredFields.length) {
-    return fields.some((field) => isFieldComplete(record, node, field));
-  }
-
-  return requiredFields.every((field) => isFieldComplete(record, node, field));
-}
-
-function getStructuredValues(record, node) {
-  return (node.fields || []).reduce((result, field) => ({
-    ...result,
-    [field.id]: responseValue(record, structuredFieldKey(node, field))
-  }), {});
-}
-
-function getMaterials(record, category, phaseId, nodeId, supportingMaterialKind = "") {
+function getMaterials(record, category, phaseId, nodeId) {
   return (record?.materials || []).filter((item) => {
     if (category && item.category !== category) return false;
-    if (supportingMaterialKind && item.supportingMaterialKind !== supportingMaterialKind) return false;
     if (phaseId && item.phaseId !== phaseId) return false;
     if (nodeId && item.nodeId && item.nodeId !== nodeId) return false;
     return true;
   });
-}
-
-function supportingMaterialKindFilterForNode(node) {
-  if (node.supportKindOptions?.length) return "";
-  return node.defaultSupportingMaterialKind || "";
 }
 
 export function inferControlType(task = {}) {
@@ -753,28 +444,12 @@ function reviewReached(current, threshold) {
 }
 
 function getNodeStatus(record, phase, node) {
-  if (node.type === "text" || node.type === "generated_text") {
+  if (node.type === "text") {
     return hasTextForNode(record, node) ? NODE_STATUS.COMPLETED : NODE_STATUS.PENDING;
   }
 
-  if (node.type === "structured") {
-    return isStructuredNodeComplete(record, node) ? NODE_STATUS.COMPLETED : NODE_STATUS.PENDING;
-  }
-
-  if (node.type === "send_toggle") {
-    return record.nodeResponses?.[node.id]?.sent
-      ? NODE_STATUS.COMPLETED
-      : NODE_STATUS.PENDING;
-  }
-
   if (node.type?.startsWith("upload")) {
-    return getMaterials(
-      record,
-      node.category,
-      phase.id,
-      node.id,
-      supportingMaterialKindFilterForNode(node)
-    ).length
+    return getMaterials(record, node.category, phase.id, node.id).length
       ? NODE_STATUS.COMPLETED
       : NODE_STATUS.PENDING;
   }
@@ -788,14 +463,13 @@ function getNodeStatus(record, phase, node) {
   return NODE_STATUS.PENDING;
 }
 
-function buildPhaseProgress(record, controlType = "") {
+function buildPhaseProgress(record) {
   let completedNodes = 0;
   let totalNodes = 0;
   let completedExecutionNodes = 0;
   let totalExecutionNodes = 0;
-  const workspacePhases = getWorkspacePhases(controlType);
 
-  const phases = workspacePhases.map((phase) => {
+  const phases = WORKSPACE_PHASES.map((phase) => {
     let phaseCompleted = 0;
     let phaseTotal = 0;
     let phaseExecutionCompleted = 0;
@@ -807,13 +481,7 @@ function buildPhaseProgress(record, controlType = "") {
       const required = node.required !== false;
       const executionNode = required && !node.signoff;
       const materials = node.type?.startsWith("upload")
-        ? getMaterials(
-            record,
-            node.category,
-            phase.id,
-            node.id,
-            supportingMaterialKindFilterForNode(node)
-          )
+        ? getMaterials(record, node.category, phase.id, node.id)
         : [];
 
       if (required) {
@@ -836,11 +504,8 @@ function buildPhaseProgress(record, controlType = "") {
       return {
         ...node,
         phaseId: phase.id,
-        dueDate: record.nodeDueDates?.[node.id] || "",
         status,
-        value: node.type === "text" || node.type === "generated_text" ? textValueForNode(record, node) : "",
-        values: node.type === "structured" ? getStructuredValues(record, node) : undefined,
-        sendState: node.type === "send_toggle" ? record.nodeResponses?.[node.id] || null : undefined,
+        value: node.type === "text" ? textValueForNode(record, node) : "",
         materialCount: materials.length
       };
     });
@@ -883,56 +548,43 @@ function getEvidenceStatus(record, progress) {
   return EVIDENCE_STATUS.NONE;
 }
 
-function deriveStatusFromProgress(record, task, allTasks = [], progress = buildPhaseProgress(record, task ? inferControlType(task) : "")) {
+function deriveStatusFromProgress(record, task, allTasks = [], progress = buildPhaseProgress(record)) {
   const blockers = task ? getBlockingPredecessors(task, allTasks) : [];
 
   if (blockers.length) return PROGRESS_STATUS.BLOCKED;
   if (record.reviewStatus === REVIEW_STATUS.COMMENTED) return PROGRESS_STATUS.NEEDS_REWORK;
-  if (progress.allRequiredComplete && allFieldReviewsAccepted(record)) {
+  if (record.reviewStatus === REVIEW_STATUS.SIGNED_OFF && progress.allRequiredComplete) {
     return PROGRESS_STATUS.COMPLETED;
   }
   if (record.reviewStatus === REVIEW_STATUS.PENDING_REVIEW || progress.executionComplete) {
     return PROGRESS_STATUS.PENDING_REVIEW;
   }
-  if (progress.completedNodes === 0) {
-    return hasWorkspaceInput(record, progress)
-      ? PROGRESS_STATUS.IN_PROGRESS
-      : PROGRESS_STATUS.NOT_STARTED;
-  }
+  if (progress.completedNodes === 0) return PROGRESS_STATUS.NOT_STARTED;
   return PROGRESS_STATUS.IN_PROGRESS;
 }
 
-function allFieldReviewsAccepted(record) {
-  return Object.values(record.fieldReviews || {}).every((review) => (
-    review.status === FIELD_REVIEW_STATUS.ACCEPTED
-  ));
+function hasUploadedWorkspaceMaterial(record) {
+  return (record.materials || []).length > 0;
 }
 
-function hasMeaningfulValue(value) {
-  if (typeof value === "string") return value.trim().length > 0;
-  if (typeof value === "boolean") return value;
-  if (typeof value === "number") return true;
-  if (Array.isArray(value)) return value.some(hasMeaningfulValue);
-  if (value && typeof value === "object") return Object.values(value).some(hasMeaningfulValue);
-  return false;
+function workspaceCompletionReady(record) {
+  const reviews = Object.values(record.fieldReviews || {});
+  if (!reviews.length) {
+    return record.reviewStatus === REVIEW_STATUS.SIGNED_OFF;
+  }
+  return reviews.every((review) => review.status === FIELD_REVIEW_STATUS.ACCEPTED);
 }
 
-function hasWorkspaceInput(record, progress) {
-  if ((progress?.completedNodes || 0) > 0) return true;
-  if ((record.materials || []).length > 0) return true;
-  if (Object.values(record.nodeResponses || {}).some(hasMeaningfulValue)) return true;
-  if (Object.values(record.extraTextFields || {}).some((fields) => (
-    Array.isArray(fields) && fields.some((field) => hasMeaningfulValue(field.value))
-  ))) return true;
-  return false;
-}
-
-function deriveWorkspaceStatus(record, progress) {
-  if (progress?.allRequiredComplete && allFieldReviewsAccepted(record)) {
+function deriveWorkspaceStatus(record) {
+  if (!hasUploadedWorkspaceMaterial(record)) return PROGRESS_STATUS.NOT_STARTED;
+  if (
+    record.milestones?.planning
+    && record.milestones?.review
+    && workspaceCompletionReady(record)
+  ) {
     return PROGRESS_STATUS.COMPLETED;
   }
-  if (hasWorkspaceInput(record, progress)) return PROGRESS_STATUS.IN_PROGRESS;
-  return PROGRESS_STATUS.NOT_STARTED;
+  return PROGRESS_STATUS.IN_PROGRESS;
 }
 
 function phaseProgressMap(phases) {
@@ -951,21 +603,20 @@ export function deriveProgressStatus(record, task, allTasks = []) {
     normalized,
     task,
     allTasks,
-    buildPhaseProgress(normalized, task ? inferControlType(task) : "")
+    buildPhaseProgress(normalized)
   );
 }
 
 function buildDetail(controlId, record, task = null, allTasks = []) {
   const normalized = normalizeRecord(controlId, record);
-  const controlType = task ? inferControlType(task) : "";
-  const progress = buildPhaseProgress(normalized, controlType);
+  const progress = buildPhaseProgress(normalized);
   const blockers = task ? getBlockingPredecessors(task, allTasks).map((candidate) => candidate.id) : [];
   const progressStatus = deriveStatusFromProgress(normalized, task, allTasks, progress);
 
   return {
     id: controlId,
     title: task?.title || "",
-    controlType,
+    controlType: task ? inferControlType(task) : "",
     testContent: normalized.testContent,
     nodeResponses: normalized.nodeResponses,
     materials: normalized.materials,
@@ -975,12 +626,11 @@ function buildDetail(controlId, record, task = null, allTasks = []) {
     phaseProgress: phaseProgressMap(progress.phases),
     progressPercent: progress.progressPercent,
     progressStatus,
-    workspaceStatus: deriveWorkspaceStatus(normalized, progress),
+    workspaceStatus: deriveWorkspaceStatus(normalized),
     milestones: normalized.milestones,
     milestoneActors: normalized.milestoneActors,
     extraTextFields: normalized.extraTextFields,
     fieldReviews: normalized.fieldReviews,
-    nodeDueDates: normalized.nodeDueDates,
     reviewStatus: normalized.reviewStatus,
     reviewComment: normalized.reviewComment,
     blockers,
@@ -993,18 +643,12 @@ function buildSnapshotItem(task, record, allTasks) {
   const evidenceCount = getMaterials(detail, MATERIAL_CATEGORY.EVIDENCE).length;
   const meetingMinutesCount = getMaterials(detail, MATERIAL_CATEGORY.MEETING_MINUTES).length;
   const sppCount = getMaterials(detail, MATERIAL_CATEGORY.SPP).length;
-  const policyCount = getMaterials(detail, MATERIAL_CATEGORY.POLICY).length;
-  const supportingMaterialCount = getMaterials(detail, MATERIAL_CATEGORY.SUPPORTING_MATERIAL).length;
-  const requirementListCount = getMaterials(detail, MATERIAL_CATEGORY.REQUIREMENT_LIST).length;
-  const samplePoolCount = getMaterials(detail, MATERIAL_CATEGORY.SAMPLE_POOL).length;
-  const returnedSampleSupportCount = getMaterials(detail, MATERIAL_CATEGORY.RETURNED_SAMPLE_SUPPORT).length;
 
   return {
     id: task.id,
     title: task.title,
     controlType: inferControlType(task),
     owner: task.owner || "未分配",
-    assigneeEmail: task.owner || "未分配",
     auditPhase: task.auditPhase || "",
     taskStatus: task.status || "todo",
     progressStatus: detail.progressStatus,
@@ -1017,15 +661,9 @@ function buildSnapshotItem(task, record, allTasks) {
     evidenceCount,
     meetingMinutesCount,
     sppCount,
-    policyCount,
-    supportingMaterialCount,
-    requirementListCount,
-    samplePoolCount,
-    returnedSampleSupportCount,
     reviewStatus: detail.reviewStatus,
     milestones: detail.milestones,
     milestoneActors: detail.milestoneActors,
-    nodeDueDates: detail.nodeDueDates,
     fieldReviewSummary: Object.values(detail.fieldReviews || {}).reduce((summary, review) => ({
       ...summary,
       [review.status]: (summary[review.status] || 0) + 1
@@ -1092,10 +730,6 @@ export function upsertControlProgress(controlId, patch, projectId = "") {
     milestoneActors: {
       ...current.milestoneActors,
       ...(patch.milestoneActors || {})
-    },
-    nodeDueDates: {
-      ...current.nodeDueDates,
-      ...(patch.nodeDueDates || {})
     },
     extraTextFields: patch.extraTextFields || current.extraTextFields,
     fieldReviews: patch.fieldReviews || current.fieldReviews,
