@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DeepSleep 模块 2 工作台预览</title>
+  <title>DeepSleep Module 2 Workspace Preview</title>
   <style>
     :root {
       --blue: #2451a6;
@@ -1478,60 +1478,60 @@
         </div>
       </div>
       <div class="login-copy">
-        <h2>测试点执行工作台</h2>
-        <p>以 ITAC / GITC 测试点为核心，TOD / TOE 子节点自动汇总进度。模块 3 只读取这里产生的事实数据。</p>
+        <h2>Test Point Execution Workspace</h2>
+        <p>Centered on ITAC / GITC test points, TOD / TOE sub-nodes automatically roll up progress. Module 3 only reads the factual data produced here.</p>
       </div>
       <div class="login-metrics">
         <div>
           <strong>4</strong>
-          <span>测试点</span>
+          <span>Test Points</span>
         </div>
         <div>
           <strong>80</strong>
-          <span>节点总数</span>
+          <span>Total Nodes</span>
         </div>
         <div>
           <strong>3</strong>
-          <span>材料类型</span>
+          <span>Material Types</span>
         </div>
       </div>
     </aside>
 
     <main class="login-panel">
       <form class="login-card" id="loginForm">
-        <h2>登录工作台</h2>
-        <p>本地预览模式，不连接后端账户。</p>
+        <h2>Sign In to Workspace</h2>
+        <p>Local preview mode. No backend account connection.</p>
         <label class="field">
-          <span class="label">邮箱</span>
+          <span class="label">Email</span>
           <input id="loginEmail" type="email" value="alice@kpmg.com" autocomplete="username" />
         </label>
         <label class="field">
-          <span class="label">密码</span>
+          <span class="label">Password</span>
           <input id="loginPassword" type="password" value="demo123" autocomplete="current-password" />
         </label>
-        <button class="button primary full" type="submit">进入模块 2</button>
+        <button class="button primary full" type="submit">Enter Module 2</button>
         <div class="login-error" id="loginError"></div>
       </form>
     </main>
   </section>
 
   <section class="app hidden" id="appView">
-    <aside class="sidebar" aria-label="项目导航">
+    <aside class="sidebar" aria-label="Project Navigation">
       <section class="project">
         <div class="brand-mark">DS</div>
         <div>
           <h1>DeepSleep</h1>
-          <p>星河零售集团</p>
+          <p>Galaxy Retail Group</p>
         </div>
       </section>
-      <nav class="nav" aria-label="主导航">
-        <button type="button"><span class="nav-icon">O</span><span>项目概览</span></button>
-        <button type="button"><span class="nav-icon">M</span><span>成员管理</span></button>
-        <button class="active" type="button"><span class="nav-icon">W</span><span>工作台</span></button>
-        <button type="button"><span class="nav-icon">K</span><span>看板</span></button>
+      <nav class="nav" aria-label="Main Navigation">
+        <button type="button"><span class="nav-icon">O</span><span>Project Overview</span></button>
+        <button type="button"><span class="nav-icon">M</span><span>Member Management</span></button>
+        <button class="active" type="button"><span class="nav-icon">W</span><span>Workspace</span></button>
+        <button type="button"><span class="nav-icon">K</span><span>Kanban</span></button>
       </nav>
-      <button class="sidebar-link" type="button">返回全部项目</button>
-      <div class="sidebar-footer">静态 HTML 预览 · 数据保存在当前浏览器</div>
+      <button class="sidebar-link" type="button">Back to All Projects</button>
+      <div class="sidebar-footer">Static HTML preview · Data is stored in this browser</div>
     </aside>
 
     <main class="content">
@@ -1539,11 +1539,11 @@
         <div class="breadcrumbs">
           <span>DeepSleep</span>
           <span>/</span>
-          <strong>星河零售集团</strong>
+          <strong>Galaxy Retail Group</strong>
           <span>/</span>
           <span>FY26 IT Audit</span>
           <span>/</span>
-          <span>工作台</span>
+          <span>Workspace</span>
         </div>
         <div class="user-chip">
           <div class="avatar" id="avatar">A</div>
@@ -1557,8 +1557,8 @@
       <section class="workspace-page">
         <header class="page-header">
           <div>
-            <p class="page-eyebrow">Workspace · 测试点执行工作台</p>
-            <h2>星河零售集团</h2>
+            <p class="page-eyebrow">Workspace · Test Point Execution Workspace</p>
+            <h2>Galaxy Retail Group</h2>
           </div>
           <div class="workspace-stats" id="stats"></div>
         </header>
@@ -1567,31 +1567,31 @@
           <aside class="panel list-panel">
             <div class="panel-toolbar">
               <div>
-                <h3>测试点清单</h3>
+                <h3>Test Point List</h3>
               </div>
-              <button class="button primary" id="openCreateControl" type="button">新建测试点</button>
+              <button class="button primary" id="openCreateControl" type="button">Create Test Point</button>
             </div>
             <div class="filter-grid">
               <label class="field">
-                <span class="label">负责人</span>
+                <span class="label">Owner</span>
                 <select id="ownerFilter"></select>
               </label>
               <label class="field">
-                <span class="label">类型</span>
+                <span class="label">Type</span>
                 <select id="typeFilter">
-                  <option value="">全部</option>
+                  <option value="">All</option>
                   <option value="GITC">GITC</option>
                   <option value="ITAC">ITAC</option>
                   <option value="TASK">TASK</option>
                 </select>
               </label>
               <label class="field full">
-                <span class="label">进度状态</span>
+                <span class="label">Progress Status</span>
                 <select id="statusFilter"></select>
               </label>
               <label class="workspace-check full">
                 <input id="actionOnly" type="checkbox" />
-                <span>仅看未完成 / 待处理</span>
+                <span>Incomplete / Action Needed Only</span>
               </label>
             </div>
             <div class="control-list" id="controlList"></div>
@@ -1607,19 +1607,19 @@
     <form class="modal" id="createControlForm">
       <div class="modal-head">
         <div>
-          <h3>新建测试点</h3>
-          <p>选择类型后自动生成节点预计完成时间，保存后同步给模块 3。</p>
+          <h3>Create Test Point</h3>
+          <p>Select a type to auto-generate node due dates. Saved due dates are synced to Module 3.</p>
         </div>
-        <button class="button subtle" id="closeCreateControl" type="button">关闭</button>
+        <button class="button subtle" id="closeCreateControl" type="button">Close</button>
       </div>
 
       <div class="create-grid">
         <label class="field full">
-          <span class="label">测试点名称</span>
-          <input id="createTitle" placeholder="例如：APD-1 Password" />
+          <span class="label">Test Point Name</span>
+          <input id="createTitle" placeholder="Example: APD-1 Password" />
         </label>
         <label class="field">
-          <span class="label">测试点类型</span>
+          <span class="label">Test Point Type</span>
           <select id="createType">
             <option value="GITC">GITC</option>
             <option value="ITAC">ITAC</option>
@@ -1627,7 +1627,7 @@
         </label>
         <label class="field" id="createOwnerField"></label>
         <label class="field">
-          <span class="label">第一个节点预计完成日期</span>
+          <span class="label">First Node Due Date</span>
           <input id="createFirstDueDate" type="date" />
         </label>
       </div>
@@ -1676,73 +1676,73 @@
     };
 
     const PROGRESS_LABELS = {
-      [PROGRESS_STATUS.NOT_STARTED]: "未开始",
-      [PROGRESS_STATUS.IN_PROGRESS]: "测试中",
-      [PROGRESS_STATUS.COMPLETED]: "已完成"
+      [PROGRESS_STATUS.NOT_STARTED]: "Not Started",
+      [PROGRESS_STATUS.IN_PROGRESS]: "Testing",
+      [PROGRESS_STATUS.COMPLETED]: "Completed"
     };
 
     const REVIEW_LABELS = {
-      [REVIEW_STATUS.NOT_SUBMITTED]: "未提交",
-      [REVIEW_STATUS.PENDING_REVIEW]: "待复核",
-      [REVIEW_STATUS.COMMENTED]: "有复核意见",
-      [REVIEW_STATUS.SIGNED_OFF]: "已签核"
+      [REVIEW_STATUS.NOT_SUBMITTED]: "Not Submitted",
+      [REVIEW_STATUS.PENDING_REVIEW]: "Pending Review",
+      [REVIEW_STATUS.COMMENTED]: "Review Comment Added",
+      [REVIEW_STATUS.SIGNED_OFF]: "Signed Off"
     };
 
     const AI_GENERATION_DELAY_MS = 3000;
     const SAMPLING_EXCEL_ROW_COUNT = 25;
     const SAMPLING_EXCEL_COLUMNS = [
-      { key: "sequence", label: "序号" },
-      { key: "sampleId", label: "抽样样本编号" },
-      { key: "populationItem", label: "样本池记录" },
-      { key: "sourcePool", label: "来源样本池" },
-      { key: "samplingMethod", label: "抽样方法" },
-      { key: "status", label: "状态" }
+      { key: "sequence", label: "No." },
+      { key: "sampleId", label: "Sample ID" },
+      { key: "populationItem", label: "Population Record" },
+      { key: "sourcePool", label: "Source Population" },
+      { key: "samplingMethod", label: "Sampling Method" },
+      { key: "status", label: "Status" }
     ];
 
-    const DEMO_GITC_DESIGN_TEXT = `2025年9月10日，审计方通过询问被审计单位IT部信息安全相关负责人，了解到公司针对程序变更的管理流程制定了相应的信息安全制度；通过获取并检查《软件变更管理制度》，审计方发现公司对此作出如下规定：
-变更流程：
-第四条  系统变更过程类似软件开发，大致可分为四个阶段：任务提交和接受、任务实现、任务验收和程序发布上线。
-第五条  需求部门提出系统变更需求，并将变更需求整理成《IT需求申请单》，由业务人员提交到内部流程系统，经过审核后流转至运维人员，由运维人员填写运维需求汇总描述后自动创建需求管理系统中的需求记录。
-第六条  由IT内部人员通过需求评审会议对需求记录进行分析，并提出系统变更建议。
-第七条  相关IT部门根据自行开发、合作开发和外包开发的不同要求组织实现系统变更需求，将需求提交至内部开发人员、合作开发商或外包开发商，产生供发布的程序。
-第八条  实现过程应按照软件开发过程规定进行。系统变更过程应遵循软件开发过程统一的编码标准，并经过测试验收才能上线。
-紧急变更流程：
-第九条  对于紧急变更，需求部门可以通过电子邮件形式、工作群沟通提出申请。
-第十条  IT部根据重要性和紧迫性作出判断，确定其优先级和影响程度，并进行相应处理。
-第十一条  紧急变更过程由专责部门或人员启动紧急修改变更程序。IT部应对紧急变更的处理进行规范的文档记录。
-第十二条  在紧急事件处理完成后，必须在一周内补办正式、完整的流程。
-审计方未发现异常。`;
+    const DEMO_GITC_DESIGN_TEXT = `On September 10, 2025, through inquiry with the responsible information security personnel in the IT department of the audited entity, the audit team understood that the company had established information security policies for program change management. By obtaining and inspecting the Software Change Management Policy, the audit team noted the following requirements:
+Change process:
+Article 4  The system change process is similar to software development and generally includes four stages: request submission and acceptance, implementation, acceptance testing, and production release.
+Article 5  The requesting department raises a system change request and prepares an IT Request Form. Business users submit the request in the internal workflow system. After approval, it is routed to operations personnel, who complete the operations request summary and automatically create the corresponding request record in the demand management system.
+Article 6  IT personnel analyze request records through demand review meetings and propose system change recommendations.
+Article 7  Relevant IT departments organize implementation based on the nature of self-developed, co-developed, or outsourced development work, and submit the request to internal developers, co-development vendors, or outsourced vendors to produce the program for release.
+Article 8  Implementation should follow the software development process. System changes should follow unified coding standards and must pass testing and acceptance before go-live.
+Emergency change process:
+Article 9  For emergency changes, the requesting department may submit requests by email or work group communication.
+Article 10  The IT department evaluates importance and urgency, determines priority and impact, and handles the change accordingly.
+Article 11  Emergency changes are initiated by the responsible department or personnel through the emergency change procedure. IT should maintain standardized documentation of emergency change handling.
+Article 12  After the emergency is resolved, a formal and complete process must be completed within one week.
+No exception was noted by the audit team.`;
 
-    const DEMO_GITC_IMPLEMENTATION_TEXT = `通过询问被审计单位信息技术部系统开发相关人员，审计方了解到在2025年01月01日-2025年09月04日现场审计时点，相关业务系统对于程序变更的管理流程如下：
-①需求提出：
-对于非BUG类需求：由业务部门提出变更需求，并将变更需求整理成《IT需求申请单》或者业务联系单，由业务人员提交至内部流程系统，经业务部门相关领导审核后流转至运维人员。由运维人员基于业务需求转化并填写运维需求单，流程系统中的运维需求创建后自动关联至需求管理平台，并创建开发需求，此时需求进入“待评审”状态，正式进入开发生命周期；
+    const DEMO_GITC_IMPLEMENTATION_TEXT = `Through inquiry with system development personnel in the IT department of the audited entity, the audit team understood that, as of the on-site audit period from January 1, 2025 to September 4, 2025, the program change management process for the relevant business systems was as follows:
+1. Request initiation:
+For non-bug requests, the business department raises the change request and prepares an IT Request Form or business contact form. Business users submit it through the internal workflow system. After review by the relevant business department leadership, it is routed to operations personnel. Operations personnel convert the business request and complete an operations request form. Once created in the workflow system, the operations request is automatically linked to the demand management platform and a development request is created. The request then enters “Pending Review” status and formally enters the development lifecycle.
 
-对于BUG类需求：当业务部门发现问题，直接反馈给IT运维人员。IT运维人员确认该问题为系统BUG后，在需求/缺陷管理平台中创建BUG记录，并指派给对应开发人员，此时需求进入“待评审”状态；
+For bug requests, when the business department identifies an issue, it reports it directly to IT operations personnel. After IT operations confirms that the issue is a system bug, a bug record is created in the demand/defect management platform and assigned to the corresponding developer. The request then enters “Pending Review” status.
 
-②需求评审：
-每周四及周五，开发团队召开“需求评审会”，对需求/缺陷管理平台中“待评审”的需求和BUG进行评估、澄清和排期；
-③制定开发计划：
-每周一，开发负责人根据需求评审结果指定本周的开发计划，明确各项任务的负责人和预计完成时间；
-④开发与测试：
-开发人员根据开发计划进行编码开发。开发完成后，由IT运维人员在测试环境中进行功能测试，测试通过后，任务状态在需求/缺陷管理平台中更新为“已解决”；
-⑤代码合并：
-由开发组长将各开发人员在各自开发分支上的代码合并到代码仓库的主干分支上，准备发布；
-⑥系统发布：
-每周二及周四为固定的发布时间，由发布人员在发布平台上点击“发布”按钮，发布平台会自动从代码仓库拉取已经合并好的主干代码，并将其部署到生产环境；
-⑦发布后验证：
-发布完成后，发布人员会通知IT运维人员在生产环境对本次发布的功能或修复的BUG进行最终验证，确保上线内容无误。`;
+2. Demand review:
+Every Thursday and Friday, the development team holds demand review meetings to evaluate, clarify, and schedule requests and bugs in “Pending Review” status in the demand/defect management platform.
+3. Development planning:
+Every Monday, the development lead prepares the weekly development plan based on demand review results, specifying the owner and expected completion date for each task.
+4. Development and testing:
+Developers code according to the development plan. After development is completed, IT operations personnel perform functional testing in the test environment. Once testing passes, the task status in the demand/defect management platform is updated to “Resolved.”
+5. Code merge:
+The development lead merges code from individual development branches into the main branch of the code repository in preparation for release.
+6. System release:
+Tuesday and Thursday are fixed release days. Release personnel click “Release” in the release platform. The platform automatically pulls the merged main-branch code from the code repository and deploys it to production.
+7. Post-release verification:
+After release, release personnel notify IT operations personnel to perform final verification in production for the released functionality or bug fixes to confirm that the go-live content is accurate.`;
 
-    const DEMO_ITAC_PROCESS_DESCRIPTION_TEXT = "ERP系统的设定逻辑具体为：针对接口传输的销售订单，系统自动验证后流转到“全网订单列表”（即有效的销售订单报表），但对于手工录入的销售订单，必须勾选跳过系统验证，即必须经过人工审批环节，当审批状态为100（即已审核完成）时，才能被纳入“全网订单列表”，即为有效的销售订单。";
+    const DEMO_ITAC_PROCESS_DESCRIPTION_TEXT = "The ERP system is configured as follows: sales orders transmitted through the interface are automatically validated by the system and then routed to the “All-channel Order List” (the valid sales order report). For manually entered sales orders, the user must select “skip system validation,” meaning the order must go through manual approval. Only when the approval status is 100 (approved) can the order be included in the “All-channel Order List” and treated as a valid sales order.";
 
     const MATERIAL_LABELS = {
       [MATERIAL_CATEGORY.SPP]: "SPP",
-      [MATERIAL_CATEGORY.MEETING_MINUTES]: "会议纪要",
-      [MATERIAL_CATEGORY.EVIDENCE]: "测试资料",
-      [MATERIAL_CATEGORY.POLICY]: "制度",
-      [MATERIAL_CATEGORY.SUPPORTING_MATERIAL]: "支持性材料",
-      [MATERIAL_CATEGORY.REQUIREMENT_LIST]: "需求清单",
-      [MATERIAL_CATEGORY.SAMPLE_POOL]: "样本池",
-      [MATERIAL_CATEGORY.RETURNED_SAMPLE_SUPPORT]: "客户返回材料"
+      [MATERIAL_CATEGORY.MEETING_MINUTES]: "Meeting Minutes",
+      [MATERIAL_CATEGORY.EVIDENCE]: "Test Evidence",
+      [MATERIAL_CATEGORY.POLICY]: "Policy",
+      [MATERIAL_CATEGORY.SUPPORTING_MATERIAL]: "Supporting Materials",
+      [MATERIAL_CATEGORY.REQUIREMENT_LIST]: "Requirement List",
+      [MATERIAL_CATEGORY.SAMPLE_POOL]: "Sample Population",
+      [MATERIAL_CATEGORY.RETURNED_SAMPLE_SUPPORT]: "Client Returned Materials"
     };
 
     const WORKSPACE_NODE_SUBTITLES = {
@@ -1791,25 +1791,25 @@
       {
         id: "tod",
         label: "TOD",
-        description: "设计有效性测试：理解流程、确认控制设计、沉淀访谈与设计证据。",
+        description: "Design effectiveness testing: understand the process, validate control design, and document interview/design evidence.",
         nodes: [
-          { id: "tod-minutes", label: "上传 TOD 会议纪要", type: "upload_minutes", required: true, category: MATERIAL_CATEGORY.MEETING_MINUTES },
-          { id: "tod-objective", label: "TOD 测试目标", type: "text", required: true, placeholder: "说明本测试点的设计有效性测试目标。" },
-          { id: "tod-process", label: "流程理解与控制描述", type: "text", required: true, placeholder: "记录流程理解、控制频率、控制人和关键系统。" },
-          { id: "tod-spp", label: "TOD支持性材料", type: "upload_spp", required: true, category: MATERIAL_CATEGORY.SPP }
+          { id: "tod-minutes", label: "Upload TOD Meeting Minutes", type: "upload_minutes", required: true, category: MATERIAL_CATEGORY.MEETING_MINUTES },
+          { id: "tod-objective", label: "TOD Test Objective", type: "text", required: true, placeholder: "Describe the design effectiveness objective for this test point." },
+          { id: "tod-process", label: "Process Understanding and Control Description", type: "text", required: true, placeholder: "Document process understanding, control frequency, control owner, and key systems." },
+          { id: "tod-spp", label: "TOD Supporting Materials", type: "upload_spp", required: true, category: MATERIAL_CATEGORY.SPP }
         ]
       },
       {
         id: "toe",
         label: "TOE",
-        description: "运行有效性测试：完成样本、执行测试、记录结论。",
+        description: "Operating effectiveness testing: complete samples, execute testing, and document conclusions.",
         nodes: [
-          { id: "toe-sample", label: "样本信息", type: "text", required: true, placeholder: "记录样本量、期间、抽样口径。" },
-          { id: "toe-procedure", label: "TOE 测试程序", type: "text", required: true, placeholder: "记录检查、重新执行、穿行或核对步骤。" },
-          { id: "toe-execution", label: "执行过程记录", type: "text", required: true, placeholder: "记录样本逐项执行过程和关键判断。" },
-          { id: "toe-spp", label: "上传TOE支持性材料", type: "upload_spp", required: true, category: MATERIAL_CATEGORY.SPP },
-          { id: "toe-minutes", label: "上传 TOE 会议纪要", type: "upload_minutes", required: true, category: MATERIAL_CATEGORY.MEETING_MINUTES },
-          { id: "toe-result", label: "TOE 测试结论", type: "text", required: true, placeholder: "记录 TOE 结论。" }
+          { id: "toe-sample", label: "Sample Information", type: "text", required: true, placeholder: "Document sample size, period, and sampling basis." },
+          { id: "toe-procedure", label: "TOE Test Procedure", type: "text", required: true, placeholder: "Document inspection, reperformance, walkthrough, or reconciliation steps." },
+          { id: "toe-execution", label: "Execution Notes", type: "text", required: true, placeholder: "Document sample-by-sample execution and key judgments." },
+          { id: "toe-spp", label: "Upload TOE Supporting Materials", type: "upload_spp", required: true, category: MATERIAL_CATEGORY.SPP },
+          { id: "toe-minutes", label: "Upload TOE Meeting Minutes", type: "upload_minutes", required: true, category: MATERIAL_CATEGORY.MEETING_MINUTES },
+          { id: "toe-result", label: "TOE Test Conclusion", type: "text", required: true, placeholder: "Document the TOE conclusion." }
         ]
       }
     ];
@@ -1818,25 +1818,25 @@
       {
         id: "tod",
         label: "TOD",
-        description: "ITAC 测试执行：上传会议纪要，生成流程描述，记录配置/代码支持材料并完成 Test of One 样本表。",
+        description: "ITAC test execution: upload meeting minutes, generate the process description, record configuration/code supporting materials, and complete the Test of One sample table.",
         nodes: [
-          { id: "itac-tod-minutes", label: "上传会议纪要", type: "upload_minutes", required: true, category: MATERIAL_CATEGORY.MEETING_MINUTES, actionLabel: "上传纪要" },
-          { id: "itac-tod-implementation", label: "自动生成流程描述", type: "generated_text", required: true, dependsOnNodeId: "itac-tod-minutes", generationKind: "implementation", placeholder: "上传会议纪要后自动生成流程描述，保存后计入完成度。" },
+          { id: "itac-tod-minutes", label: "Upload Meeting Minutes", type: "upload_minutes", required: true, category: MATERIAL_CATEGORY.MEETING_MINUTES, actionLabel: "Upload Minutes" },
+          { id: "itac-tod-implementation", label: "Auto-generate Process Description", type: "generated_text", required: true, dependsOnNodeId: "itac-tod-minutes", generationKind: "implementation", placeholder: "After meeting minutes are uploaded, the process description is auto-generated. Save it to count toward completion." },
           {
             id: "itac-tod-supporting-material",
-            label: "上传配置/代码支持性材料",
+            label: "Upload Configuration / Code Supporting Materials",
             type: "upload_supporting_material",
             required: true,
             category: MATERIAL_CATEGORY.SUPPORTING_MATERIAL,
-            actionLabel: "上传支持性材料",
+            actionLabel: "Upload Supporting Materials",
             supportKindOptions: [
-              { value: "configuration", label: "配置" },
-              { value: "code", label: "代码" }
+              { value: "configuration", label: "Configuration" },
+              { value: "code", label: "Code" }
             ],
             defaultSupportingMaterialKind: "configuration"
           },
-          { id: "itac-tod-test-of-one-support", label: "上传 Test of One 支持性材料", type: "upload_test_of_one_support", required: true, category: MATERIAL_CATEGORY.SUPPORTING_MATERIAL, actionLabel: "上传 Test of One 支持材料", defaultSupportingMaterialKind: "test_of_one" },
-          { id: "itac-tod-test-of-one", label: "填写 Test of One 样本表", type: "generated_text", required: true, dependsOnNodeId: "itac-tod-test-of-one-support", generationKind: "test_of_one", builderKind: "itac_test_of_one_table", placeholder: "手动填写样本字段并填写样本信息后生成 Test of One 表格，保存后计入完成度。" }
+          { id: "itac-tod-test-of-one-support", label: "Upload Test of One Supporting Materials", type: "upload_test_of_one_support", required: true, category: MATERIAL_CATEGORY.SUPPORTING_MATERIAL, actionLabel: "Upload Test of One Support", defaultSupportingMaterialKind: "test_of_one" },
+          { id: "itac-tod-test-of-one", label: "Complete Test of One Sample Table", type: "generated_text", required: true, dependsOnNodeId: "itac-tod-test-of-one-support", generationKind: "test_of_one", builderKind: "itac_test_of_one_table", placeholder: "Manually define sample fields and enter sample information, then generate the Test of One table. Save it to count toward completion." }
         ]
       }
     ];
@@ -1845,27 +1845,27 @@
       {
         id: "tod",
         label: "TOD",
-        description: "GITC 设计有效性：上传制度、生成 Design、记录访谈实施情况并完成 Test of One。",
+        description: "GITC design effectiveness: upload the policy, generate Design, document interview implementation, and complete Test of One.",
         nodes: [
-          { id: "gitc-tod-policy", label: "上传制度", type: "upload_policy", required: true, category: MATERIAL_CATEGORY.POLICY, actionLabel: "上传制度", accept: ".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document", acceptedFileKind: "word", fileHint: "仅支持 Word（.doc/.docx）" },
-          { id: "gitc-tod-design", label: "自动生成 Design", type: "generated_text", required: true, dependsOnNodeId: "gitc-tod-policy", generationKind: "design", placeholder: "上传制度后自动生成 Design 草稿，保存后计入完成度。" },
-          { id: "gitc-tod-minutes", label: "上传会议纪要", type: "upload_minutes", required: true, category: MATERIAL_CATEGORY.MEETING_MINUTES, actionLabel: "上传纪要" },
-          { id: "gitc-tod-implementation", label: "自动生成 Implementation", type: "generated_text", required: true, dependsOnNodeId: "gitc-tod-minutes", generationKind: "implementation", placeholder: "上传会议纪要后自动生成 Implementation 草稿，保存后计入完成度。" },
-          { id: "gitc-tod-supporting-material", label: "上传支持性材料", type: "upload_supporting_material", required: true, category: MATERIAL_CATEGORY.SUPPORTING_MATERIAL, actionLabel: "上传支持性材料" },
-          { id: "gitc-tod-test-of-one", label: "填写 Test of One 样本表", type: "generated_text", required: true, dependsOnNodeId: "gitc-tod-supporting-material", generationKind: "test_of_one", builderKind: "test_of_one_table", placeholder: "手动填写样本字段和样本信息后生成 Test of One 表格，保存后计入完成度。" }
+          { id: "gitc-tod-policy", label: "Upload Policy", type: "upload_policy", required: true, category: MATERIAL_CATEGORY.POLICY, actionLabel: "Upload Policy", accept: ".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document", acceptedFileKind: "word", fileHint: "Word files only (.doc/.docx)" },
+          { id: "gitc-tod-design", label: "Auto-generate Design", type: "generated_text", required: true, dependsOnNodeId: "gitc-tod-policy", generationKind: "design", placeholder: "After the policy is uploaded, a Design draft is auto-generated. Save it to count toward completion." },
+          { id: "gitc-tod-minutes", label: "Upload Meeting Minutes", type: "upload_minutes", required: true, category: MATERIAL_CATEGORY.MEETING_MINUTES, actionLabel: "Upload Minutes" },
+          { id: "gitc-tod-implementation", label: "Auto-generate Implementation", type: "generated_text", required: true, dependsOnNodeId: "gitc-tod-minutes", generationKind: "implementation", placeholder: "After meeting minutes are uploaded, an Implementation draft is auto-generated. Save it to count toward completion." },
+          { id: "gitc-tod-supporting-material", label: "Upload Supporting Materials", type: "upload_supporting_material", required: true, category: MATERIAL_CATEGORY.SUPPORTING_MATERIAL, actionLabel: "Upload Supporting Materials" },
+          { id: "gitc-tod-test-of-one", label: "Complete Test of One Sample Table", type: "generated_text", required: true, dependsOnNodeId: "gitc-tod-supporting-material", generationKind: "test_of_one", builderKind: "test_of_one_table", placeholder: "Manually define sample fields and sample information, then generate the Test of One table. Save it to count toward completion." }
         ]
       },
       {
         id: "toe",
         label: "TOE",
-        description: "GITC 运行有效性：上传需求和样本清单，生成抽样样本，发送并完成抄写。",
+        description: "GITC operating effectiveness: upload requirements and the sample listing, generate selected samples, send them, and complete transcription.",
         nodes: [
-          { id: "gitc-toe-requirement-list", label: "上传需求清单", type: "upload_requirement_list", required: true, category: MATERIAL_CATEGORY.REQUIREMENT_LIST, actionLabel: "上传需求清单" },
-          { id: "gitc-toe-sample-pool", label: "上传样本清单", type: "upload_sample_pool", required: true, category: MATERIAL_CATEGORY.SAMPLE_POOL, actionLabel: "上传样本清单", requiresExportPath: true, exportPathLabel: "客户导出清单路径", exportPathPlaceholder: "例如：客户系统 / 程序变更 / 2025变更清单导出.xlsx" },
-          { id: "gitc-toe-sampling", label: "自动抽样生成抽样样本", type: "generated_file", required: true, dependsOnNodeId: "gitc-toe-sample-pool", generationKind: "sampling", fileKind: "sampling_excel", placeholder: "上传样本清单后自动生成 25 个抽样样本 Excel，保存后计入完成度。" },
-          { id: "gitc-toe-send-sample", label: "是否发送样本", type: "send_toggle", required: true },
-          { id: "gitc-toe-returned-sample-support", label: "上传客户返回的样本支持性材料", type: "upload_returned_sample_support", required: true, category: MATERIAL_CATEGORY.RETURNED_SAMPLE_SUPPORT, actionLabel: "上传返回材料" },
-          { id: "gitc-toe-transcription", label: "填写样本抄写表", type: "generated_text", required: true, dependsOnNodeId: "gitc-toe-returned-sample-support", generationKind: "transcription", builderKind: "sample_transcription_table", placeholder: "手动填写样本字段并录入多个样本后，点击生成抄写表格，保存后计入完成度。" }
+          { id: "gitc-toe-requirement-list", label: "Upload Requirement List", type: "upload_requirement_list", required: true, category: MATERIAL_CATEGORY.REQUIREMENT_LIST, actionLabel: "Upload Requirement List" },
+          { id: "gitc-toe-sample-pool", label: "Upload Sample Listing", type: "upload_sample_pool", required: true, category: MATERIAL_CATEGORY.SAMPLE_POOL, actionLabel: "Upload Sample Listing", requiresExportPath: true, exportPathLabel: "Client Export Path", exportPathPlaceholder: "Example: Client system / Program changes / 2025 change listing export.xlsx" },
+          { id: "gitc-toe-sampling", label: "Auto-generate Selected Samples", type: "generated_file", required: true, dependsOnNodeId: "gitc-toe-sample-pool", generationKind: "sampling", fileKind: "sampling_excel", placeholder: "After the sample listing is uploaded, a 25-sample Excel file is auto-generated. Save it to count toward completion." },
+          { id: "gitc-toe-send-sample", label: "Send Samples?", type: "send_toggle", required: true },
+          { id: "gitc-toe-returned-sample-support", label: "Upload Client-returned Sample Support", type: "upload_returned_sample_support", required: true, category: MATERIAL_CATEGORY.RETURNED_SAMPLE_SUPPORT, actionLabel: "Upload Returned Materials" },
+          { id: "gitc-toe-transcription", label: "Complete Sample Transcription Table", type: "generated_text", required: true, dependsOnNodeId: "gitc-toe-returned-sample-support", generationKind: "transcription", builderKind: "sample_transcription_table", placeholder: "Manually define sample fields and enter multiple samples, then generate the transcription table. Save it to count toward completion." }
         ]
       }
     ];
@@ -1886,7 +1886,7 @@
     const demoControls = [
       {
         id: "GITC-001",
-        title: "GITC 访问管理控制测试",
+        title: "GITC Access Management Control Test",
         controlType: "GITC",
         owner: "alice@kpmg.com",
         auditPhase: "control-design",
@@ -1895,25 +1895,25 @@
         nodeResponses: {
           "gitc-tod-design": DEMO_GITC_DESIGN_TEXT,
           "gitc-tod-implementation": DEMO_GITC_IMPLEMENTATION_TEXT,
-          "gitc-tod-test-of-one": "Test of One\n\n| 样本编号 | 请求/工单编号 | 审批记录 | 账号创建/变更时间 | 权限分配结果 |\n| --- | --- | --- | --- | --- |\n| AM-001 | REQ-2026-014 | 已取得业务负责人审批 | 2026-03-14 10:32 | 与审批权限一致 |",
+          "gitc-tod-test-of-one": "Test of One\n\n| Sample ID | Request / Ticket ID | Approval Record | Account Creation / Change Time | Access Assignment Result |\n| --- | --- | --- | --- | --- |\n| AM-001 | REQ-2026-014 | Business owner approval obtained | 2026-03-14 10:32 | Consistent with approved access |",
           "gitc-toe-sample-pool": {
-            exportPath: "客户系统 / 程序变更 / 2025变更清单导出.xlsx"
+            exportPath: "Client system / Program changes / 2025 change listing export.xlsx"
           },
           "gitc-toe-sampling": {
             kind: "sampling_excel",
-            fileName: "GITC-访问管理控制测试-抽样样本.xls",
+            fileName: "GITC-Access-Management-Control-Test-Selected-Samples.xls",
             fileType: "application/vnd.ms-excel",
-            sheetName: "抽样样本",
+            sheetName: "Selected Samples",
             generatedAt: new Date().toISOString(),
             rowCount: SAMPLING_EXCEL_ROW_COUNT,
             columns: SAMPLING_EXCEL_COLUMNS,
             rows: Array.from({ length: SAMPLING_EXCEL_ROW_COUNT }, (_, index) => ({
               sequence: index + 1,
               sampleId: `SAMPLE-${String(index + 1).padStart(3, "0")}`,
-              populationItem: `访问管理样本池-ROW-${String((index + 1) * 7).padStart(4, "0")}`,
-              sourcePool: "访问管理样本池.xlsx (428 KB)",
-              samplingMethod: "系统随机抽样（Demo）",
-              status: "待发送"
+              populationItem: `Access Management Population-ROW-${String((index + 1) * 7).padStart(4, "0")}`,
+              sourcePool: "Access Management Sample Population.xlsx (428 KB)",
+              samplingMethod: "System random sampling (Demo)",
+              status: "Pending Send"
             }))
           },
           "gitc-toe-send-sample": {
@@ -1921,15 +1921,15 @@
             sentBy: "AL",
             sentAt: new Date().toISOString()
           },
-          "gitc-toe-transcription": "样本抄写\n\n| 样本编号 | 请求/工单编号 | 客户返回材料 | 控制属性 | 证据内容 | 测试结果 |\n| --- | --- | --- | --- | --- | --- |\n| AM-001 | REQ-2026-014 | 客户返回样本材料.zip | 访问权限审批 | 审批截图与账号创建记录一致 | 未发现例外 |"
+          "gitc-toe-transcription": "Sample Transcription\n\n| Sample ID | Request / Ticket ID | Client Returned Materials | Control Attribute | Evidence Content | Test Result |\n| --- | --- | --- | --- | --- | --- |\n| AM-001 | REQ-2026-014 | Client Returned Sample Support.zip | Access approval | Approval screenshot agrees to account creation record | No exception noted |"
         },
         materials: [
-          material("policy", "tod", "gitc-tod-policy", "访问管理制度.docx", "alice@kpmg.com", 188000),
-          material("meeting_minutes", "tod", "gitc-tod-minutes", "访问管理访谈纪要.docx", "alice@kpmg.com", 88000),
-          material("supporting_material", "tod", "gitc-tod-supporting-material", "访问管理 TOD 支持性材料.xlsx", "alice@kpmg.com", 421000),
-          material("requirement_list", "toe", "gitc-toe-requirement-list", "访问管理需求清单.xlsx", "alice@kpmg.com", 112000),
-          material("sample_pool", "toe", "gitc-toe-sample-pool", "访问管理样本池.xlsx", "alice@kpmg.com", 438000),
-          material("returned_sample_support", "toe", "gitc-toe-returned-sample-support", "客户返回样本材料.zip", "alice@kpmg.com", 91000)
+          material("policy", "tod", "gitc-tod-policy", "Access Management Policy.docx", "alice@kpmg.com", 188000),
+          material("meeting_minutes", "tod", "gitc-tod-minutes", "Access Management Interview Minutes.docx", "alice@kpmg.com", 88000),
+          material("supporting_material", "tod", "gitc-tod-supporting-material", "Access Management TOD Support.xlsx", "alice@kpmg.com", 421000),
+          material("requirement_list", "toe", "gitc-toe-requirement-list", "Access Management Requirement List.xlsx", "alice@kpmg.com", 112000),
+          material("sample_pool", "toe", "gitc-toe-sample-pool", "Access Management Sample Population.xlsx", "alice@kpmg.com", 438000),
+          material("returned_sample_support", "toe", "gitc-toe-returned-sample-support", "Client Returned Sample Support.zip", "alice@kpmg.com", 91000)
         ],
         milestones: {
           planning: true,
@@ -1943,8 +1943,8 @@
         fieldReviews: {
           "gitc-toe-transcription": {
             id: "rev_gitc_toe_procedure",
-            text: "请补充权限复核样本的抽样口径。",
-            reply: "已补充样本范围和期间说明。",
+            text: "Please add the sampling basis for access review samples.",
+            reply: "Sample scope and period have been added.",
             status: "accepted",
             createdBy: "manager@kpmg.com",
             createdAt: new Date().toISOString(),
@@ -1953,12 +1953,12 @@
           }
         },
         reviewStatus: REVIEW_STATUS.SIGNED_OFF,
-        reviewComment: "等待 Manager 复核 TOE 样本。",
+        reviewComment: "Waiting for Manager review of TOE samples.",
         updatedAt: new Date().toISOString()
       },
       {
         id: "ITAC-001",
-        title: "ITAC 三单匹配自动控制测试",
+        title: "ITAC Three-way Match Automated Control Test",
         controlType: "ITAC",
         owner: "alice@kpmg.com",
         auditPhase: "control-test",
@@ -1966,12 +1966,12 @@
         blockers: [],
         nodeResponses: {
           "itac-tod-implementation": DEMO_ITAC_PROCESS_DESCRIPTION_TEXT,
-          "itac-tod-test-of-one": "ITAC Test of One\n\n| 样本编号 | 配置/代码对象 | 关键参数 | 支持材料索引 | 检查结果 | 结论 |\n| --- | --- | --- | --- | --- | --- |\n| ITAC-TOO-001 | 三单匹配容差配置 | 金额容差 0.5% | 三单匹配 Test of One 支持材料.xlsx | 参数与审批记录一致 | 未发现例外 |"
+          "itac-tod-test-of-one": "ITAC Test of One\n\n| Sample ID | Configuration / Code Object | Key Parameter | Support Reference | Inspection Result | Conclusion |\n| --- | --- | --- | --- | --- | --- |\n| ITAC-TOO-001 | Three-way match tolerance configuration | Amount tolerance 0.5% | Three-way Match Test of One Support.xlsx | Parameter agrees to approval record | No exception noted |"
         },
         materials: [
-          material("meeting_minutes", "tod", "itac-tod-minutes", "采购流程访谈纪要.docx", "alice@kpmg.com", 76000),
-          material("supporting_material", "tod", "itac-tod-supporting-material", "三单匹配配置截图.xlsx", "alice@kpmg.com", 366000, "configuration"),
-          material("supporting_material", "tod", "itac-tod-test-of-one-support", "三单匹配 Test of One 支持材料.xlsx", "alice@kpmg.com", 244000, "test_of_one")
+          material("meeting_minutes", "tod", "itac-tod-minutes", "Procurement Process Interview Minutes.docx", "alice@kpmg.com", 76000),
+          material("supporting_material", "tod", "itac-tod-supporting-material", "Three-way Match Configuration Screenshots.xlsx", "alice@kpmg.com", 366000, "configuration"),
+          material("supporting_material", "tod", "itac-tod-test-of-one-support", "Three-way Match Test of One Support.xlsx", "alice@kpmg.com", 244000, "test_of_one")
         ],
         milestones: {
           planning: true,
@@ -1985,7 +1985,7 @@
         fieldReviews: {
           "itac-tod-test-of-one": {
             id: "rev_itac_tod_process",
-            text: "请补充三单匹配容差参数的系统配置来源。",
+            text: "Please add the system configuration source for the three-way match tolerance parameter.",
             reply: "",
             status: "open",
             createdBy: "manager@kpmg.com",
@@ -1998,7 +1998,7 @@
       },
       {
         id: "ITAC-002",
-        title: "ITAC 销售价格主数据变更测试",
+        title: "ITAC Sales Price Master Data Change Test",
         controlType: "ITAC",
         owner: "bob@kpmg.com",
         auditPhase: "control-test",
@@ -2024,7 +2024,7 @@
       },
       {
         id: "GITC-002",
-        title: "GITC 变更管理控制测试",
+        title: "GITC Change Management Control Test",
         controlType: "GITC",
         owner: "manager@kpmg.com",
         auditPhase: "control-test",
@@ -2193,7 +2193,7 @@
       const owners = memberOptions();
       const field = document.getElementById("createOwnerField");
       field.innerHTML = `
-        <span class="label">指派成员</span>
+        <span class="label">Assignee</span>
         ${owners.length ? `
           <select id="createOwner">
             ${owners.map((owner) => `<option value="${owner}" ${owner === createDraft.owner ? "selected" : ""}>${owner}</option>`).join("")}
@@ -2205,7 +2205,7 @@
     function renderCreateDueTable() {
       const nodes = nodesForType(createDraft.controlType);
       document.getElementById("createDueTable").innerHTML = `
-        <div class="due-table-head"><span>节点</span><span>预计完成日期</span></div>
+        <div class="due-table-head"><span>Node</span><span>Due Date</span></div>
         ${nodes.map((node, index) => `
           <label class="due-row">
             <span>
@@ -2257,7 +2257,7 @@
           fieldKey,
           {
             id: review.id || `rev_${Math.random().toString(36).slice(2, 8)}`,
-            text: review.text || "请补充说明。",
+            text: review.text || "Please add details.",
             reply: review.reply || "",
             status: review.status || "open",
             createdBy: review.createdBy || "manager@kpmg.com",
@@ -2274,7 +2274,7 @@
     }
 
     function formatDateTime(value) {
-      if (!value) return "未更新";
+      if (!value) return "Not Updated";
       return new Intl.DateTimeFormat("zh-CN", {
         month: "2-digit",
         day: "2-digit",
@@ -2419,16 +2419,16 @@
     }
 
     function supportingMaterialKindLabel(kind) {
-      if (kind === "configuration") return "配置";
-      if (kind === "code") return "代码";
+      if (kind === "configuration") return "Configuration";
+      if (kind === "code") return "Code";
       if (kind === "test_of_one") return "Test of One";
       return "";
     }
 
     function materialDisplayLabel(item) {
-      const base = MATERIAL_LABELS[item.category] || "材料";
+      const base = MATERIAL_LABELS[item.category] || "Material";
       const kind = supportingMaterialKindLabel(item.supportingMaterialKind);
-      return kind ? `${base}（${kind}）` : base;
+      return kind ? `${base} (${kind})` : base;
     }
 
     function visibleControls() {
@@ -2447,10 +2447,10 @@
       const testing = controls.filter((control) => progressStatus(control) === PROGRESS_STATUS.IN_PROGRESS).length;
       const done = controls.filter((control) => progressStatus(control) === PROGRESS_STATUS.COMPLETED).length;
       document.getElementById("stats").innerHTML = [
-        stat(controls.length, "测试点"),
-        stat(`${completed}/${total}`, "节点进度"),
-        stat(testing, "测试中"),
-        stat(done, "已完成")
+        stat(controls.length, "Test Points"),
+        stat(`${completed}/${total}`, "Node Progress"),
+        stat(testing, "Testing"),
+        stat(done, "Completed")
       ].join("");
     }
 
@@ -2461,11 +2461,11 @@
     function renderFilters() {
       const owners = [...new Set(controls.map((item) => item.owner))].sort();
       const ownerSelect = document.getElementById("ownerFilter");
-      ownerSelect.innerHTML = `<option value="">全部</option>${owners.map((owner) => `<option value="${owner}">${owner}</option>`).join("")}`;
+      ownerSelect.innerHTML = `<option value="">All</option>${owners.map((owner) => `<option value="${owner}">${owner}</option>`).join("")}`;
       ownerSelect.value = filters.owner;
 
       const statusSelect = document.getElementById("statusFilter");
-      statusSelect.innerHTML = `<option value="">全部状态</option>${Object.entries(PROGRESS_LABELS).map(([value, label]) => `<option value="${value}">${label}</option>`).join("")}`;
+      statusSelect.innerHTML = `<option value="">All Statuses</option>${Object.entries(PROGRESS_LABELS).map(([value, label]) => `<option value="${value}">${label}</option>`).join("")}`;
       statusSelect.value = filters.status;
 
       document.getElementById("typeFilter").value = filters.type;
@@ -2499,13 +2499,13 @@
                 `<span>${phaseId.toUpperCase()} ${phase.completedNodes}/${phase.totalNodes}</span>`
               )).join("")}
             </div>
-            <small>制度 ${countsByCategory(control, "policy")} · 纪要 ${countsByCategory(control, "meeting_minutes")} · 支持 ${countsByCategory(control, "supporting_material") || countsByCategory(control, "spp")}</small>
+            <small>Policy ${countsByCategory(control, "policy")} · Minutes ${countsByCategory(control, "meeting_minutes")} · Support ${countsByCategory(control, "supporting_material") || countsByCategory(control, "spp")}</small>
           </button>
         `;
       }).join("") : `
         <div class="control-card">
-          <strong>暂无可记录的测试点</strong>
-          <span>当前筛选条件下没有结果。</span>
+          <strong>No test points available</strong>
+          <span>No results under the current filters.</span>
         </div>
       `;
     }
@@ -2513,7 +2513,7 @@
     function renderDetail() {
       const control = controls.find((item) => item.id === selectedId);
       if (!control) {
-        document.getElementById("detailPanel").innerHTML = `<div class="empty-line">暂无测试点。</div>`;
+        document.getElementById("detailPanel").innerHTML = `<div class="empty-line">No test points.</div>`;
         return;
       }
 
@@ -2527,13 +2527,13 @@
           <div>
             <span class="tag ${control.controlType.toLowerCase()}">${control.controlType}</span>
             <h3>${control.title}</h3>
-            <p>${control.owner} · 最近更新 ${formatDateTime(control.updatedAt)}</p>
+            <p>${control.owner} · Last Updated ${formatDateTime(control.updatedAt)}</p>
           </div>
           <span class="status-pill ${statusClass(status)}">${PROGRESS_LABELS[status]}</span>
         </div>
 
         <div class="progress-summary">
-          ${meter("总进度", progress.completedNodes, progress.totalNodes)}
+          ${meter("Overall Progress", progress.completedNodes, progress.totalNodes)}
           ${Object.entries(progress.phases).map(([phaseId, phaseProgress]) => (
             meter(phaseId.toUpperCase(), phaseProgress.completedNodes, phaseProgress.totalNodes)
           )).join("")}
@@ -2600,7 +2600,7 @@
               fieldKey: `${node.id}::${item.id}`,
               extraId: item.id,
               value: item.value,
-              placeholder: "补充文本框",
+              placeholder: "Additional Text Box",
               extra: true
             })).join("")}
           ` : ""}
@@ -2617,8 +2617,8 @@
               ${node.fileHint ? `<p class="node-note">${node.fileHint}</p>` : ""}
               ${node.requiresExportPath ? `
                 <label class="export-path">
-                  <span>${node.exportPathLabel || "客户导出清单路径"}</span>
-                  <input type="text" value="${escapeHtml(uploadResponse.exportPath || "")}" placeholder="${escapeHtml(node.exportPathPlaceholder || "填写客户导出清单路径")}" data-export-path-node="${node.id}" />
+                  <span>${node.exportPathLabel || "Client Export Path"}</span>
+                  <input type="text" value="${escapeHtml(uploadResponse.exportPath || "")}" placeholder="${escapeHtml(node.exportPathPlaceholder || "Enter client export path")}" data-export-path-node="${node.id}" />
                 </label>
               ` : ""}
               ${materials.length ? `
@@ -2629,15 +2629,15 @@
                         <strong>${item.name}</strong>
                         <span>${materialDisplayLabel(item)} · ${item.uploadedBy} · ${formatDateTime(item.uploadedAt)} · ${Math.round((item.size || 0) / 1024)} KB</span>
                       </div>
-                      <button class="button subtle" type="button" data-remove-material="${item.id}">移除</button>
+                      <button class="button subtle" type="button" data-remove-material="${item.id}">Remove</button>
                     </li>
                   `).join("")}
                 </ul>
-              ` : `<p class="empty-line">暂无材料</p>`}
+              ` : `<p class="empty-line">No materials</p>`}
             </div>
           ` : ""}
           ${node.type === "review" ? `
-            <p class="node-note">当前复核状态：${REVIEW_LABELS[control.reviewStatus]}。${node.threshold === REVIEW_STATUS.SIGNED_OFF ? "该节点需要签核。" : "提交复核后该节点完成。"}</p>
+            <p class="node-note">Current review status: ${REVIEW_LABELS[control.reviewStatus]}. ${node.threshold === REVIEW_STATUS.SIGNED_OFF ? "This node requires sign-off." : "This node is completed after submission for review."}</p>
           ` : ""}
         </div>
       `;
@@ -2679,13 +2679,13 @@
       if (generationTimers[key]) window.clearTimeout(generationTimers[key]);
       generatingNodes[key] = true;
       renderDetail();
-      showToast("AI 正在生成草稿，约 3 秒后更新。");
+      showToast("AI is generating the draft and will update it in about 3 seconds.");
       generationTimers[key] = window.setTimeout(() => {
         setDraft(control, node.id, createValue());
         delete generatingNodes[key];
         delete generationTimers[key];
         renderDetail();
-        showToast("AI 草稿已生成，Save 后计入进度。");
+        showToast("AI draft generated. Save to count it toward progress.");
       }, AI_GENERATION_DELAY_MS);
       return true;
     }
@@ -2727,24 +2727,24 @@
     }
 
     function tableTitleForBuilder(node) {
-      if (node?.builderKind === "sample_transcription_table") return "样本抄写";
+      if (node?.builderKind === "sample_transcription_table") return "Sample Transcription";
       if (node?.builderKind === "itac_test_of_one_table") return "ITAC Test of One";
       return "Test of One";
     }
 
     function tableGenerateButtonLabel(node) {
-      if (node?.builderKind === "sample_transcription_table") return "生成抄写表格";
-      return "生成 Test of One 表格";
+      if (node?.builderKind === "sample_transcription_table") return "Generate Transcription Table";
+      return "Generate Test of One Table";
     }
 
     function tableBuilderHelp(node) {
       if (node?.builderKind === "sample_transcription_table") {
-        return "先手动填写样本字段，再按字段逐行录入多个样本，全部填完后点击生成抄写表格。";
+        return "First define sample fields manually, then enter multiple samples row by row. Generate the transcription table after all samples are complete.";
       }
       if (node?.builderKind === "itac_test_of_one_table") {
-        return "先手动填写 ITAC 样本字段，再填写一个完整样本，生成 Test of One 表格。";
+        return "First define ITAC sample fields manually, then complete one sample and generate the Test of One table.";
       }
-      return "先手动填写样本字段，再填写一个完整样本，生成 Test of One 表格。";
+      return "First define sample fields manually, then complete one sample and generate the Test of One table.";
     }
 
     function shouldAutoGenerateTable(node) {
@@ -2827,11 +2827,11 @@
       const builder = testOfOneBuilderFor(control, nodeId);
       const table = buildTestOfOneTable(builder, node);
       if (!table) {
-        showToast("请先填写至少一个完整样本。");
+        showToast("Please complete at least one full sample first.");
         return;
       }
       setDraft(control, nodeId, table);
-      showToast(`${tableTitleForBuilder(node)}表格已生成，Save 后计入进度。`);
+      showToast(`${tableTitleForBuilder(node)} table generated. Save to count it toward progress.`);
     }
 
     function renderTestOfOneBuilder(control, node) {
@@ -2840,13 +2840,13 @@
       return `
         <div class="test-one-builder">
           <div class="test-one-fields">
-            <span>样本字段</span>
+            <span>Sample Fields</span>
             <div class="field-name-list">
               ${builder.fields.map((field, fieldIndex) => `
                 <div class="field-name-row">
-                  <span>字段 ${fieldIndex + 1}</span>
-                  <input type="text" value="${escapeHtml(field.label || "")}" placeholder="手动填写字段名" data-table-field-label="${field.id}" data-table-field-node="${node.id}" />
-                  <button class="button subtle" type="button" data-remove-table-field="${field.id}" data-table-field-node="${node.id}">移除</button>
+                  <span>Field ${fieldIndex + 1}</span>
+                  <input type="text" value="${escapeHtml(field.label || "")}" placeholder="Enter field name manually" data-table-field-label="${field.id}" data-table-field-node="${node.id}" />
+                  <button class="button subtle" type="button" data-remove-table-field="${field.id}" data-table-field-node="${node.id}">Remove</button>
                 </div>
               `).join("")}
             </div>
@@ -2856,30 +2856,30 @@
               <table>
                 <thead>
                   <tr>
-                    <th>样本</th>
+                    <th>Sample</th>
                     ${fields.map((field) => `<th>${escapeHtml(field.label)}</th>`).join("")}
-                    <th>操作</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   ${builder.rows.map((row, rowIndex) => `
                     <tr>
-                      <th>样本 ${rowIndex + 1}</th>
+                      <th>Sample ${rowIndex + 1}</th>
                       ${fields.map((field) => `
                         <td>
                           <input type="text" value="${escapeHtml(row.values?.[field.id] || "")}" placeholder="${escapeHtml(field.label)}" data-test-one-cell="${node.id}" data-test-one-row="${row.id}" data-test-one-field-id="${field.id}" />
                         </td>
                       `).join("")}
-                      <td><button class="button subtle" type="button" data-remove-test-one-row="${row.id}" data-test-one-node="${node.id}">移除</button></td>
+                      <td><button class="button subtle" type="button" data-remove-test-one-row="${row.id}" data-test-one-node="${node.id}">Remove</button></td>
                     </tr>
                   `).join("")}
                 </tbody>
               </table>
             </div>
-          ` : `<p class="empty-line">先填写至少一个样本字段，系统会在下方生成录入表。</p>`}
+          ` : `<p class="empty-line">Enter at least one sample field first; the input table will appear below.</p>`}
           <div class="test-one-actions">
-            <button class="button subtle" type="button" data-add-table-field="${node.id}">新增字段</button>
-            <button class="button subtle" type="button" data-add-test-one-row="${node.id}">新增样本</button>
+            <button class="button subtle" type="button" data-add-table-field="${node.id}">Add Field</button>
+            <button class="button subtle" type="button" data-add-test-one-row="${node.id}">Add Sample</button>
             <button class="button primary" type="button" data-generate-test-one-table="${node.id}">${tableGenerateButtonLabel(node)}</button>
             <span>${tableBuilderHelp(node)}</span>
           </div>
@@ -2898,11 +2898,11 @@
           <div class="text-box-toolbar">
             <span>${escapeHtml(parsedTable?.title || tableTitleForBuilder(node))}</span>
             <div class="text-menu-wrap">
-              <button class="text-menu-button" type="button" data-text-menu="${fieldKey}" title="更多操作">...</button>
+              <button class="text-menu-button" type="button" data-text-menu="${fieldKey}" title="More Actions">...</button>
               ${review ? `<button class="comment-dot ${review.status}" type="button" data-open-review="${fieldKey}" title="${reviewStateLabel(review.status)}" aria-label="${reviewStateLabel(review.status)}"></button>` : ""}
               ${menuOpen ? `
                 <div class="text-menu">
-                  <button type="button" data-add-review="${fieldKey}">添加复核意见</button>
+                  <button type="button" data-add-review="${fieldKey}">Add Review Comment</button>
                 </div>
               ` : ""}
             </div>
@@ -2922,7 +2922,7 @@
                 </tbody>
               </table>
             </div>
-          ` : `<p class="empty-line">生成后将在这里显示实际表格。</p>`}
+          ` : `<p class="empty-line">The generated table will appear here.</p>`}
           ${review && reviewOpen ? renderReviewThread(fieldKey, review) : ""}
         </div>
       `;
@@ -2936,10 +2936,10 @@
         <div class="generated-node">
           <div class="generated-actions">
             ${isTableBuilderNode(node)
-              ? `<span>按样本字段填表生成${tableTitleForBuilder(node)}</span>`
-              : `<button class="button subtle" type="button" data-regenerate-node="${node.id}" ${generating ? "disabled" : ""}>${generating ? "AI 生成中..." : "重新生成"}</button>`}
-            ${generating ? `<span class="ai-generating">正在读取材料并生成草稿</span>` : ""}
-            ${draft !== undefined ? `<span>未保存草稿</span>` : ""}
+              ? `<span>Fill by sample fields to generate ${tableTitleForBuilder(node)}</span>`
+              : `<button class="button subtle" type="button" data-regenerate-node="${node.id}" ${generating ? "disabled" : ""}>${generating ? "AI Generating..." : "Regenerate"}</button>`}
+            ${generating ? `<span class="ai-generating">Reading materials and generating draft</span>` : ""}
+            ${draft !== undefined ? `<span>Unsaved Draft</span>` : ""}
           </div>
           ${isTableBuilderNode(node) ? renderTestOfOneBuilder(control, node) : ""}
           ${isTableBuilderNode(node)
@@ -2962,18 +2962,18 @@
       return `
         <div class="generated-node">
           <div class="generated-actions">
-            <button class="button subtle" type="button" data-regenerate-node="${node.id}">重新生成 Excel</button>
-            ${draft !== undefined ? `<span>未保存文件</span>` : ""}
+            <button class="button subtle" type="button" data-regenerate-node="${node.id}">Regenerate Excel</button>
+            ${draft !== undefined ? `<span>Unsaved File</span>` : ""}
           </div>
           ${hasFile ? `
             <div class="generated-file">
               <div>
-                <strong>${escapeHtml(file.fileName || "抽样样本.xls")}</strong>
-                <span>${file.rows.length} 个抽样样本 · Excel · 生成时间 ${formatDateTime(file.generatedAt)}</span>
+                <strong>${escapeHtml(file.fileName || "Selected-Samples.xls")}</strong>
+                <span>${file.rows.length}  selected samples · Excel · Generated at ${formatDateTime(file.generatedAt)}</span>
               </div>
-              <button class="button primary" type="button" data-download-generated-file="${node.id}">下载 Excel</button>
+              <button class="button primary" type="button" data-download-generated-file="${node.id}">Download Excel</button>
             </div>
-          ` : `<p class="empty-line">上传样本清单后点击“重新生成 Excel”，系统会自动生成 25 个抽样样本。</p>`}
+          ` : `<p class="empty-line">Upload the sample listing and click “Regenerate Excel”; the system will generate 25 selected samples.</p>`}
         </div>
       `;
     }
@@ -2986,7 +2986,7 @@
           <button class="send-button ${sent ? "active" : ""}" type="button" data-send-node="${node.id}">
             ${sent ? state.sentBy || "SENT" : "Send"}
           </button>
-          <span>${sent ? `已发送 · ${formatDateTime(state.sentAt)}` : "未发送"}</span>
+          <span>${sent ? `Sent · ${formatDateTime(state.sentAt)}` : "Not Sent"}</span>
         </div>
       `;
     }
@@ -2999,12 +2999,12 @@
         <div class="text-box">
           <div class="text-box-toolbar">
             <div class="text-menu-wrap">
-              <button class="text-menu-button" type="button" data-text-menu="${field.fieldKey}" title="更多操作">...</button>
+              <button class="text-menu-button" type="button" data-text-menu="${field.fieldKey}" title="More Actions">...</button>
               ${review ? `<button class="comment-dot ${review.status}" type="button" data-open-review="${field.fieldKey}" title="${reviewStateLabel(review.status)}" aria-label="${reviewStateLabel(review.status)}"></button>` : ""}
               ${menuOpen ? `
                 <div class="text-menu">
-                  <button type="button" data-add-textbox="${field.nodeId}">新增文本框</button>
-                  <button type="button" data-add-review="${field.fieldKey}">添加复核意见</button>
+                  <button type="button" data-add-textbox="${field.nodeId}">Add Text Box</button>
+                  <button type="button" data-add-review="${field.fieldKey}">Add Review Comment</button>
                 </div>
               ` : ""}
             </div>
@@ -3023,26 +3023,26 @@
       return `
         <div class="review-thread ${review.status}">
           <div class="review-thread-head">
-            <span>复核意见 · ${review.createdBy}</span>
+            <span>Review Comment · ${review.createdBy}</span>
             <span class="review-state ${review.status}">${reviewStateLabel(review.status)}</span>
           </div>
-          <textarea data-review-text="${fieldKey}" rows="2" placeholder="填写复核意见">${escapeHtml(review.text)}</textarea>
+          <textarea data-review-text="${fieldKey}" rows="2" placeholder="Enter review comment">${escapeHtml(review.text)}</textarea>
           ${replyOpen ? `
-            <textarea data-review-reply="${fieldKey}" rows="2" placeholder="回复复核意见">${escapeHtml(review.reply || "")}</textarea>
+            <textarea data-review-reply="${fieldKey}" rows="2" placeholder="Reply to review comment">${escapeHtml(review.reply || "")}</textarea>
           ` : ""}
           <div class="review-actions">
-            ${review.status === "open" && !replyOpen ? `<button class="button subtle" type="button" data-reply-review="${fieldKey}">回复</button>` : ""}
-            ${review.status !== "accepted" && replyOpen ? `<button class="button subtle" type="button" data-submit-reply="${fieldKey}">提交回复</button>` : ""}
-            ${review.status === "replied" ? `<button class="button primary" type="button" data-accept-review="${fieldKey}">接受意见</button>` : ""}
+            ${review.status === "open" && !replyOpen ? `<button class="button subtle" type="button" data-reply-review="${fieldKey}">Reply</button>` : ""}
+            ${review.status !== "accepted" && replyOpen ? `<button class="button subtle" type="button" data-submit-reply="${fieldKey}">Submit Reply</button>` : ""}
+            ${review.status === "replied" ? `<button class="button primary" type="button" data-accept-review="${fieldKey}">Accept Comment</button>` : ""}
           </div>
         </div>
       `;
     }
 
     function reviewStateLabel(status) {
-      if (status === "accepted") return "已接受";
-      if (status === "replied") return "已回复";
-      return "待回复";
+      if (status === "accepted") return "Accepted";
+      if (status === "replied") return "Replied";
+      return "Pending Reply";
     }
 
     function allNodesFor(control) {
@@ -3064,8 +3064,8 @@
     }
 
     function materialSummary(items = []) {
-      if (!items.length) return "暂无材料";
-      return items.map((item) => `${item.name || "未命名材料"}${item.size ? ` (${Math.round(item.size / 1024)} KB)` : ""}`).join("、");
+      if (!items.length) return "No materials";
+      return items.map((item) => `${item.name || "Unnamed Material"}${item.size ? ` (${Math.round(item.size / 1024)} KB)` : ""}`).join(", ");
     }
 
     const WORD_FILE_MIME_TYPES = new Set([
@@ -3085,7 +3085,7 @@
     }
 
     function buildGeneratedText(control, node, materials = []) {
-      const title = control?.title || "当前测试点";
+      const title = control?.title || "Current Test Point";
       const source = materialSummary(materials);
       const generatedAt = formatDateTime(new Date().toISOString());
 
@@ -3102,17 +3102,17 @@
         return "";
       }
       if (node.generationKind === "sampling") {
-        return `抽样样本草稿\n测试点：${title}\n依据样本池：${source}\n\n系统模拟抽样结果：Sample-01、Sample-08、Sample-15、Sample-22、Sample-30。\n生成时间：${generatedAt}\n请复核样本池期间、总体完整性和样本数量。`;
+        return `Selected Samples Draft\nTest point: ${title}\nBased on sample population: ${source}\n\nSystem simulated selected samples: Sample-01, Sample-08, Sample-15, Sample-22, Sample-30.\nGenerated at: ${generatedAt}\nPlease review Sample Population period, population completeness, and sample size.`;
       }
       if (node.generationKind === "transcription") {
         if (node.builderKind === "sample_transcription_table") return "";
-        return `测试抄写草稿\n测试点：${title}\n依据客户返回材料：${source}\n\n系统根据客户返回的样本支持性材料模拟完成抄写，整理每个样本的控制属性、支持证据和初步测试结果。请复核抄写内容与附件是否一致。`;
+        return `Test Transcription Draft\nTest point: ${title}\nBased on client returned materials: ${source}\n\nThe system simulates transcription based on client-returned sample support, organizing each sample’s control attributes, supporting evidence, and preliminary test result. Please review whether the transcription agrees to the attachments.`;
       }
-      return `自动生成草稿\n测试点：${title}\n依据材料：${source}\n生成时间：${generatedAt}`;
+      return `Auto-generated Draft\nTest point: ${title}\nBased on material: ${source}\nGenerated at: ${generatedAt}`;
     }
 
     function buildGeneratedFile(control, node, materials = []) {
-      const title = control?.title || "当前测试点";
+      const title = control?.title || "Current Test Point";
       const sourcePool = materialSummary(materials);
       const sourceBase = sanitizeFileName(materials[0]?.name || "sample-pool");
       const generatedAt = new Date().toISOString();
@@ -3120,9 +3120,9 @@
       if (node.fileKind === "sampling_excel") {
         return {
           kind: "sampling_excel",
-          fileName: `${sanitizeFileName(title)}-抽样样本.xls`,
+          fileName: `${sanitizeFileName(title)}-Selected-Samples.xls`,
           fileType: "application/vnd.ms-excel",
-          sheetName: "抽样样本",
+          sheetName: "Selected Samples",
           generatedAt,
           rowCount: SAMPLING_EXCEL_ROW_COUNT,
           columns: SAMPLING_EXCEL_COLUMNS,
@@ -3131,15 +3131,15 @@
             sampleId: `SAMPLE-${String(index + 1).padStart(3, "0")}`,
             populationItem: `${sourceBase}-ROW-${String((index + 1) * 7).padStart(4, "0")}`,
             sourcePool,
-            samplingMethod: "系统随机抽样（Demo）",
-            status: "待发送"
+            samplingMethod: "System random sampling (Demo)",
+            status: "Pending Send"
           }))
         };
       }
 
       return {
         kind: node.fileKind || "generated_file",
-        fileName: `${sanitizeFileName(title)}-生成文件.xls`,
+        fileName: `${sanitizeFileName(title)}-Generated-File.xls`,
         fileType: "application/vnd.ms-excel",
         generatedAt,
         columns: SAMPLING_EXCEL_COLUMNS,
@@ -3150,7 +3150,7 @@
     function regenerateGeneratedNode(control, node) {
       const sourceMaterials = control.materials.filter((item) => item.nodeId === node.dependsOnNodeId);
       if (!sourceMaterials.length) {
-        showToast("请先上传该节点所需材料。");
+        showToast("Please upload the required material for this node first.");
         return false;
       }
       if (scheduleGeneratedDraft(control, node, () => buildGeneratedText(control, node, sourceMaterials))) {
@@ -3164,9 +3164,9 @@
 
     function uploadLabel(node) {
       if (node.actionLabel) return node.actionLabel;
-      if (node.type === "upload_spp") return "上传 SPP";
-      if (node.type === "upload_minutes") return "上传纪要";
-      return "上传资料";
+      if (node.type === "upload_spp") return "Upload SPP";
+      if (node.type === "upload_minutes") return "Upload Minutes";
+      return "Upload Material";
     }
 
     function supportKindKey(control, node) {
@@ -3197,13 +3197,13 @@
       `;
     }
 
-    function sanitizeFileName(value = "抽样样本") {
-      const normalized = String(value || "抽样样本")
+    function sanitizeFileName(value = "Selected Samples") {
+      const normalized = String(value || "Selected Samples")
         .replace(/[\\/:*?"<>|]+/g, "-")
         .replace(/\s+/g, "-")
         .replace(/-+/g, "-")
         .replace(/^-|-$/g, "");
-      return normalized || "抽样样本";
+      return normalized || "Selected Samples";
     }
 
     function escapeHtml(value) {
@@ -3219,7 +3219,7 @@
         ? file.columns
         : SAMPLING_EXCEL_COLUMNS;
       const rows = Array.isArray(file?.rows) ? file.rows : [];
-      const title = file?.sheetName || "抽样样本";
+      const title = file?.sheetName || "Selected Samples";
       return `<!doctype html>
 <html>
 <head>
@@ -3254,7 +3254,7 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = file.fileName || "抽样样本.xls";
+      link.download = file.fileName || "Selected-Samples.xls";
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -3285,7 +3285,7 @@
       const email = document.getElementById("loginEmail").value.trim();
       const password = document.getElementById("loginPassword").value.trim();
       if (!email || !password) {
-        document.getElementById("loginError").textContent = "请输入邮箱和密码。";
+        document.getElementById("loginError").textContent = "Please enter email and password.";
         return;
       }
       currentUser = email;
@@ -3301,15 +3301,15 @@
       const title = createDraft.title.trim();
       const owner = createDraft.owner.trim();
       if (!title) {
-        showToast("请填写测试点名称。");
+        showToast("Please enter a test point name.");
         return;
       }
       if (!owner) {
-        showToast("请先指派项目组成员。");
+        showToast("Please assign a project team member first.");
         return;
       }
       if (!createDraft.firstDueDate) {
-        showToast("请先选择第一个节点预计完成日期。");
+        showToast("Please select the first node due date first.");
         return;
       }
 
@@ -3350,7 +3350,7 @@
       persist();
       document.getElementById("createControlModal").classList.add("hidden");
       renderAll();
-      showToast("测试点已创建。");
+      showToast("Test point created.");
     });
 
     document.addEventListener("change", (event) => {
@@ -3410,7 +3410,7 @@
           ? selectedFiles.filter(isWordFile)
           : selectedFiles;
         if (files.length !== selectedFiles.length) {
-          showToast(`${uploadNode?.label || "该节点"}仅支持 Word 文件（.doc/.docx）。`);
+          showToast(`${uploadNode?.label || "this node "}only supports Word files (.doc/.docx).`);
         }
         if (!files.length) {
           target.value = "";
@@ -3447,9 +3447,9 @@
         persist();
         renderAll();
         if (files.length && hasDelayedGeneration) {
-          showToast(`已记录 ${files.length} 个材料，AI 正在生成草稿。`);
+          showToast(`Recorded ${files.length} material(s). AI is generating the draft.`);
         } else if (files.length) {
-          showToast(`已记录 ${files.length} 个材料，相关草稿已生成，Save 后计入进度。`);
+          showToast(`Recorded ${files.length} material(s). Related draft generated. Save to count it toward progress.`);
         }
       }
     });
@@ -3692,8 +3692,8 @@
           control.updatedAt = new Date().toISOString();
           renderAll();
           showToast(node.type === "generated_file"
-            ? "已生成抽样 Excel，Save 后计入进度。"
-            : "已重新生成草稿，Save 后计入进度。");
+            ? "Selected-sample Excel generated. Save to count it toward progress."
+            : "Draft regenerated. Save to count it toward progress.");
         }
         return;
       }
@@ -3730,7 +3730,7 @@
         control.updatedAt = new Date().toISOString();
         persist();
         renderAll();
-        showToast(nextSent ? "样本已标记为发送。" : "样本发送标记已取消。");
+        showToast(nextSent ? "Samples marked as sent." : "Sample sent mark removed.");
         return;
       }
 
@@ -3748,7 +3748,7 @@
         control.updatedAt = new Date().toISOString();
         persist();
         renderDetail();
-        showToast("已新增文本框。");
+        showToast("Text box added.");
         return;
       }
 
@@ -3759,7 +3759,7 @@
         control.fieldReviews = control.fieldReviews || {};
         control.fieldReviews[fieldKey] = {
           id: `rev_${Math.random().toString(36).slice(2, 8)}`,
-          text: "请补充说明。",
+          text: "Please add details.",
           reply: "",
           status: "open",
           createdBy: "manager@kpmg.com",
@@ -3773,7 +3773,7 @@
         control.updatedAt = new Date().toISOString();
         persist();
         renderAll();
-        showToast("已添加复核意见。");
+        showToast("Review comment added.");
         return;
       }
 
@@ -3797,9 +3797,9 @@
           control.updatedAt = new Date().toISOString();
           persist();
           renderAll();
-          showToast("回复已提交。");
+          showToast("Reply submitted.");
         } else {
-          showToast("请先填写回复内容。");
+          showToast("Please enter a reply first.");
         }
         return;
       }
@@ -3813,7 +3813,7 @@
           control.updatedAt = new Date().toISOString();
           persist();
           renderAll();
-          showToast("复核意见已接受。");
+          showToast("Review comment accepted.");
         }
         return;
       }
@@ -3850,7 +3850,7 @@
         control.updatedAt = new Date().toISOString();
         persist();
         renderAll();
-        showToast("材料记录已移除。");
+        showToast("Material record removed.");
         return;
       }
 
@@ -3865,7 +3865,7 @@
         control.updatedAt = new Date().toISOString();
         persist();
         renderAll();
-        showToast("测试点已保存。");
+        showToast("Test point saved.");
         return;
       }
 
@@ -3881,7 +3881,7 @@
         openReviewKey = "";
         openReplyKey = "";
         renderAll();
-        showToast("已取消未保存修改。");
+        showToast("Unsaved changes cancelled.");
       }
     });
 

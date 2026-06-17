@@ -17,12 +17,12 @@ export function initials(name) {
 }
 
 export function platformClass(platform) {
-  if (platform === "移动端") return "mobile";
-  if (platform === "后端") return "backend";
+  if (platform === "Mobile") return "mobile";
+  if (platform === "Backend") return "backend";
   if (platform === "AI") return "ai";
   return "pc";
 }
 
 export function columnTitle(status) {
-  return COLUMNS.find((column) => column.id === status)?.title || "待办";
+  return COLUMNS.find((column) => column.id === status)?.title || "To Do";
 }

@@ -11,10 +11,10 @@ export const SPECIALIST_LEAD_ROLES = [
 ];
 
 export const PROJECT_SORT_OPTIONS = [
-  { id: "recent", label: "最近创建" },
-  { id: "client", label: "按客户名称" },
-  { id: "industry", label: "按行业" },
-  { id: "year", label: "按年份" }
+  { id: "recent", label: "Recently Created" },
+  { id: "client", label: "By Client Name" },
+  { id: "industry", label: "By Industry" },
+  { id: "year", label: "By Year" }
 ];
 
 export function labelOfSpecialistTeam(id) {

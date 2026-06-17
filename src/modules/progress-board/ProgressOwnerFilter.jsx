@@ -41,7 +41,7 @@ export function ProgressOwnerFilter({
           className="filter-chip subtle-clear compact"
           onClick={() => onChange("")}
         >
-          清除
+          Clear
         </button>
       ) : null}
     </label>

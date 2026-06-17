@@ -1,13 +1,13 @@
 import React from "react";
 
 const VIEW_LABELS = {
-  home: "项目列表",
-  create: "新建项目",
-  detail: "项目概览",
-  members: "成员管理",
-  workspace: "工作台",
-  board: "看板",
-  progress: "进度看板"
+  home: "Project List",
+  create: "Create Project",
+  detail: "Project Overview",
+  members: "Member Management",
+  workspace: "Workspace",
+  board: "Kanban",
+  progress: "Progress Board"
 };
 
 export function Topbar({
@@ -38,7 +38,7 @@ export function Topbar({
       </div>
       <div className="actions">
         {activeView === "board" ? (
-          <button className="button primary" type="button" onClick={onNewTask}>新建任务</button>
+          <button className="button primary" type="button" onClick={onNewTask}>Create Task</button>
         ) : null}
       </div>
     </header>

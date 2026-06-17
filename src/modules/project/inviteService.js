@@ -1,10 +1,10 @@
 export function notifyMockInvites(onToast, count) {
   if (!count) {
-    onToast("已保存变更。");
+    onToast("Changes saved.");
     return;
   }
 
-  onToast(`已生成 ${count} 条邀请链接（演示模式，请复制链接分享）。`);
+  onToast(`Generated ${count} invite link(s) in demo mode. Copy and share the links.`);
 }
 
 export function collectInviteCount(project, extraMembers = [], extraSpecialistStaff = []) {

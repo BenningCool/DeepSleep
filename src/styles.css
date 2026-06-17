@@ -3270,7 +3270,7 @@ button {
   padding: 0 24px 24px;
   min-height: min-content;
 
-  /* 三态 + 逾期：KPI / 环形图 / 图例 / pill 共用 */
+  /* Three states + overdue: shared by KPI, donut chart, legend, and pills */
   --pb-status-not-started-fill: #ff991f;
   --pb-status-not-started-bg: #fffae6;
   --pb-status-not-started-border: #ffab00;
@@ -4566,7 +4566,7 @@ button {
 .progress-pill.workspace-status.in-progress { background: #deebff; color: #0052cc; }
 .progress-pill.workspace-status.completed { background: #e3fcef; color: #006644; }
 
-/* v1.6.6 进度看板视觉语义（合伙人 / 经理鸟瞰） */
+/* v1.6.6 Progress Board visual semantics for partner / manager overview */
 .progress-board-page .progress-pill.workspace-status {
   border: 2px solid transparent;
   font-weight: 800;
@@ -5277,7 +5277,7 @@ button {
   }
 }
 
-/* 组内成员进度（进度看板） */
+/* Team member progress on Progress Board */
 .progress-dashboard-card-head.stacked {
   display: grid;
   gap: 10px;

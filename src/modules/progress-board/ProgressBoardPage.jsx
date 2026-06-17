@@ -60,21 +60,21 @@ function formatNodeDueDatesList(detail) {
 
 function formatMaterialSummary(control) {
   const parts = [
-    `制度 ${control.policyCount || 0}`,
-    `纪要 ${control.meetingMinutesCount || 0}`,
-    `支持性材料 ${control.supportingMaterialCount || 0}`,
+    `Policy ${control.policyCount || 0}`,
+    `Minutes ${control.meetingMinutesCount || 0}`,
+    `Supporting Materials ${control.supportingMaterialCount || 0}`,
     `SPP ${control.sppCount || 0}`,
-    `测试资料 ${control.evidenceCount || 0}`
+    `Test Evidence ${control.evidenceCount || 0}`
   ];
 
   if (control.requirementListCount) {
-    parts.push(`需求清单 ${control.requirementListCount}`);
+    parts.push(`Requirement List ${control.requirementListCount}`);
   }
   if (control.samplePoolCount) {
-    parts.push(`样本池 ${control.samplePoolCount}`);
+    parts.push(`Sample Population ${control.samplePoolCount}`);
   }
   if (control.returnedSampleSupportCount) {
-    parts.push(`返回材料 ${control.returnedSampleSupportCount}`);
+    parts.push(`Returned Materials ${control.returnedSampleSupportCount}`);
   }
 
   return parts.join(" · ");
@@ -155,12 +155,12 @@ export function ProgressBoardPage({
 
   const controlTypeTabs = useMemo(() => {
     const tabs = [
-      { id: "ALL", label: "全部", count: filteredControls.length },
+      { id: "ALL", label: "All", count: filteredControls.length },
       { id: "GITC", label: "GITC", count: gitcControls.length },
       { id: "ITAC", label: "ITAC", count: itacControls.length }
     ];
     if (otherControls.length) {
-      tabs.push({ id: "OTHER", label: "其他", count: otherControls.length });
+      tabs.push({ id: "OTHER", label: "Other", count: otherControls.length });
     }
     return tabs;
   }, [filteredControls.length, gitcControls.length, itacControls.length, otherControls.length]);
@@ -224,11 +224,11 @@ export function ProgressBoardPage({
       <table className="progress-table">
         <thead>
           <tr>
-            <th>测试点</th>
-            <th>负责人</th>
-            <th>负责组</th>
-            <th>测试点状态</th>
-            <th>节点进度</th>
+            <th>Test Points</th>
+            <th>Owner</th>
+            <th>Owner Group</th>
+            <th>Test Point Status</th>
+            <th>Node Progress</th>
           </tr>
         </thead>
         <tbody>
@@ -253,7 +253,7 @@ export function ProgressBoardPage({
                   {rowOverdue ? (
                     <span className="progress-flag overdue compact">
                       {ATTENTION_LABELS.overdueBadge}
-                      {overdueDays ? ` ${overdueDays}天` : ""}
+                      {overdueDays ? ` ${overdueDays}d` : ""}
                     </span>
                   ) : null}
                   <span className="progress-control-title">{control.title}</span>
@@ -289,7 +289,7 @@ export function ProgressBoardPage({
     return (
       <section className="progress-board-page">
         <div className="empty-state compact">
-          <p>未找到当前项目，请从项目列表重新进入。</p>
+          <p>Current project not found. Re-enter from Project List.</p>
         </div>
       </section>
     );
@@ -299,7 +299,7 @@ export function ProgressBoardPage({
     <section className="progress-board-page">
       <header className="page-header">
         <div>
-          <p className="page-eyebrow">Progress Board · 项目进度看板</p>
+          <p className="page-eyebrow">Progress Board · Project Progress Board</p>
           <h2>{project.clientName || project.name}</h2>
         </div>
       </header>
@@ -342,7 +342,7 @@ export function ProgressBoardPage({
       <div className="progress-main-grid">
         <section className="progress-table-panel">
           <div className="progress-table-head">
-            <h3>测试点列表</h3>
+            <h3>Test Point List</h3>
             {groupFilteredControls.length ? (
               <div className="progress-table-tools">
                 <ProgressOwnerFilter
@@ -373,12 +373,12 @@ export function ProgressBoardPage({
               ownerFilter
                 ? PROGRESS_LIST_LABELS.filterEmpty
                 : controlTypeTab === "ALL"
-                  ? "当前筛选下暂无测试点。"
-                  : `当前筛选下暂无 ${controlTypeTab === "OTHER" ? "其他" : controlTypeTab} 测试点。`
+                  ? "No test points under the current filters."
+                  : `No ${controlTypeTab === "OTHER" ? "Other" : controlTypeTab} test points under the current filters.`
             )
           ) : (
             <div className="empty-state compact">
-              <p>暂无测试点，请在工作台新建测试点或调整筛选条件。</p>
+              <p>No test points yet. Create a test point in Workspace or adjust filters.</p>
             </div>
           )}
         </section>
@@ -395,13 +395,13 @@ export function ProgressBoardPage({
                   <p>
                     {selectedControl.id}
                     {" · "}
-                    <ProgressOwnerLabel owner={selectedControl.owner || "未分配"} />
+                    <ProgressOwnerLabel owner={selectedControl.owner || "Unassigned"} />
                   </p>
                 </div>
 
                 <div className="progress-dual-status">
                   <div className="dual-status-row">
-                    <span className="dual-status-label">测试点状态</span>
+                    <span className="dual-status-label">Test Point Status</span>
                     <div className="progress-status-value">
                       <span className={`progress-pill workspace-status ${statusClass(selectedControl.workspaceStatus)}`}>
                         {labelOfWorkspaceStatus(selectedControl.workspaceStatus)}
@@ -426,7 +426,7 @@ export function ProgressBoardPage({
                 <div className="progress-detail-block progress-drawer-fill">
                   <h4>{DRAWER_WORKSPACE_LABELS.workspaceSummary}</h4>
                   <p>
-                    {ATTENTION_LABELS.dueLabel}：
+                    {ATTENTION_LABELS.dueLabel}:
                     {resolveControlPlanDue(selectedControl, taskMap[selectedControl.id]) || "—"}
                   </p>
                   <div className="progress-detail-subfield progress-drawer-due-field">
@@ -444,18 +444,18 @@ export function ProgressBoardPage({
               <div className="panel-footer-actions progress-drawer-footer">
                 {onGoBoard ? (
                   <button className="button" type="button" onClick={() => onGoBoard(selectedControl.id)}>
-                    去看板
+                    Go to Kanban
                   </button>
                 ) : null}
                 <button className="button primary" type="button" onClick={() => onGoWorkspace(selectedControl.id)}>
-                  去工作台
+                  Go to Workspace
                 </button>
-                <button className="button subtle" type="button" onClick={refresh}>刷新</button>
+                <button className="button subtle" type="button" onClick={refresh}>Refresh</button>
               </div>
             </div>
           ) : (
             <div className="progress-drawer-placeholder">
-              <p>选择测试点或点击「近期动态」「需关注事项」中的条目，查看只读详情。</p>
+              <p>Select a test point or click an item in Recent Activity or Attention Items to view read-only details.</p>
             </div>
           )}
         </aside>

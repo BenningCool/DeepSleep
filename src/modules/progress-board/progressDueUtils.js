@@ -1,10 +1,10 @@
 import { PROGRESS_STATUS } from "../../services/workspaceProgressService";
 
 /**
- * 控制点计划完成日解析（对齐 PROGRESS_API.md）
+ * Control planned due date resolution aligned with PROGRESS_API.md
  *
- * 优先级：看板 task.due → snapshot 预留字段 → nodeDueDates 最晚节点日 → task 预留
- * 逾期判定：未完成且（计划完成日已过期，或任一节点 nodeDueDates 已过期）
+ * Priority: Kanban task.due -> snapshot reserved field -> latest nodeDueDates node date -> task reserved field
+ * Overdue rule: incomplete and either planned due date has passed or any nodeDueDates entry has passed
  */
 const DAY_MS = 1000 * 60 * 60 * 24;
 
@@ -24,7 +24,7 @@ function collectNodeDueDates(control) {
     .filter(Boolean);
 }
 
-/** 控制点级展示用计划完成日：取 nodeDueDates 中最晚日期 */
+/** Control-level display due date: latest date in nodeDueDates */
 function resolveNodeDueDatesPlanDue(control) {
   const dates = collectNodeDueDates(control).sort();
   return dates.length ? dates[dates.length - 1] : "";
@@ -101,7 +101,7 @@ export function isControlPlanOverdue(control, task) {
   return daysOverdueForControl(control, task) > 0;
 }
 
-/** 当前筛选范围内是否已有可计算计划完成日（含 nodeDueDates） */
+/** Whether the current filtered scope has computable planned due dates, including nodeDueDates */
 export function countControlsWithPlanDue(controls = [], taskMap = {}) {
   return controls.filter((control) => (
     hasResolvablePlanDue(control, taskMap[control.id])

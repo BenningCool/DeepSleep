@@ -31,16 +31,16 @@ export function computeWorkspaceStatusBreakdown(controls = []) {
   return breakdown;
 }
 
-/** 占当前筛选控制点总数的百分比（整数，无分母时返回 —） */
+/** Percentage of current filtered controls, integer; returns dash when denominator is zero */
 export function formatSharePercent(count, total) {
   if (!total || total <= 0) return "—";
   const numeric = typeof count === "number" ? count : 0;
   return `${Math.round((numeric / total) * 100)}%`;
 }
 
-/** 按控制点类型筛选（ALL / GITC / ITAC） */
+/** Filter by control type: ALL / GITC / ITAC */
 export const CONTROL_TYPE_FILTER_TABS = [
-  { id: "ALL", label: "全部" },
+  { id: "ALL", label: "All" },
   { id: "GITC", label: "GITC" },
   { id: "ITAC", label: "ITAC" }
 ];
@@ -60,7 +60,7 @@ export function countControlsByType(controls = []) {
 
 export const KPI_CONTROL_TYPES = ["GITC", "ITAC"];
 
-/** 某状态桶内 GITC / ITAC 数量及占该桶比例 */
+/** GITC / ITAC counts and share within a status bucket */
 export function computeTypeSplitForControls(controls = [], bucketTotal = controls.length) {
   const total = bucketTotal || 0;
   return KPI_CONTROL_TYPES.reduce((acc, type) => {
@@ -87,7 +87,7 @@ export function filterOverdueControls(controls = [], taskMap = {}) {
   });
 }
 
-/** 各控制点节点完成度（completedNodes / totalNodes） */
+/** Node completion for each control: completedNodes / totalNodes */
 export function computeControlNodeProgressRows(controls = []) {
   return controls
     .map((control) => {
@@ -112,7 +112,7 @@ export function computeControlNodeProgressRows(controls = []) {
 const NODE_PROGRESS_COMPLETED_COLOR = "#00875a";
 const NODE_PROGRESS_REMAINING_COLOR = "#ebecf0";
 
-/** 汇总 snapshot 节点进度（completedNodes / totalNodes） */
+/** Aggregate snapshot node progress: completedNodes / totalNodes */
 export function computeAggregateNodeProgress(controls = []) {
   let completedNodes = 0;
   let totalNodes = 0;
@@ -146,7 +146,7 @@ export function computeNodeProgressOverviewRows(controls = []) {
   const byType = computeNodeProgressByControlType(controls);
 
   return [
-    { id: "ALL", label: "全部", ...all },
+    { id: "ALL", label: "All", ...all },
     { id: "GITC", label: "GITC", ...byType.GITC },
     { id: "ITAC", label: "ITAC", ...byType.ITAC }
   ];
@@ -295,7 +295,7 @@ export function getRecentActivity(controls = [], limit = 8) {
 
 export function formatActivityTime(value) {
   if (!value) return "—";
-  return new Intl.DateTimeFormat("zh-CN", {
+  return new Intl.DateTimeFormat("en-US", {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",

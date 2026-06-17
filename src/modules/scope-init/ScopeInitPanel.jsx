@@ -77,13 +77,13 @@ export function ScopeInitPanel({ onGenerate, onToast }) {
     });
     setActivePreset(preset.id);
     setPreviewTasks([]);
-    onToast(`已应用模板：${preset.label}`);
+    onToast(`Applied template: ${preset.label}`);
   }
 
   function handlePreview(event) {
     event.preventDefault();
     if (!form.projectName.trim()) {
-      onToast("请先填写项目名称。");
+      onToast("Enter a project name first.");
       return;
     }
     setPreviewTasks(generateScopeTasks(form));
@@ -91,36 +91,36 @@ export function ScopeInitPanel({ onGenerate, onToast }) {
 
   function handleImport() {
     if (!previewTasks.length) {
-      onToast("请先生成 Scope 预览。");
+      onToast("Generate a Scope preview first.");
       return;
     }
     const confirmed = window.confirm(
-      `将把 ${previewTasks.length} 条初始化任务导入看板，是否继续？`
+      `Import ${previewTasks.length} initialization task(s) into Kanban?`
     );
     if (!confirmed) return;
     onGenerate(previewTasks, form.projectName.trim());
-    onToast(`已导入 ${previewTasks.length} 条 Scope 任务，可在看板中查看。`);
+    onToast(`Imported ${previewTasks.length} Scope task(s). You can view them in Kanban.`);
     setPreviewTasks([]);
   }
 
   return (
-    <section className="scope-init" aria-label="Scope 初始化">
+    <section className="scope-init" aria-label="Scope Initialization">
       <header className="scope-hero">
         <div>
-          <h2>审计 Scope 初始化</h2>
+          <h2>Audit Scope Initialization</h2>
           <p>
-            选择行业、审计领域、项目类型与关键系统，自动生成约 80% 的初始化任务。
-            关键审计步骤在看板中受阶段门禁约束，不可跨步推进。
+            Select industry, audit domain, project type, and key systems to automatically generate about 80% of setup tasks.
+            Critical audit steps are controlled by stage gates in the Kanban and cannot skip stages.
           </p>
         </div>
         <div className="scope-badges">
-          <span className="pill p0">P0 模块</span>
-          <span className="pill pc">IT 审计</span>
+          <span className="pill p0">P0 Module</span>
+          <span className="pill pc">IT Audit</span>
         </div>
       </header>
 
-      <section className="scope-presets" aria-label="快速模板">
-        <span className="label">快速模板</span>
+      <section className="scope-presets" aria-label="Quick Templates">
+        <span className="label">Quick Templates</span>
         <div className="scope-preset-list">
           {QUICK_PRESETS.map((preset) => (
             <button
@@ -137,21 +137,21 @@ export function ScopeInitPanel({ onGenerate, onToast }) {
 
       <div className="scope-layout">
         <form className="scope-form" onSubmit={handlePreview}>
-          <h3>创建审计项目</h3>
+          <h3>Create Audit Project</h3>
 
           <label className="field full">
-            <span className="label">项目名称</span>
+            <span className="label">Project Name</span>
             <input
               required
               maxLength="60"
               value={form.projectName}
               onChange={(event) => updateField("projectName", event.target.value)}
-              placeholder="例如：某银行 2026 年度 ITGC 审计"
+              placeholder="Example: ABC Bank 2026 ITGC Audit"
             />
           </label>
 
           <label className="field">
-            <span className="label">行业</span>
+            <span className="label">Industry</span>
             <select
               value={form.industry}
               onChange={(event) => updateField("industry", event.target.value)}
@@ -164,7 +164,7 @@ export function ScopeInitPanel({ onGenerate, onToast }) {
           </label>
 
           <label className="field">
-            <span className="label">审计领域</span>
+            <span className="label">Audit Domain</span>
             <select
               value={form.auditDomain}
               onChange={(event) => updateField("auditDomain", event.target.value)}
@@ -177,7 +177,7 @@ export function ScopeInitPanel({ onGenerate, onToast }) {
           </label>
 
           <label className="field">
-            <span className="label">项目类型</span>
+            <span className="label">Project Type</span>
             <select
               value={form.projectType}
               onChange={(event) => updateField("projectType", event.target.value)}
@@ -190,16 +190,16 @@ export function ScopeInitPanel({ onGenerate, onToast }) {
           </label>
 
           <label className="field">
-            <span className="label">项目负责人</span>
+            <span className="label">Project Owner</span>
             <input
               value={form.owner}
               onChange={(event) => updateField("owner", event.target.value)}
-              placeholder="例如：审计经理"
+              placeholder="Example: Audit Manager"
             />
           </label>
 
           <label className="field">
-            <span className="label">计划开始日期</span>
+            <span className="label">Planned Start Date</span>
             <input
               type="date"
               value={form.startDate}
@@ -208,7 +208,7 @@ export function ScopeInitPanel({ onGenerate, onToast }) {
           </label>
 
           <div className="field full">
-            <span className="label">关键系统（可多选）</span>
+            <span className="label">Key Systems (multi-select)</span>
             <div className="scope-system-grid">
               {KEY_SYSTEMS.map((system) => {
                 const selected = form.systems.includes(system.id);
@@ -229,7 +229,7 @@ export function ScopeInitPanel({ onGenerate, onToast }) {
           </div>
 
           <div className="scope-summary-card full">
-            <strong>当前 Scope 组合</strong>
+            <strong>Current Scope Mix</strong>
             <p>{summary.industryLabel}</p>
             <p>{summary.auditDomainLabel}</p>
             <p>{summary.projectTypeLabel}</p>
@@ -237,10 +237,10 @@ export function ScopeInitPanel({ onGenerate, onToast }) {
           </div>
 
           <div className="scope-actions full">
-            <button className="button primary" type="submit">生成 Scope 预览</button>
+            <button className="button primary" type="submit">Generate Scope Preview</button>
             {previewTasks.length ? (
               <button className="button" type="button" onClick={handleImport}>
-                导入看板（{previewTasks.length} 条）
+                Import to Kanban ({previewTasks.length} item(s))
               </button>
             ) : null}
           </div>
@@ -248,19 +248,19 @@ export function ScopeInitPanel({ onGenerate, onToast }) {
 
         <aside className="scope-preview">
           <div className="scope-preview-head">
-            <h3>初始化任务清单</h3>
+            <h3>Initial Task List</h3>
             {previewTasks.length ? (
               <div className="scope-stats">
-                <ScopeStat value={`${stats.coverage}%`} label="自动化覆盖" />
-                <ScopeStat value={stats.total} label="任务数" />
-                <ScopeStat value={stats.criticalCount} label="关键步骤" />
-                <ScopeStat value={stats.p0Count} label="P0 任务" />
+                <ScopeStat value={`${stats.coverage}%`} label="Automation Coverage" />
+                <ScopeStat value={stats.total} label="Tasks" />
+                <ScopeStat value={stats.criticalCount} label="Critical Steps" />
+                <ScopeStat value={stats.p0Count} label="P0 Tasks" />
               </div>
             ) : null}
           </div>
 
-          <section className="scope-workflow" aria-label="审计阶段路径">
-            <span className="label">审计阶段路径</span>
+          <section className="scope-workflow" aria-label="Audit Stage Path">
+            <span className="label">Audit Stage Path</span>
             <div className="scope-workflow-track">
               {WORKFLOW_STEPS.map((step, index) => (
                 <div className="scope-workflow-step" key={step.id}>
@@ -273,7 +273,7 @@ export function ScopeInitPanel({ onGenerate, onToast }) {
                 </div>
               ))}
             </div>
-            <p className="scope-workflow-note">橙色节点为关键步骤，看板中不可跨列跳转。</p>
+            <p className="scope-workflow-note">Orange nodes are critical steps and cannot skip columns in Kanban.</p>
           </section>
 
           {previewTasks.length ? (
@@ -282,20 +282,20 @@ export function ScopeInitPanel({ onGenerate, onToast }) {
                 <section className="scope-phase-group" key={group.phase}>
                   <header className="scope-phase-header">
                     <h4>{group.label}</h4>
-                    <span>{group.tasks.length} 项</span>
+                    <span>{group.tasks.length} items</span>
                   </header>
                   <ul className="scope-task-list">
                     {group.tasks.map((task) => (
                       <li key={task.id} className="scope-task-item">
                         <div className="scope-task-head">
                           <span className={`pill ${task.priority.toLowerCase()}`}>{task.priority}</span>
-                          {task.scopeCritical ? <span className="pill critical">关键</span> : null}
-                          {task.systemScoped ? <span className="pill backend">系统</span> : null}
+                          {task.scopeCritical ? <span className="pill critical">Critical</span> : null}
+                          {task.systemScoped ? <span className="pill backend">System</span> : null}
                         </div>
                         <strong>{task.title}</strong>
                         <p>{task.description.split("\n")[0]}</p>
                         <span className="scope-task-meta">
-                          截止 {task.due} · {task.owner}
+                          Due {task.due} · {task.owner}
                         </span>
                       </li>
                     ))}
@@ -305,16 +305,16 @@ export function ScopeInitPanel({ onGenerate, onToast }) {
             </div>
           ) : (
             <div className="scope-empty">
-              填写左侧表单并点击「生成 Scope 预览」，将按审计阶段分组展示任务清单。
+              Complete the form on the left and click Generate Scope Preview to show tasks grouped by audit stage.
             </div>
           )}
 
           <section className="scope-rules-card">
-            <h4>阶段门禁规则</h4>
+            <h4>Stage Gate Rules</h4>
             <ul>
-              <li>关键步骤不可跨列跳转，须按看板阶段逐步推进。</li>
-              <li>推进任务前，同项目内更早阶段的关键步骤须先达到相同或更后阶段。</li>
-              <li>选择关键系统后，自动追加对应系统的控制测试任务。</li>
+              <li>Critical steps cannot skip columns and must move through Kanban stages sequentially.</li>
+              <li>Before moving a task forward, earlier critical steps in the same project must reach the same or a later stage.</li>
+              <li>Selecting key systems automatically adds corresponding system control testing tasks.</li>
             </ul>
           </section>
         </aside>

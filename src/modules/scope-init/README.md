@@ -1,11 +1,11 @@
-# Scope Init Module
+# Scope Initialization Module
 
-负责“审计定制化 / Scope 初始化”功能。
+Owns audit customization and scope initialization.
 
-建议在这里开发：
+Recommended work area:
 
-- 项目创建表单
-- 行业、审计领域、项目类型选择
-- Scope 模板数据
-- 初始化任务生成逻辑
-- 关键步骤不可跳过规则
+- project creation form
+- industry, audit domain, and project type selection
+- scope template data
+- initialization task generation
+- critical-step no-skip rules

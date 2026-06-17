@@ -5,36 +5,36 @@ import { normalizeTaskStatus } from "../../utils/taskStatusMigration";
 export const SCOPE_DRAFT_KEY = "deepsleep-scope-draft-v1";
 
 export const INDUSTRIES = [
-  { id: "finance", label: "金融服务 / 银行", hint: "核心系统、支付清算、监管报送" },
-  { id: "manufacturing", label: "制造业", hint: "ERP、MES、供应链与生产系统" },
-  { id: "tech", label: "科技 / 互联网", hint: "云原生、DevOps、数据平台" },
-  { id: "retail", label: "零售与消费品", hint: "POS、电商、会员与库存系统" },
-  { id: "healthcare", label: "医药健康", hint: "GMP、临床试验、患者数据" },
-  { id: "energy", label: "能源与公用事业", hint: "SCADA、资产运维、计费系统" }
+  { id: "finance", label: "Financial Services / Banking", hint: "Core systems, payment clearing, regulatory reporting" },
+  { id: "manufacturing", label: "Manufacturing", hint: "ERP, MES, supply chain, and production systems" },
+  { id: "tech", label: "Technology / Internet", hint: "Cloud-native, DevOps, data platforms" },
+  { id: "retail", label: "Retail & Consumer", hint: "POS, e-commerce, membership, and inventory systems" },
+  { id: "healthcare", label: "Healthcare", hint: "GMP, clinical trials, patient data" },
+  { id: "energy", label: "Energy & Utilities", hint: "SCADA, asset operations, billing systems" }
 ];
 
 export const AUDIT_DOMAINS = [
-  { id: "itgc", label: "ITGC", hint: "访问管理、变更管理、运维与备份" },
-  { id: "itac", label: "ITAC", hint: "应用控制、接口勾稽、自动化控制" },
-  { id: "sox404", label: "SOX 404", hint: "财务报告相关 IT 一般控制" },
-  { id: "privacy", label: "数据治理与隐私", hint: "个人信息保护、数据分级分类" },
-  { id: "cyber", label: "网络安全", hint: "漏洞管理、事件响应、渗透测试" }
+  { id: "itgc", label: "ITGC", hint: "Access management, change management, operations, and backup" },
+  { id: "itac", label: "ITAC", hint: "Application controls, interface reconciliation, automated controls" },
+  { id: "sox404", label: "SOX 404", hint: "IT general controls related to financial reporting" },
+  { id: "privacy", label: "Data Governance & Privacy", hint: "Personal information protection, data classification" },
+  { id: "cyber", label: "Cybersecurity", hint: "Vulnerability management, incident response, penetration testing" }
 ];
 
 export const PROJECT_TYPES = [
-  { id: "annual", label: "年度财务报表审计（IT 部分）", hint: "按审计准则执行 IT 控制测试" },
-  { id: "soc", label: "SOC 1 / SOC 2 审计", hint: "服务组织控制报告" },
-  { id: "special", label: "专项 IT 审计", hint: "聚焦单一风险域或监管要求" },
-  { id: "ipo", label: "IPO 就绪评估", hint: "上市前 IT 内控成熟度评估" },
-  { id: "mna", label: "并购 IT 尽职调查", hint: "目标公司 IT 风险与整合评估" }
+  { id: "annual", label: "Annual Financial Statement Audit (IT Scope)", hint: "Execute IT control testing under audit standards" },
+  { id: "soc", label: "SOC 1 / SOC 2 Audit", hint: "Service organization control report" },
+  { id: "special", label: "Special IT Audit", hint: "Focus on a single risk domain or regulatory requirement" },
+  { id: "ipo", label: "IPO Readiness Assessment", hint: "Pre-listing IT internal control maturity assessment" },
+  { id: "mna", label: "M&A IT Due Diligence", hint: "Target company IT risk and integration assessment" }
 ];
 
 export const QUICK_PRESETS = [
   {
     id: "bank-itgc",
-    label: "银行 ITGC 年报",
+    label: "Banking ITGC Annual Audit",
     form: {
-      projectName: "某银行 2026 年度 ITGC 审计",
+      projectName: "ABC Bank 2026 ITGC Audit",
       industry: "finance",
       auditDomain: "itgc",
       projectType: "annual",
@@ -43,9 +43,9 @@ export const QUICK_PRESETS = [
   },
   {
     id: "tech-soc2",
-    label: "互联网 SOC 2",
+    label: "Internet SOC 2",
     form: {
-      projectName: "某科技公司 SOC 2 Type II",
+      projectName: "Example Technology Company SOC 2 Type II",
       industry: "tech",
       auditDomain: "cyber",
       projectType: "soc",
@@ -54,9 +54,9 @@ export const QUICK_PRESETS = [
   },
   {
     id: "mfg-itac",
-    label: "制造业 ITAC 专项",
+    label: "Manufacturing ITAC Special Audit",
     form: {
-      projectName: "某制造企业 ITAC 专项审计",
+      projectName: "Example Manufacturer ITAC Special Audit",
       industry: "manufacturing",
       auditDomain: "itac",
       projectType: "special",
@@ -68,38 +68,38 @@ export const QUICK_PRESETS = [
 const DOMAIN_TASKS = {
   itgc: [
     {
-      title: "Scope 确认与客户沟通",
-      description: "确认审计范围、关键系统清单、外包与第三方依赖，形成 Scope 备忘录。",
+      title: "Scope Confirmation and Client Communication",
+      description: "Confirm audit scope, key systems, outsourcing, and third-party dependencies; prepare scope memo.",
       priority: "P0",
       status: "grooming",
       auditPhase: "scope-confirm",
       scopeCritical: true
     },
     {
-      title: "IT 风险评估与重要性水平",
-      description: "识别与财务报告相关的 IT 风险，确定控制测试策略与样本量。",
+      title: "IT Risk Assessment and Materiality",
+      description: "Identify IT risks related to financial reporting and determine control testing strategy and sample size.",
       priority: "P0",
       status: "grooming",
       auditPhase: "risk-assessment",
       scopeCritical: true
     },
     {
-      title: "访问管理控制测试",
-      description: "用户准入、权限复核、特权账号与离职回收等 ITGC 控制点。",
+      title: "Access Management Control Testing",
+      description: "ITGC controls over user onboarding, access review, privileged accounts, and leaver access removal.",
       priority: "P0",
       status: "design",
       auditPhase: "control-design"
     },
     {
-      title: "变更管理控制测试",
-      description: "变更申请、审批、测试与上线流程，紧急变更事后复核。",
+      title: "Change Management Control Testing",
+      description: "Change request, approval, testing, release process, and emergency change post-review.",
       priority: "P0",
       status: "design",
       auditPhase: "control-design"
     },
     {
-      title: "运维与备份控制测试",
-      description: "批处理监控、备份恢复、机房运维与灾备演练记录。",
+      title: "Operations and Backup Control Testing",
+      description: "Batch monitoring, backup recovery, data center operations, and DR drill records.",
       priority: "P1",
       status: "development",
       auditPhase: "control-test"
@@ -107,30 +107,30 @@ const DOMAIN_TASKS = {
   ],
   itac: [
     {
-      title: "业务流程与控制点识别",
-      description: "梳理收入、采购、库存等关键业务流程中的 IT 应用控制。",
+      title: "Business Process and Control Identification",
+      description: "Identify IT application controls in key business processes such as revenue, procurement, and inventory.",
       priority: "P0",
       status: "grooming",
       auditPhase: "scope-confirm",
       scopeCritical: true
     },
     {
-      title: "接口与数据勾稽测试",
-      description: "验证系统间接口完整性、对账逻辑与异常处理机制。",
+      title: "Interface and Data Reconciliation Testing",
+      description: "Validate inter-system interface completeness, reconciliation logic, and exception handling.",
       priority: "P0",
       status: "design",
       auditPhase: "control-design"
     },
     {
-      title: "自动化控制有效性测试",
-      description: "对系统内置校验、审批流、三单匹配等自动化控制执行测试。",
+      title: "Automated Control Effectiveness Testing",
+      description: "Test automated controls such as system validations, approval workflows, and three-way matching.",
       priority: "P0",
       status: "development",
       auditPhase: "control-test"
     },
     {
-      title: "人工补偿控制评估",
-      description: "当自动化控制失效时，评估人工复核控制的设计与执行有效性。",
+      title: "Manual Compensating Control Assessment",
+      description: "Assess the design and operating effectiveness of manual review controls when automated controls fail.",
       priority: "P1",
       status: "development",
       auditPhase: "control-test"
@@ -138,23 +138,23 @@ const DOMAIN_TASKS = {
   ],
   sox404: [
     {
-      title: "财务报告流程 IT 依赖分析",
-      description: "识别财报编制所依赖的关键系统、报表引擎与关账流程。",
+      title: "IT Dependency Analysis for Financial Reporting Process",
+      description: "Identify key systems, reporting engines, and closing processes used in financial reporting.",
       priority: "P0",
       status: "grooming",
       auditPhase: "scope-confirm",
       scopeCritical: true
     },
     {
-      title: "关账与分录控制测试",
-      description: "测试期末关账权限、日记账审批与反冲控制。",
+      title: "Close and Journal Entry Control Testing",
+      description: "Test period-end closing access, journal approval, and reversal controls.",
       priority: "P0",
       status: "design",
       auditPhase: "control-design"
     },
     {
-      title: "SOX 缺陷评估与整改跟踪",
-      description: "汇总控制缺陷，评估严重程度并跟踪管理层整改。",
+      title: "SOX Deficiency Evaluation and Remediation Tracking",
+      description: "Summarize control deficiencies, assess severity, and track management remediation.",
       priority: "P0",
       status: "review",
       auditPhase: "deficiency-review",
@@ -163,23 +163,23 @@ const DOMAIN_TASKS = {
   ],
   privacy: [
     {
-      title: "个人信息清单与分级",
-      description: "梳理个人信息收集、存储、共享场景，完成数据分级分类。",
+      title: "Personal Information Inventory and Classification",
+      description: "Map personal information collection, storage, and sharing scenarios; complete data classification.",
       priority: "P0",
       status: "grooming",
       auditPhase: "scope-confirm",
       scopeCritical: true
     },
     {
-      title: "同意机制与跨境传输评估",
-      description: "检查隐私政策、用户同意记录及跨境数据传输合规性。",
+      title: "Consent Mechanism and Cross-border Transfer Assessment",
+      description: "Review privacy policy, user consent records, and cross-border data transfer compliance.",
       priority: "P0",
       status: "design",
       auditPhase: "control-design"
     },
     {
-      title: "数据主体权利响应测试",
-      description: "验证查询、更正、删除等数据主体权利请求的响应流程。",
+      title: "Data Subject Rights Response Testing",
+      description: "Validate response processes for data subject requests such as access, correction, and deletion.",
       priority: "P1",
       status: "development",
       auditPhase: "control-test"
@@ -187,23 +187,23 @@ const DOMAIN_TASKS = {
   ],
   cyber: [
     {
-      title: "安全治理与威胁建模",
-      description: "评估安全组织架构、资产清单与威胁建模方法论。",
+      title: "Security Governance and Threat Modeling",
+      description: "Assess security organization structure, asset inventory, and threat modeling methodology.",
       priority: "P0",
       status: "grooming",
       auditPhase: "risk-assessment",
       scopeCritical: true
     },
     {
-      title: "漏洞与补丁管理测试",
-      description: "检查漏洞扫描周期、补丁审批与紧急修复流程。",
+      title: "Vulnerability and Patch Management Testing",
+      description: "Review vulnerability scan cadence, patch approval, and emergency fix process.",
       priority: "P0",
       status: "design",
       auditPhase: "control-design"
     },
     {
-      title: "安全事件响应演练复核",
-      description: "审阅事件响应预案、演练记录与事后复盘报告。",
+      title: "Security Incident Response Drill Review",
+      description: "Review incident response plans, drill records, and post-incident review reports.",
       priority: "P1",
       status: "development",
       auditPhase: "control-test"
@@ -213,43 +213,43 @@ const DOMAIN_TASKS = {
 
 const INDUSTRY_ADDONS = {
   finance: {
-    title: "监管报送与核心系统专项",
-    description: "关注人民银行/银保监会报送接口、核心账务系统变更与灾备切换。",
+    title: "Regulatory Reporting and Core System Special Review",
+    description: "Focus on regulatory reporting interfaces, core accounting system changes, and DR switchover.",
     priority: "P0",
     status: "design",
     auditPhase: "control-test"
   },
   manufacturing: {
-    title: "ERP 与生产系统集成控制",
-    description: "检查 BOM、成本核算与 MES 工单数据在 ERP 中的勾稽关系。",
+    title: "ERP and Production System Integration Controls",
+    description: "Review reconciliation among BOM, cost accounting, and MES work order data in ERP.",
     priority: "P1",
     status: "design",
     auditPhase: "control-test"
   },
   tech: {
-    title: "CI/CD 与云资源配置审查",
-    description: "审查代码仓库权限、流水线审批与云 IAM 最小权限配置。",
+    title: "CI/CD and Cloud Resource Configuration Review",
+    description: "Review repository access, pipeline approvals, and least-privilege cloud IAM configuration.",
     priority: "P0",
     status: "design",
     auditPhase: "control-test"
   },
   retail: {
-    title: "POS 与电商订单对账",
-    description: "验证门店 POS、OMS 与财务收入确认的端到端数据一致性。",
+    title: "POS and E-commerce Order Reconciliation",
+    description: "Validate end-to-end data consistency among store POS, OMS, and financial revenue recognition.",
     priority: "P0",
     status: "development",
     auditPhase: "control-test"
   },
   healthcare: {
-    title: "临床试验与患者数据隔离",
-    description: "检查 EDC 系统权限、数据脱敏与 GxP 合规要求。",
+    title: "Clinical Trial and Patient Data Segregation",
+    description: "Review EDC system access, data masking, and GxP compliance requirements.",
     priority: "P0",
     status: "design",
     auditPhase: "control-test"
   },
   energy: {
-    title: "OT/IT 边界与工控安全",
-    description: "评估 SCADA 与办公网隔离、工控设备补丁与远程运维控制。",
+    title: "OT/IT Boundary and Industrial Control Security",
+    description: "Assess SCADA and office network segregation, industrial device patching, and remote operations controls.",
     priority: "P0",
     status: "design",
     auditPhase: "control-test"
@@ -258,39 +258,39 @@ const INDUSTRY_ADDONS = {
 
 const PROJECT_ADDONS = {
   annual: {
-    title: "审计底稿与管理层声明",
-    description: "完成底稿复核、管理层 IT 声明书获取与项目归档。",
+    title: "Audit Workpapers and Management Representation",
+    description: "Complete workpaper review, obtain IT management representation, and archive the engagement.",
     priority: "P0",
     status: "review",
     auditPhase: "wrap-up",
     scopeCritical: true
   },
   soc: {
-    title: "SOC 控制描述与鉴证意见",
-    description: "编制控制描述、测试证据包并出具 SOC 报告意见草稿。",
+    title: "SOC Control Description and Assurance Opinion",
+    description: "Prepare control description, testing evidence package, and draft SOC report opinion.",
     priority: "P0",
     status: "review",
     auditPhase: "wrap-up",
     scopeCritical: true
   },
   special: {
-    title: "专项发现与整改建议",
-    description: "输出专项审计发现清单、风险评级与整改时间表。",
+    title: "Special Findings and Remediation Recommendations",
+    description: "Produce special audit findings, risk ratings, and remediation timeline.",
     priority: "P0",
     status: "review",
     auditPhase: "wrap-up"
   },
   ipo: {
-    title: "IPO IT 内控成熟度报告",
-    description: "形成上市就绪差距分析、整改路线图与里程碑跟踪表。",
+    title: "IPO IT Internal Control Maturity Report",
+    description: "Prepare listing-readiness gap analysis, remediation roadmap, and milestone tracking sheet.",
     priority: "P0",
     status: "review",
     auditPhase: "wrap-up",
     scopeCritical: true
   },
   mna: {
-    title: "尽调风险清单与整合建议",
-    description: "汇总 IT 风险、技术债务与并购后整合优先级建议。",
+    title: "Due Diligence Risk List and Integration Recommendations",
+    description: "Summarize IT risks, technical debt, and post-merger integration priorities.",
     priority: "P0",
     status: "review",
     auditPhase: "wrap-up"
@@ -318,12 +318,12 @@ export function buildScopeSummary(selection) {
     industryLabel: industryLabelOverride
   } = selection;
   return {
-    industryLabel: industryLabelOverride || labelOf(INDUSTRIES, industry) || "通用行业",
+    industryLabel: industryLabelOverride || labelOf(INDUSTRIES, industry) || "General Industry",
     auditDomainLabel: labelOf(AUDIT_DOMAINS, auditDomain),
     projectTypeLabel: labelOf(PROJECT_TYPES, projectType),
     systemsLabel: systems.length
-      ? systems.map(labelOfSystem).join("、")
-      : "未选择关键系统"
+      ? systems.map(labelOfSystem).join(", ")
+      : "No Key Systems Selected"
   };
 }
 
@@ -357,7 +357,7 @@ export function generateScopeTasks(selection, options = {}) {
     auditDomain,
     projectType,
     systems = [],
-    owner = "未分配",
+    owner = "Unassigned",
     startDate = new Date().toISOString().slice(0, 10)
   } = selection;
 
@@ -368,7 +368,7 @@ export function generateScopeTasks(selection, options = {}) {
   } = options;
 
   const summary = buildScopeSummary(selection);
-  const product = projectName.trim() || "新建审计项目";
+  const product = projectName.trim() || "New Audit Project";
   const baseTasks = DOMAIN_TASKS[auditDomain] || DOMAIN_TASKS.itgc;
   const industryAddon = industry ? INDUSTRY_ADDONS[industry] : null;
   const projectAddon = PROJECT_ADDONS[projectType];
@@ -388,18 +388,18 @@ export function generateScopeTasks(selection, options = {}) {
       template.description,
       "",
       `【Scope】${summary.industryLabel} · ${summary.auditDomainLabel} · ${summary.projectTypeLabel}`,
-      summary.systemsLabel !== "未选择关键系统" ? `【关键系统】${summary.systemsLabel}` : ""
+      summary.systemsLabel !== "No Key Systems Selected" ? `【Key Systems】${summary.systemsLabel}` : ""
     ].filter(Boolean).join("\n"),
     priority: template.priority,
-    platform: "PC 端",
+    platform: "PC",
     product,
-    owner: owner.trim() || "未分配",
+    owner: owner.trim() || "Unassigned",
     due: addDays(startDate, 7 + index * 3),
     status: normalizeTaskStatus(template.status),
     comments: [
       {
-        author: "Scope 引擎",
-        text: `由 Scope 初始化自动生成。审计阶段：${template.auditPhase || "general"}。`
+        author: "Scope Engine",
+        text: `Generated automatically from Scope initialization. Audit stage: ${template.auditPhase || "general"}.`
       }
     ],
     scopeGenerated: true,

@@ -24,8 +24,8 @@ function MemberProgressRow({ row }) {
         />
         <strong>
           {total
-            ? `${completedCount}/${total} 已完成 · ${percent}%`
-            : "0 测试点"}
+            ? `${completedCount}/${total} Completed · ${percent}%`
+            : "0 Test Points"}
         </strong>
       </div>
       {total ? (
@@ -36,7 +36,7 @@ function MemberProgressRow({ row }) {
       ) : (
         <>
           <MemberCompletionProgressBar breakdown={row.breakdown} pending />
-          <p className="progress-member-meta muted">暂无测试点</p>
+          <p className="progress-member-meta muted">No Test Points</p>
         </>
       )}
     </div>
@@ -44,7 +44,7 @@ function MemberProgressRow({ row }) {
 }
 
 /**
- * 成员列表与柱图跟随页顶负责组筛选；仅展示 In-charge（IC）与 Staff 及其负责的控制点。
+ * Member list and bar chart follow the top owner-group filter and show only In-charge (IC), Staff, and their assigned controls.
  */
 export function TeamMemberProgressCard({
   project,

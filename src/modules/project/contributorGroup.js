@@ -22,17 +22,17 @@ function templateContributorGroup(template, auditDomain) {
   if (AUDIT_COORDINATION_PHASES.has(template.auditPhase) && template.scopeCritical) {
     return "audit";
   }
-  if (text.includes("税务") || text.includes("tax")) {
+  if (text.includes("Tax") || text.includes("tax")) {
     return "tax";
   }
-  if (text.includes("frm") || text.includes("金融风险")) {
+  if (text.includes("frm") || text.includes("Financial Risk")) {
     return "frm";
   }
   if (
     auditDomain === "itac"
     || text.includes("itac")
-    || text.includes("应用控制")
-    || text.includes("自动化控制")
+    || text.includes("Application Control")
+    || text.includes("Automated Control")
   ) {
     return "ita";
   }

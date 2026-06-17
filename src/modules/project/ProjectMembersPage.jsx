@@ -39,14 +39,14 @@ function InviteCard({ title, email, invite, onCopy }) {
         <span className="status-pill active">Active</span>
       </div>
       <div className="invite-preview">
-        <p><strong>中文</strong></p>
+        <p><strong>Chinese</strong></p>
         <pre>{invite.zh}</pre>
         <p><strong>English</strong></p>
         <pre>{invite.en}</pre>
       </div>
       <div className="invite-actions">
         <button className="button subtle" type="button" onClick={() => onCopy(invite.link)}>
-          复制邀请链接
+          Copy Invite Link
         </button>
       </div>
     </article>
@@ -111,8 +111,8 @@ export function ProjectMembersPage({
     return (
       <section className="page-shell">
         <div className="empty-state large">
-          <h3>项目不存在</h3>
-          <button className="button primary" type="button" onClick={onBack}>返回列表</button>
+          <h3>Project Not Found</h3>
+          <button className="button primary" type="button" onClick={onBack}>Back to List</button>
         </div>
       </section>
     );
@@ -181,7 +181,7 @@ export function ProjectMembersPage({
 
   function handleCopy(link) {
     navigator.clipboard.writeText(link).then(() => {
-      onToast("邀请链接已复制。");
+      onToast("Invite link copied.");
     }).catch(() => {
       onToast(link);
     });
@@ -202,7 +202,7 @@ export function ProjectMembersPage({
     try {
       const result = updateProjectMembers(projectId, payload);
       if (!result) {
-        onToast("成员更新失败。");
+        onToast("Member update failed.");
         return;
       }
 
@@ -227,9 +227,9 @@ export function ProjectMembersPage({
       (team) => (team.staff || []).some((member) => member.status === "active")
     );
     if (removedWithStaff.length) {
-      const names = removedWithStaff.map((team) => labelOfSpecialistTeam(team.team)).join("、");
+      const names = removedWithStaff.map((team) => labelOfSpecialistTeam(team.team)).join(", ");
       const confirmed = window.confirm(
-        `取消勾选将移除 ${names} 及其 Staff 配置，确定继续？`
+        `Disabling will remove ${names} and their staff configuration. Continue?`
       );
       if (!confirmed) return;
     }
@@ -238,7 +238,7 @@ export function ProjectMembersPage({
     try {
       const result = updateProjectSpecialists(projectId, { specialists: specialistForm });
       if (!result) {
-        onToast("Specialist 更新失败。");
+        onToast("Specialist update failed.");
         return;
       }
 
@@ -263,7 +263,7 @@ export function ProjectMembersPage({
     try {
       const result = updateSpecialistStaff(projectId, teamId, staffEmails);
       if (!result) {
-        onToast("Specialist team staff 更新失败。");
+        onToast("Specialist team staff update failed.");
         return;
       }
 
@@ -285,20 +285,20 @@ export function ProjectMembersPage({
       <header className="page-header">
         <div>
           <p className="page-eyebrow">Member Management</p>
-          <h2>成员管理</h2>
+          <h2>Member Management</h2>
           <p className="page-lead">
-            项目「{project.name}」· 当前 {activeCount} 位核心成员。
-            修改邮箱后保存，新成员将生成邀请链接（演示模式）。
+            Project “{project.name}” · {activeCount} current core member(s).
+            After editing emails and saving, invite links will be generated for new members in demo mode.
           </p>
         </div>
       </header>
 
       {focusedTeam ? (
         <div className="members-lead-callout">
-          <strong>Specialist Lead 入职</strong>
+          <strong>Specialist Lead Onboarding</strong>
           <p>
-            您以 {labelOfSpecialistTeam(focusedTeam.team)} · {labelOfSpecialistLeadRole(focusedTeam.leadRole)} 身份加入。
-            请在下方 <strong>Specialist team staff</strong> 区域补充本组 Staff。
+            You joined as {labelOfSpecialistLeadRole(focusedTeam.leadRole)} of {labelOfSpecialistTeam(focusedTeam.team)}.
+            Add staff for this team in the <strong>Specialist team staff</strong> section below.
           </p>
         </div>
       ) : null}
@@ -306,9 +306,9 @@ export function ProjectMembersPage({
       <div className="members-page-grid">
         <div className="members-edit-column">
           <section className="detail-panel members-editor">
-            <h3>编辑核心成员</h3>
+            <h3>Edit Core Members</h3>
             <p className="panel-note">
-              Partner 不可与 Manager / In-charge 重复。Manager 与 In-charge 可相同。
+              Partner cannot duplicate Manager / In-charge. Manager and In-charge may be the same.
             </p>
 
             <div className="form-grid two-col compact">
@@ -345,7 +345,7 @@ export function ProjectMembersPage({
                   type="email"
                   value={memberForm.smEmail}
                   onChange={(e) => updateMemberField("smEmail", e.target.value)}
-                  placeholder="可选"
+                  placeholder="Optional"
                 />
               </label>
             </div>
@@ -354,7 +354,7 @@ export function ProjectMembersPage({
               <div className="staff-head">
                 <span className="label">Staff</span>
                 <button className="button subtle" type="button" onClick={addStaffRow}>
-                  + 添加 Staff
+                  + Add Staff
                 </button>
               </div>
               {memberForm.staffEmails.map((email, index) => (
@@ -369,7 +369,7 @@ export function ProjectMembersPage({
                     <button
                       className="button icon"
                       type="button"
-                      aria-label="删除"
+                      aria-label="Delete"
                       onClick={() => removeStaffRow(index)}
                     >
                       ×
@@ -386,17 +386,17 @@ export function ProjectMembersPage({
                 disabled={saving}
                 onClick={handleSaveMembers}
               >
-                {saving ? "保存中..." : "保存核心成员"}
+                {saving ? "Saving..." : "Save Core Members"}
               </button>
             </div>
           </section>
 
           {isAudit ? (
             <section className="detail-panel members-editor">
-              <h3>Specialist 团队</h3>
+              <h3>Specialist Teams</h3>
               <p className="panel-note">
-                仅 Audit team 项目可配置。勾选 ITA / Tax / FRM 专家组并指定 Lead；
-                Lead 接受邀请后在本页补充 Specialist team staff。
+                Only Audit team projects can be configured. Select ITA / Tax / FRM specialist groups and assign Leads.
+                After Leads accept invites, specialist team staff can be added on this page.
               </p>
 
               <div className="specialist-grid compact">
@@ -419,7 +419,7 @@ export function ProjectMembersPage({
                       {entry.enabled ? (
                         <div className="specialist-fields">
                           <label className="field">
-                            <span className="label">Lead 角色 *</span>
+                            <span className="label">Lead Role *</span>
                             <select
                               value={entry.leadRole}
                               onChange={(e) => updateSpecialist(item.id, { leadRole: e.target.value })}
@@ -430,7 +430,7 @@ export function ProjectMembersPage({
                             </select>
                           </label>
                           <label className="field">
-                            <span className="label">Lead 邮箱 *</span>
+                            <span className="label">Lead Email *</span>
                             <input
                               type="email"
                               value={entry.leadEmail}
@@ -452,7 +452,7 @@ export function ProjectMembersPage({
                   disabled={saving}
                   onClick={handleSaveSpecialists}
                 >
-                  {saving ? "保存中..." : "保存 Specialist 配置"}
+                  {saving ? "Saving..." : "Save Specialist Configuration"}
                 </button>
               </div>
             </section>
@@ -466,8 +466,8 @@ export function ProjectMembersPage({
               <h3>Specialist team staff</h3>
               <p className="panel-note">
                 {focusedTeam
-                  ? `请为 ${labelOfSpecialistTeamStaff(focusedTeam.team)} 补充 Staff；保存后将生成邀请链接。`
-                  : "Audit team 项目已勾选的专家组（ITA / Tax / FRM）均可在此补充 Staff。各组 Lead 接受邀请后进入本页填写；项目管理员也可代填。"}
+                  ? `Add staff for ${labelOfSpecialistTeamStaff(focusedTeam.team)}. Invite links will be generated after saving.`
+                  : "Staff can be added here for selected specialist groups (ITA / Tax / FRM) in Audit team projects. Leads can fill this page after accepting invites; project admins can also fill it on their behalf."}
               </p>
 
               {specialistTeamsForStaff.map((team) => (
@@ -493,7 +493,7 @@ export function ProjectMembersPage({
                         type="button"
                         onClick={() => addSpecialistStaffRow(team.id)}
                       >
-                        + 添加 Staff
+                        + Add Staff
                       </button>
                     </div>
                     {(specialistStaffForms[team.id] || [""]).map((email, index) => (
@@ -508,7 +508,7 @@ export function ProjectMembersPage({
                           <button
                             className="button icon"
                             type="button"
-                            aria-label="删除"
+                            aria-label="Delete"
                             onClick={() => removeSpecialistStaffRow(team.id, index)}
                           >
                             ×
@@ -525,7 +525,7 @@ export function ProjectMembersPage({
                       disabled={saving}
                       onClick={() => handleSaveSpecialistStaff(team.id)}
                     >
-                      {saving ? "保存中..." : `保存 ${labelOfSpecialistTeamStaff(team.team)} Staff`}
+                      {saving ? "Saving..." : `Save ${labelOfSpecialistTeamStaff(team.team)} Staff`}
                     </button>
                   </div>
                 </div>
@@ -536,8 +536,8 @@ export function ProjectMembersPage({
 
         <div className="members-invite-column">
           <section className="detail-panel">
-            <h3>核心成员邀请</h3>
-            <p className="panel-note">演示模式：复制中英双语邀请链接分享给成员。</p>
+            <h3>Core Member Invites</h3>
+            <p className="panel-note">Demo mode: copy bilingual invite links and share them with members.</p>
             <div className="invite-grid single-col">
               {project.members
                 .filter((member) => member.status === "active")
@@ -556,7 +556,7 @@ export function ProjectMembersPage({
           {isAudit ? (
             <>
               <section className="detail-panel">
-                <h3>Specialist Lead 邀请</h3>
+                <h3>Specialist Lead Invites</h3>
                 <div className="invite-grid single-col">
                   {(project.specialistTeams || []).map((team) => (
                     <InviteCard
@@ -572,8 +572,8 @@ export function ProjectMembersPage({
 
               {(project.specialistTeams || []).length ? (
                 <section className="detail-panel">
-                  <h3>Specialist team staff 邀请</h3>
-                  <p className="panel-note">按已勾选专家组分别生成 Staff 邀请链接。</p>
+                  <h3>Specialist Team Staff Invites</h3>
+                  <p className="panel-note">Generate staff invite links by selected specialist group.</p>
                   {(project.specialistTeams || []).map((team) => (
                     <div className="specialist-invite-group" key={`staff-invite-${team.id}`}>
                       <h4>{labelOfSpecialistTeam(team.team)}</h4>

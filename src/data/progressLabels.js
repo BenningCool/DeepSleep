@@ -1,108 +1,108 @@
 import { PROGRESS_STATUS } from "../services/workspaceProgressService";
 
 export const PROGRESS_STATUS_LABELS = {
-  [PROGRESS_STATUS.NOT_STARTED]: "未开始",
-  [PROGRESS_STATUS.IN_PROGRESS]: "测试中",
-  [PROGRESS_STATUS.EVIDENCE_SUBMITTED]: "资料已获取",
-  [PROGRESS_STATUS.PENDING_REVIEW]: "待复核",
-  [PROGRESS_STATUS.NEEDS_REWORK]: "待补充测试",
-  [PROGRESS_STATUS.COMPLETED]: "已完成",
-  [PROGRESS_STATUS.BLOCKED]: "被阻塞"
+  [PROGRESS_STATUS.NOT_STARTED]: "Not Started",
+  [PROGRESS_STATUS.IN_PROGRESS]: "Testing",
+  [PROGRESS_STATUS.EVIDENCE_SUBMITTED]: "Evidence Obtained",
+  [PROGRESS_STATUS.PENDING_REVIEW]: "Pending Review",
+  [PROGRESS_STATUS.NEEDS_REWORK]: "Needs Rework",
+  [PROGRESS_STATUS.COMPLETED]: "Completed",
+  [PROGRESS_STATUS.BLOCKED]: "Blocked"
 };
 
-/** 工作台三态（环形图、进度列表主状态） */
+/** Three workspace states used by donut charts and progress lists. */
 export const WORKSPACE_STATUS_LABELS = {
-  [PROGRESS_STATUS.NOT_STARTED]: "未开始",
-  [PROGRESS_STATUS.IN_PROGRESS]: "测试中",
-  [PROGRESS_STATUS.COMPLETED]: "已完成"
+  [PROGRESS_STATUS.NOT_STARTED]: "Not Started",
+  [PROGRESS_STATUS.IN_PROGRESS]: "Testing",
+  [PROGRESS_STATUS.COMPLETED]: "Completed"
 };
 
 export const KPI_LABELS = {
-  total: "总数",
-  completed: "已完成",
-  pending: "进行中",
-  delay: "逾期/阻塞"
+  total: "Total",
+  completed: "Completed",
+  pending: "In Progress",
+  delay: "Overdue / Blocked"
 };
 
 export const DASHBOARD_KPI_LABELS = {
-  notStarted: "未开始",
-  inProgress: "测试中",
-  completed: "已完成",
-  overdue: "已逾期",
-  overdueAwaitingData: "计划完成日同步后展示"
+  notStarted: "Not Started",
+  inProgress: "Testing",
+  completed: "Completed",
+  overdue: "Overdue",
+  overdueAwaitingData: "Shown after due dates sync"
 };
 
 export const DASHBOARD_KPI_SECTION = {
-  title: "测试点进度",
-  lead: "按工作台底稿三态汇总当前筛选下的测试点；卡片小字为 GITC / ITAC 数量及占该状态比例。"
+  title: "Test Point Progress",
+  lead: "Summarizes filtered test points by the three workspace workpaper states; card details show GITC / ITAC counts and their share of the state."
 };
 
 export const PROGRESS_LIST_LABELS = {
-  allMembers: "全部成员",
-  memberFilter: "负责人筛选",
-  filterEmpty: "当前筛选条件下暂无测试点，请调整状态、逾期或成员筛选。"
+  allMembers: "All Members",
+  memberFilter: "Owner Filter",
+  filterEmpty: "No test points match the current filters. Adjust status, overdue, or member filters."
 };
 
 export const DASHBOARD_CARD_LABELS = {
-  nodeProgressOverview: "测试节点进度",
-  nodeProgressOverviewLead: "来自工作台 snapshot 的 completedNodes / totalNodes，按当前筛选汇总整体节点完成度。",
-  nodeProgressCenterLabel: "节点完成度",
-  nodeProgressCompleted: "已完成节点",
-  nodeProgressRemaining: "未完成节点",
-  nodeProgressTestPoints: "测试点",
-  controlTotal: "测试点",
-  viewAllControls: "查看全部测试点",
-  recentActivity: "近期动态",
-  recentActivityLead: "按工作台最近保存时间排序",
-  recentActivityEmpty: "尚无动态。在工作台保存测试点后，将在此显示最近更新。",
-  controlNodeProgress: "测试点节点进度",
-  controlNodeProgressEmpty: "当前类型下暂无测试点。",
-  teamMemberProgress: "组内成员进度",
-  teamMemberProgressLead: "跟随页顶负责组筛选；仅展示 In-charge 与 Staff 及其负责的测试点；柱体为已完成占比，下方为三态明细。",
-  teamMemberProgressEmpty: "当前组暂无成员。",
-  teamMemberProgressUnassigned: "未分配",
-  blockedNote: "被阻塞"
+  nodeProgressOverview: "Test Node Progress",
+  nodeProgressOverviewLead: "Aggregates completedNodes / totalNodes from the workspace snapshot under the current filters.",
+  nodeProgressCenterLabel: "Node Completion",
+  nodeProgressCompleted: "Completed Nodes",
+  nodeProgressRemaining: "Remaining Nodes",
+  nodeProgressTestPoints: "Test Points",
+  controlTotal: "Test Points",
+  viewAllControls: "View All Test Points",
+  recentActivity: "Recent Activity",
+  recentActivityLead: "Sorted by latest workspace save time",
+  recentActivityEmpty: "No activity yet. Recent updates will appear here after test points are saved in Workspace.",
+  controlNodeProgress: "Test Point Node Progress",
+  controlNodeProgressEmpty: "No test points under this type.",
+  teamMemberProgress: "Team Member Progress",
+  teamMemberProgressLead: "Follows the owner-group filter at the top; shows only In-charge and Staff and their assigned test points. Bars show completion ratio, with three-state details below.",
+  teamMemberProgressEmpty: "No members in this group.",
+  teamMemberProgressUnassigned: "Unassigned",
+  blockedNote: "Blocked"
 };
 
 export const ATTENTION_LABELS = {
-  panelTitle: "需关注事项",
-  panelLead: "仅汇总计划逾期与长期未启动的测试点，便于安排跟进优先级。",
-  overdueTitle: "计划逾期",
-  staleTitle: "长期未开始",
-  overdueBadge: "已逾期",
-  dueLabel: "计划完成日",
-  overdueDaysPrefix: "已逾期 ",
-  overdueEmpty: "暂无计划逾期项",
-  overdueAwaitingData: "计划完成日数据同步后，逾期项将在此红色高亮展示"
+  panelTitle: "Attention Items",
+  panelLead: "Summarizes only overdue and long-not-started test points to help prioritize follow-up.",
+  overdueTitle: "Overdue",
+  staleTitle: "Long Not Started",
+  overdueBadge: "Overdue",
+  dueLabel: "Planned Due Date",
+  overdueDaysPrefix: "Overdue ",
+  overdueEmpty: "No overdue items",
+  overdueAwaitingData: "After planned due dates sync, overdue items will be highlighted here in red"
 };
 
 export const ATTENTION_BUCKET_LABELS = {
-  overdue: "计划逾期",
-  stale: "长期未开始",
-  blocked: "被阻塞",
-  onTrack: "正常推进"
+  overdue: "Overdue",
+  stale: "Long Not Started",
+  blocked: "Blocked",
+  onTrack: "On Track"
 };
 
 export const DRAWER_PREREQUISITE_LABELS = {
-  title: "前置程序未完成",
-  goBoard: "去看板处理前置"
+  title: "Prerequisite Steps Incomplete",
+  goBoard: "Go to Kanban"
 };
 
 export const DRAWER_WORKSPACE_LABELS = {
-  overallProgress: "整体进度",
-  workspaceSummary: "工作台摘要",
-  nodeProgress: "节点进度",
-  nodeDueDates: "节点预计完成日",
-  materials: "材料",
-  fieldReviews: "字段复核",
+  overallProgress: "Overall Progress",
+  workspaceSummary: "Workspace Summary",
+  nodeProgress: "Node Progress",
+  nodeDueDates: "Node Due Dates",
+  materials: "Material",
+  fieldReviews: "Field Review",
   planning: "Planning",
   review: "Review",
-  detailProgress: "节点进度",
-  mismatchHint: "看板已推进，底稿尚未齐备。"
+  detailProgress: "Node Progress",
+  mismatchHint: "Kanban has progressed while workpapers are not yet complete."
 };
 
 export const CONTRIBUTOR_FILTER_OPTIONS = [
-  { id: "", label: "全部" },
+  { id: "", label: "All" },
   { id: "audit", label: "Audit team" },
   { id: "ita", label: "ITA team" },
   { id: "tax", label: "Tax team" },

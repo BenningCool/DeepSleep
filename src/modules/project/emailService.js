@@ -31,7 +31,7 @@ export async function sendProjectInvites(project, members) {
       ok: false,
       sent: data.sent || 0,
       failed: data.failed ?? invites.length,
-      message: data.message || "邮件发送失败，请检查 SMTP 配置与邮件服务是否启动。",
+      message: data.message || "Email sending failed. Check SMTP configuration and whether the mail service is running.",
       results: data.results || []
     };
   }

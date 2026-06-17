@@ -2,7 +2,7 @@ import { getControlProgressSnapshot } from "../../services/workspaceProgressServ
 import { computeWorkspaceStatusBreakdown } from "../progress-board/progressDashboardUtils";
 
 /**
- * 项目列表「状态概述」：与进度看板环形图同一 snapshot + computeWorkspaceStatusBreakdown 口径。
+ * Project List Status Overview uses the same snapshot and computeWorkspaceStatusBreakdown basis as the Progress Board donut chart.
  */
 export function getProjectWorkspaceStatusOverview(projectId, allTasks = []) {
   if (!projectId) {

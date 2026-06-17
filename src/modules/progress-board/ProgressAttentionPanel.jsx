@@ -57,13 +57,13 @@ export function ProgressAttentionPanel({
                     <div className="attention-item-badges">
                       <span className="progress-flag overdue">
                         {ATTENTION_LABELS.overdueBadge}
-                        {overdueDays ? ` ${overdueDays} 天` : ""}
+                        {overdueDays ? ` ${overdueDays} d` : ""}
                       </span>
                     </div>
                     <strong>{control.title}</strong>
                     <small> · {control.id}</small>
                     <p className="attention-item-meta">
-                      {ATTENTION_LABELS.dueLabel}：{planDue || "—"}
+                      {ATTENTION_LABELS.dueLabel}:{planDue || "—"}
                       {control.owner ? (
                         <>
                           {" · "}
@@ -102,7 +102,7 @@ export function ProgressAttentionPanel({
                     <p className="attention-item-meta">
                       {reason}
                       {resolveControlPlanDue(control, task)
-                        ? ` · ${ATTENTION_LABELS.dueLabel}：${resolveControlPlanDue(control, task)}`
+                        ? ` · ${ATTENTION_LABELS.dueLabel}:${resolveControlPlanDue(control, task)}`
                         : ""}
                       {control.owner ? (
                         <>

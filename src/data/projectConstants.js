@@ -9,66 +9,66 @@ export const ENGAGEMENT_TYPES = [
 ];
 
 export const PROJECT_TYPES = [
-  { id: "annual", label: "年度财务报表审计", labelEn: "Annual FS Audit" },
-  { id: "special-it", label: "专项 IT 审计", labelEn: "Special IT Audit" },
-  { id: "ipo", label: "IPO 核查", labelEn: "IPO Review" },
-  { id: "soc", label: "SOC 1 / SOC 2 审计", labelEn: "SOC 1 / SOC 2" },
-  { id: "privacy", label: "个人信息保护合规审计", labelEn: "PIPL / Privacy" }
+  { id: "annual", label: "Annual Financial Statement Audit", labelEn: "Annual FS Audit" },
+  { id: "special-it", label: "Special IT Audit", labelEn: "Special IT Audit" },
+  { id: "ipo", label: "IPO Review", labelEn: "IPO Review" },
+  { id: "soc", label: "SOC 1 / SOC 2 Audit", labelEn: "SOC 1 / SOC 2" },
+  { id: "privacy", label: "Privacy Compliance Audit", labelEn: "PIPL / Privacy" }
 ];
 
 export const INDUSTRY_GROUPS = [
   {
-    label: "金融 Financial Services",
+    label: "Financial Services",
     items: [
-      { id: "finance-banking", label: "金融 — Banking / 银行" },
-      { id: "finance-insurance", label: "金融 — Insurance / 保险" },
-      { id: "finance-securities", label: "金融 — Securities & Asset Mgmt / 证券资管" },
-      { id: "finance-other", label: "金融 — Other / 其他" }
+      { id: "finance-banking", label: "Banking" },
+      { id: "finance-insurance", label: "Insurance" },
+      { id: "finance-securities", label: "Securities & Asset Management" },
+      { id: "finance-other", label: "Financial Services — Other" }
     ]
   },
   {
-    label: "制造业 Manufacturing",
+    label: "Manufacturing",
     items: [
-      { id: "mfg-general", label: "制造业 — General / 通用" },
-      { id: "mfg-automotive", label: "制造业 — Automotive / 汽车" },
-      { id: "mfg-chemicals", label: "制造业 — Chemicals / 化工" },
-      { id: "mfg-industrial", label: "制造业 — Industrial / 工业装备" }
+      { id: "mfg-general", label: "Manufacturing — General" },
+      { id: "mfg-automotive", label: "Manufacturing — Automotive" },
+      { id: "mfg-chemicals", label: "Manufacturing — Chemicals" },
+      { id: "mfg-industrial", label: "Manufacturing — Industrial Equipment" }
     ]
   },
   {
-    label: "零售与消费 Retail & Consumer",
+    label: "Retail & Consumer",
     items: [
-      { id: "retail-general", label: "零售 — General / 通用" },
-      { id: "retail-fmcg", label: "零售 — FMCG / 快消" },
-      { id: "retail-ecommerce", label: "零售 — E-commerce / 电商" }
+      { id: "retail-general", label: "Retail — General" },
+      { id: "retail-fmcg", label: "Retail — FMCG" },
+      { id: "retail-ecommerce", label: "Retail — E-commerce" }
     ]
   },
   {
     label: "TMT",
     items: [
-      { id: "tmt-technology", label: "TMT — Technology / 科技互联网" },
-      { id: "tmt-media", label: "TMT — Media / 传媒" },
-      { id: "tmt-telecom", label: "TMT — Telecom / 电信" }
+      { id: "tmt-technology", label: "TMT — Technology / Internet" },
+      { id: "tmt-media", label: "TMT — Media" },
+      { id: "tmt-telecom", label: "TMT — Telecom" }
     ]
   },
   {
-    label: "其他 Other Industries",
+    label: "Other Industries",
     items: [
-      { id: "healthcare-pharma", label: "医药健康 — Pharma / 制药" },
-      { id: "healthcare-devices", label: "医药健康 — MedTech / 医疗器械" },
-      { id: "healthcare-services", label: "医药健康 — Healthcare Services / 医疗服务" },
-      { id: "energy-oil-gas", label: "能源 — Oil & Gas / 石油天然气" },
-      { id: "energy-power", label: "能源 — Power & Utilities / 电力公用" },
-      { id: "real-estate", label: "房地产 — Real Estate" },
-      { id: "construction", label: "建筑 — Construction & Engineering" },
-      { id: "transport-logistics", label: "交通运输 — Transport & Logistics" },
-      { id: "hospitality-leisure", label: "酒店餐饮 — Hospitality & Leisure" },
-      { id: "education", label: "教育 — Education" },
-      { id: "agriculture", label: "农业 — Agriculture" },
-      { id: "mining", label: "采矿 — Mining" },
-      { id: "government-public", label: "政府公共 — Government & Public Sector" },
-      { id: "private-equity", label: "私募股权 — Private Equity" },
-      { id: "other", label: "其他 — Other" }
+      { id: "healthcare-pharma", label: "Healthcare — Pharma" },
+      { id: "healthcare-devices", label: "Healthcare — MedTech" },
+      { id: "healthcare-services", label: "Healthcare Services" },
+      { id: "energy-oil-gas", label: "Energy — Oil & Gas" },
+      { id: "energy-power", label: "Energy — Power & Utilities" },
+      { id: "real-estate", label: "Real Estate" },
+      { id: "construction", label: "Construction & Engineering" },
+      { id: "transport-logistics", label: "Transport & Logistics" },
+      { id: "hospitality-leisure", label: "Hospitality & Leisure" },
+      { id: "education", label: "Education" },
+      { id: "agriculture", label: "Agriculture" },
+      { id: "mining", label: "Mining" },
+      { id: "government-public", label: "Government & Public Sector" },
+      { id: "private-equity", label: "Private Equity" },
+      { id: "other", label: "Other" }
     ]
   }
 ];

@@ -2,7 +2,7 @@ import { TaskCard } from "./TaskCard";
 
 export function Board({ columns, tasks, onOpenTask, onMoveTask }) {
   return (
-    <section className="board-wrap" aria-label="JIRA 风格 Kanban 看板">
+    <section className="board-wrap" aria-label="JIRA-style Kanban Board">
       <div className="board">
         {columns.map((column) => {
           const columnTasks = tasks.filter((task) => task.status === column.id);
@@ -26,7 +26,7 @@ export function Board({ columns, tasks, onOpenTask, onMoveTask }) {
                     task={task}
                     onOpen={() => onOpenTask(task)}
                   />
-                )) : <div className="empty">没有匹配任务<br />可拖入或新建卡片</div>}
+                )) : <div className="empty">No matching tasks<br />Drag in or create a card</div>}
               </div>
             </section>
           );

@@ -14,22 +14,22 @@ function validateMemberEmails(form) {
   const inCharge = normalizeEmail(form.inChargeEmail);
 
   if (!isValidEmail(partner)) {
-    return { ok: false, message: "请填写有效的 Partner 邮箱。" };
+    return { ok: false, message: "Enter a valid Partner email." };
   }
   if (!isValidEmail(manager)) {
-    return { ok: false, message: "请填写有效的 Manager 邮箱。" };
+    return { ok: false, message: "Enter a valid Manager email." };
   }
   if (!isValidEmail(inCharge)) {
-    return { ok: false, message: "请填写有效的 In-charge 邮箱。" };
+    return { ok: false, message: "Enter a valid In-charge email." };
   }
 
   if (partner === manager || partner === inCharge) {
-    return { ok: false, message: "Partner 邮箱不可与 Manager 或 In-charge 重复。" };
+    return { ok: false, message: "Partner email cannot duplicate Manager or In-charge." };
   }
 
   const sm = normalizeEmail(form.smEmail);
   if (sm && !isValidEmail(sm)) {
-    return { ok: false, message: "Senior Manager 邮箱格式无效。" };
+    return { ok: false, message: "Senior Manager email is invalid." };
   }
 
   const staffEmails = (form.staffEmails || [])
@@ -37,11 +37,11 @@ function validateMemberEmails(form) {
     .filter(Boolean);
 
   if (staffEmails.some((email) => !isValidEmail(email))) {
-    return { ok: false, message: "Staff 邮箱格式无效。" };
+    return { ok: false, message: "Staff email is invalid." };
   }
 
   if (new Set(staffEmails).size !== staffEmails.length) {
-    return { ok: false, message: "Staff 列表中存在重复邮箱。" };
+    return { ok: false, message: "Duplicate emails exist in the Staff list." };
   }
 
   return { ok: true };
@@ -60,16 +60,16 @@ function validateSpecialists(form) {
   for (const [teamId, entry] of enabled) {
     const email = normalizeEmail(entry.leadEmail);
     if (!isValidEmail(email)) {
-      return { ok: false, message: `请填写有效的 ${teamId.toUpperCase()} Specialist Lead 邮箱。` };
+      return { ok: false, message: `Enter a valid ${teamId.toUpperCase()} Specialist Lead email.` };
     }
     if (!entry.leadRole) {
-      return { ok: false, message: `请选择 ${teamId.toUpperCase()} Specialist Lead 角色。` };
+      return { ok: false, message: `Select ${teamId.toUpperCase()} Specialist Lead role.` };
     }
   }
 
   const leadEmails = enabled.map(([, entry]) => normalizeEmail(entry.leadEmail));
   if (new Set(leadEmails).size !== leadEmails.length) {
-    return { ok: false, message: "Specialist Lead 邮箱不可重复。" };
+    return { ok: false, message: "Specialist Lead emails cannot duplicate." };
   }
 
   return { ok: true };
@@ -77,25 +77,25 @@ function validateSpecialists(form) {
 
 export function validateProjectForm(form) {
   if (!form.clientName?.trim()) {
-    return { ok: false, message: "请填写客户名称。" };
+    return { ok: false, message: "Enter client name." };
   }
   if (!form.name?.trim()) {
-    return { ok: false, message: "请填写项目名称。" };
+    return { ok: false, message: "Enter project name." };
   }
   if (!form.team) {
-    return { ok: false, message: "请选择团队。" };
+    return { ok: false, message: "Select a team." };
   }
   if (!form.engagementType) {
-    return { ok: false, message: "请选择项目性质。" };
+    return { ok: false, message: "Select an engagement type." };
   }
   if (!form.projectType) {
-    return { ok: false, message: "请选择项目类型。" };
+    return { ok: false, message: "Select a project type." };
   }
   if (!form.industry) {
-    return { ok: false, message: "请选择行业。" };
+    return { ok: false, message: "Select an industry." };
   }
   if (!form.startDate) {
-    return { ok: false, message: "请选择计划开始日期。" };
+    return { ok: false, message: "Select a planned start date." };
   }
 
   const memberCheck = validateMemberEmails(form);
@@ -106,13 +106,13 @@ export function validateProjectForm(form) {
 
 export function validateEditableProject(payload) {
   if (!payload.clientName?.trim()) {
-    return { ok: false, message: "请填写客户名称。" };
+    return { ok: false, message: "Enter client name." };
   }
   if (!payload.name?.trim()) {
-    return { ok: false, message: "请填写项目名称。" };
+    return { ok: false, message: "Enter project name." };
   }
   if (!payload.startDate) {
-    return { ok: false, message: "请选择计划开始日期。" };
+    return { ok: false, message: "Select a planned start date." };
   }
   return { ok: true };
 }
@@ -129,15 +129,15 @@ export function validateSpecialistStaffForm(staffEmails) {
   const emails = (staffEmails || []).map(normalizeEmail).filter(Boolean);
 
   if (!emails.length) {
-    return { ok: false, message: "请至少填写一位 Specialist Staff 邮箱。" };
+    return { ok: false, message: "Enter at least one Specialist Staff email." };
   }
 
   if (emails.some((email) => !isValidEmail(email))) {
-    return { ok: false, message: "Staff 邮箱格式无效。" };
+    return { ok: false, message: "Staff email is invalid." };
   }
 
   if (new Set(emails).size !== emails.length) {
-    return { ok: false, message: "Staff 列表中存在重复邮箱。" };
+    return { ok: false, message: "Duplicate emails exist in the Staff list." };
   }
 
   return { ok: true };

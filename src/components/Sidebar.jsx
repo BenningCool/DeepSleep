@@ -5,22 +5,22 @@ export function Sidebar({
   onGoHome
 }) {
   const projectNav = currentProject ? [
-    { id: "detail", icon: "O", label: "项目概览" },
-    { id: "members", icon: "M", label: "成员管理" },
-    { id: "workspace", icon: "W", label: "工作台" },
-    { id: "board", icon: "K", label: "看板" },
-    { id: "progress", icon: "P", label: "进度看板" }
+    { id: "detail", icon: "O", label: "Project Overview" },
+    { id: "members", icon: "M", label: "Member Management" },
+    { id: "workspace", icon: "W", label: "Workspace" },
+    { id: "board", icon: "K", label: "Kanban" },
+    { id: "progress", icon: "P", label: "Progress Board" }
   ] : [];
 
   const globalNav = [
-    { id: "home", icon: "P", label: "项目列表" },
-    { id: "create", icon: "+", label: "新建项目" }
+    { id: "home", icon: "P", label: "Project List" },
+    { id: "create", icon: "+", label: "Create Project" }
   ];
 
   const navItems = currentProject ? projectNav : globalNav;
 
   return (
-    <aside className="sidebar" aria-label="项目导航">
+    <aside className="sidebar" aria-label="Project Navigation">
       <section className="project">
         <div className="project-mark">DS</div>
         <div>
@@ -29,7 +29,7 @@ export function Sidebar({
         </div>
       </section>
 
-      <nav className="nav" aria-label="主导航">
+      <nav className="nav" aria-label="Main Navigation">
         {navItems.map((item) => (
           <button
             key={item.id}
@@ -46,7 +46,7 @@ export function Sidebar({
       {currentProject ? (
         <div className="sidebar-project-actions">
           <button className="sidebar-link" type="button" onClick={onGoHome}>
-            ← 全部项目
+            ← All Projects
           </button>
         </div>
       ) : null}

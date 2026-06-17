@@ -16,7 +16,7 @@ function startOfDay(date) {
   return value;
 }
 
-/** @deprecated 使用 daysOverdueForControl(control, task) */
+/** @deprecated Use daysOverdueForControl(control, task) */
 export function daysOverdue(task) {
   if (!task?.due) return 0;
   const due = startOfDay(task.due);
@@ -80,13 +80,13 @@ export function getStaleNotStartedControls(controls, taskMap = {}, projectStartD
     .map((control) => {
       const task = taskMap[control.id];
       const untilDue = daysUntilPlanDue(control, task);
-      let reason = `项目已进行 ${daysSinceStart} 天仍未启动`;
+      let reason = `Project has been active for ${daysSinceStart} day(s) and is still not started`;
       if (untilDue !== null && untilDue >= 0 && untilDue <= DUE_SOON_NOT_STARTED_DAYS) {
-        reason = `距计划完成日仅剩 ${untilDue} 天，仍未启动`;
+        reason = `Only ${untilDue} day(s) until planned due date, still not started`;
       }
       return { control, task, reason };
     })
-    .sort((a, b) => a.control.title.localeCompare(b.control.title, "zh-CN"));
+    .sort((a, b) => a.control.title.localeCompare(b.control.title, "en-US"));
 }
 
 export function hasAttentionItems(controls, taskMap = {}, projectStartDate = "") {

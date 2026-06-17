@@ -57,7 +57,7 @@ export function ProjectScopeSection({
     setAuditDomain(preset.form.auditDomain);
     setSystems(preset.form.systems || []);
     setPreviewTasks([]);
-    onToast(`已应用模板：${preset.label}`);
+    onToast(`Applied template: ${preset.label}`);
   }
 
   function buildForm() {
@@ -91,20 +91,20 @@ export function ProjectScopeSection({
       : generateScopeTasks(buildForm(), scopeOptions());
 
     if (!tasks.length) {
-      onToast("未能生成 Scope 任务，请检查配置。");
+      onToast("Unable to generate Scope tasks. Check the configuration.");
       return;
     }
 
     const message = scopeDefined
-      ? `将替换当前项目已生成的 ${existingTaskCount} 条 Scope 任务，是否继续？`
-      : `将生成 ${tasks.length} 条控制点任务并解锁工作台 / 看板 / 进度看板，是否继续？`;
+      ? `Replace the ${existingTaskCount} Scope task(s) already generated for this project?`
+      : `Generate ${tasks.length} control task(s) and unlock Workspace / Kanban / Progress Board?`;
 
     if (!window.confirm(message)) return;
 
     onGenerate(tasks);
     setPreviewTasks([]);
     setEditing(false);
-    onToast(`已生成 ${tasks.length} 个控制点，相关模块已解锁。`);
+    onToast(`Generated ${tasks.length} control(s). Related modules are now unlocked.`);
   }
 
   if (scopeDefined && !editing && !previewTasks.length) {
@@ -115,10 +115,10 @@ export function ProjectScopeSection({
           <span className="status-pill active">Defined</span>
         </div>
         <p className="panel-note">
-          已生成 {existingTaskCount} 个控制点。可在看板推进执行、在工作台记录测试，在进度看板查看整体健康度。
+          {existingTaskCount} control(s) have been generated. Use Kanban to move execution, Workspace to document testing, and Progress Board to monitor overall health.
         </p>
         <div className="scope-defined-actions">
-          <button className="button" type="button" onClick={() => setEditing(true)}>重新配置 Scope</button>
+          <button className="button" type="button" onClick={() => setEditing(true)}>Reconfigure Scope</button>
         </div>
       </div>
     );
@@ -127,21 +127,21 @@ export function ProjectScopeSection({
   return (
     <div className="project-scope-section">
       <div className="scope-panel-head">
-        <h3>Scope 初始化</h3>
+        <h3>Scope Initialization</h3>
         <span className={`status-pill ${scopeDefined ? "active" : "pending"}`}>
           {scopeDefined ? "Defined" : "Pending"}
         </span>
       </div>
 
       <p className="panel-note">
-        选择审计领域与关键系统，自动生成控制点清单。生成后解锁工作台、看板与进度看板。
+        Select audit domain and key systems to automatically generate the control list. After generation, Workspace, Kanban, and Progress Board are unlocked.
       </p>
 
       <div className="scope-locked-meta">
         <span>{project.clientName || project.name}</span>
         <span>{labelOfProjectType(project.projectType)}</span>
         <span>{labelOfIndustry(project.industry)}</span>
-        <span>负责人默认 {owner || "未设置"}</span>
+        <span>Default owner {owner || "Not set"}</span>
       </div>
 
       <div className="scope-presets compact">
@@ -154,7 +154,7 @@ export function ProjectScopeSection({
 
       <div className="scope-form-grid compact">
         <label className="field">
-          <span className="label">审计领域</span>
+          <span className="label">Audit Domain</span>
           <select value={auditDomain} onChange={(e) => { setAuditDomain(e.target.value); setPreviewTasks([]); }}>
             {AUDIT_DOMAINS.map((item) => (
               <option key={item.id} value={item.id}>{item.label}</option>
@@ -164,7 +164,7 @@ export function ProjectScopeSection({
       </div>
 
       <div className="field full">
-        <span className="label">关键系统</span>
+        <span className="label">Key Systems</span>
         <div className="scope-system-grid compact">
           {KEY_SYSTEMS.map((system) => (
             <button
@@ -183,7 +183,7 @@ export function ProjectScopeSection({
         <strong>{summary.auditDomainLabel}</strong>
         <p>{summary.systemsLabel}</p>
         {previewTasks.length ? (
-          <p>预览 {stats.total} 项 · 关键步骤 {stats.criticalCount}</p>
+          <p>Preview {stats.total} items · Critical Steps {stats.criticalCount}</p>
         ) : null}
       </div>
 
@@ -198,12 +198,12 @@ export function ProjectScopeSection({
       <div className="panel-footer-actions">
         {scopeDefined ? (
           <button className="button" type="button" onClick={() => { setEditing(false); setPreviewTasks([]); }}>
-            取消
+            Cancel
           </button>
         ) : null}
-        <button className="button" type="button" onClick={handlePreview}>预览任务</button>
+        <button className="button" type="button" onClick={handlePreview}>Preview Tasks</button>
         <button className="button primary" type="button" onClick={handleGenerate}>
-          {scopeDefined ? "重新生成 Scope" : "生成 Scope"}
+          {scopeDefined ? "Regenerate Scope" : "Generate Scope"}
         </button>
       </div>
     </div>

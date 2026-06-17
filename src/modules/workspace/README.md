@@ -1,11 +1,11 @@
 # Workspace Module
 
-负责“协同办公 / 个人工作台”功能。
+Owns collaboration and personal workspace functions.
 
-建议在这里开发：
+Recommended work area:
 
-- 我的任务
-- 我的项目
-- 成员列表
-- 成员负荷统计
-- 按负责人聚合任务
+- my tasks
+- my projects
+- member list
+- member workload summary
+- owner-based task aggregation

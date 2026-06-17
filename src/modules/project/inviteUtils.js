@@ -19,13 +19,13 @@ export function formatMemberInviteMessage(project, member) {
   const team = labelOfTeam(project.team);
   const role = labelOfRole(member.role);
   const link = buildInviteLink(project.id, member.inviteToken);
-  const clientLine = project.clientName ? `客户：${project.clientName}\n` : "";
+  const clientLine = project.clientName ? `Client: ${project.clientName}\n` : "";
 
   const zh = [
-    `您已被邀请加入审计项目「${project.name}」。`,
+    `You have been invited to join audit project “${project.name}”.`,
     clientLine.trim(),
-    `团队：${team} · 角色：${role}`,
-    `请点击链接加入项目：${link}`
+    `Team: ${team} · Role: ${role}`,
+    `Click the link to join the project: ${link}`
   ].filter(Boolean).join("\n");
 
   const en = [
@@ -46,9 +46,9 @@ export function formatSpecialistLeadInviteMessage(project, specialistTeam) {
   const roleLabel = labelOfSpecialistLeadRole(specialistTeam.leadRole);
 
   const zh = [
-    `您已被邀请作为 ${teamLabel} 的 ${roleLabel} 加入项目「${project.name}」。`,
-    project.clientName ? `客户：${project.clientName}` : "",
-    `请登录并补充本组 Staff：${link}`
+    `You have been invited to join project “${project.name}” as ${roleLabel} of ${teamLabel}.`,
+    project.clientName ? `Client: ${project.clientName}` : "",
+    `Please sign in and add staff for this team: ${link}`
   ].filter(Boolean).join("\n");
 
   const en = [
@@ -65,9 +65,9 @@ export function formatSpecialistStaffInviteMessage(project, specialistTeam, staf
   const teamLabel = labelOfSpecialistTeam(specialistTeam.team);
 
   const zh = [
-    `您已被邀请加入项目「${project.name}」的 ${teamLabel} 专家组。`,
-    project.clientName ? `客户：${project.clientName}` : "",
-    `请点击链接查看项目：${link}`
+    `You have been invited to join the ${teamLabel} specialist team for project “${project.name}”.`,
+    project.clientName ? `Client: ${project.clientName}` : "",
+    `Click the link to view the project: ${link}`
   ].filter(Boolean).join("\n");
 
   const en = [

@@ -77,7 +77,7 @@ export function ControlNodeProgressCard({
         <div
           className="progress-type-tabs compact"
           role="tablist"
-          aria-label="测试点节点进度类型"
+          aria-label="Test Point Node ProgressType"
         >
           {CONTROL_TYPE_FILTER_TABS.map((tab) => (
             <button

@@ -31,7 +31,7 @@ const emptyTask = {
   title: "",
   description: "",
   priority: "P1",
-  platform: "PC 端",
+  platform: "PC",
   product: "",
   owner: "",
   due: "",
@@ -145,10 +145,10 @@ function App() {
     if (context.type === "specialist_lead") {
       setSpecialistTeamId(context.specialistTeam.id);
       setActiveView("members");
-      setToast("欢迎，请在成员管理中补充 Specialist team staff。");
+      setToast("Welcome. Please add Specialist team staff in Member Management.");
     } else {
       setActiveView("detail");
-      setToast("已通过邀请链接打开项目。");
+      setToast("Project opened through invite link.");
     }
 
     const cleanUrl = `${window.location.origin}${window.location.pathname}`;
@@ -172,9 +172,9 @@ function App() {
     const createdTask = {
       id: nextTaskId(tasks),
       title: payload.title,
-      description: `${controlType} 测试点，由工作台新建。`,
+      description: `${controlType} test point, created from Workspace.`,
       priority: "P1",
-      platform: "PC 端",
+      platform: "PC",
       product: currentProject?.name || currentProject?.clientName || "DeepSleep",
       owner: payload.owner,
       due: payload.firstDueDate,
@@ -259,7 +259,7 @@ function App() {
     event.preventDefault();
     const title = draft.title.trim();
     if (!title) {
-      setToast("请先填写任务标题。");
+      setToast("Enter a task title first.");
       return;
     }
 
@@ -275,7 +275,7 @@ function App() {
     const comments = [...(existing?.comments || draft.comments || [])];
     const nextComment = commentDraft.trim();
     if (nextComment) {
-      comments.push({ author: draft.owner.trim() || "成员", text: nextComment });
+      comments.push({ author: draft.owner.trim() || "Member", text: nextComment });
     }
 
     const normalizedTask = {
@@ -284,10 +284,10 @@ function App() {
       title,
       description: draft.description.trim(),
       product: draft.product.trim() || currentProject?.name || "",
-      owner: draft.owner.trim() || "未分配",
+      owner: draft.owner.trim() || "Unassigned",
       projectId: currentProjectId,
       contributorGroup: resolveTaskContributorGroup(
-        { ...draft, owner: draft.owner.trim() || "未分配" },
+        { ...draft, owner: draft.owner.trim() || "Unassigned" },
         currentProject?.specialistTeams
       ),
       comments
@@ -299,16 +299,16 @@ function App() {
         ? current.map((task) => task.id === normalizedTask.id ? normalizedTask : task)
         : [normalizedTask, ...current];
     });
-    setToast(existing ? "任务已更新。" : "任务已创建。");
+    setToast(existing ? "Task updated." : "Task created.");
     closeDrawer();
   }
 
   function deleteTask() {
     if (!draft.id) return;
-    const confirmed = window.confirm(`删除任务「${draft.title}」？`);
+    const confirmed = window.confirm(`Delete task "${draft.title}"?`);
     if (!confirmed) return;
     setTasks((current) => current.filter((task) => task.id !== draft.id));
-    setToast("任务已删除。");
+    setToast("Task deleted.");
     closeDrawer();
   }
 
@@ -325,12 +325,12 @@ function App() {
     setTasks((current) => current.map((task) => (
       task.id === taskId ? { ...task, status: nextStatus } : task
     )));
-    setToast(`${target.id} 已移动到「${columnTitle(nextStatus)}」。`);
+    setToast(`${target.id} moved to "${columnTitle(nextStatus)}".`);
   }
 
   function handleDeleteProject(projectId, projectName) {
     const confirmed = window.confirm(
-      `确定要删除项目「${projectName}」吗？\n\n此操作不可恢复。项目成员、控制点与关联看板任务将一并移除。`
+      `Delete project "${projectName}"?\n\nThis action cannot be undone. Project members, controls, and linked Kanban tasks will also be removed.`
     );
     if (!confirmed) return;
 
@@ -344,7 +344,7 @@ function App() {
     saveCurrentProjectId("");
     setActiveView("home");
     refreshProjects();
-    setToast(`项目「${projectName}」已删除。`);
+    setToast(`Project "${projectName}" deleted.`);
   }
 
   function renderMain() {
@@ -520,7 +520,7 @@ function App() {
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
-  throw new Error("找不到 #root 容器，无法启动 DeepSleep。");
+  throw new Error("Cannot find #root container. DeepSleep cannot start.");
 }
 
 const root = createRoot(rootElement);

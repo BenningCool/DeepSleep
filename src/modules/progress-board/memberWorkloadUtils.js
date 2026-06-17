@@ -10,7 +10,7 @@ import {
 export { UNASSIGNED_MEMBER_KEY };
 const UNASSIGNED_KEY = UNASSIGNED_MEMBER_KEY;
 
-/** 执行层成员：Audit 的 In-charge + Staff；Specialist 仅 Staff（不含 Lead） */
+/** Execution members: Audit In-charge + Staff; Specialist Staff only, excluding Lead */
 const EXECUTION_AUDIT_ROLES = new Set(["in_charge", "staff"]);
 
 function normalizeEmail(value) {
@@ -50,7 +50,7 @@ export function getTeamMemberEmails(project, teamId) {
   return [...emails];
 }
 
-/** Audit / Specialist 执行层成员邮箱（IC + Staff） */
+/** Audit / Specialist execution member emails: IC + Staff */
 export function getExecutionMemberEmails(project, teamId) {
   if (teamId === "audit") {
     return (project?.members || [])
@@ -70,7 +70,7 @@ export function getExecutionMemberEmails(project, teamId) {
     .filter(Boolean);
 }
 
-/** 「全部」负责组：各组 IC + Staff（去重） */
+/** All owner group: each group IC + Staff, deduplicated */
 export function getAllExecutionMemberEmails(project) {
   const emails = new Set();
   getProjectTeamIds(project).forEach((teamId) => {
@@ -79,7 +79,7 @@ export function getAllExecutionMemberEmails(project) {
   return [...emails];
 }
 
-/** 「全部」负责组：Audit + 本项目已启用 Specialist 的全部 active 成员（去重） */
+/** All owner group: Audit plus all active members from enabled Specialist groups in this project, deduplicated */
 export function getAllProjectMemberEmails(project) {
   const emails = new Set();
   getProjectTeamIds(project).forEach((teamId) => {
@@ -89,8 +89,8 @@ export function getAllProjectMemberEmails(project) {
 }
 
 /**
- * @param teamId 页顶负责组；空字符串表示「全部」
- * @param controls 当前全局筛选下的 snapshot 控制点（工作台 workspaceStatus）
+ * @param teamId Top owner group; empty string means All
+ * @param controls Snapshot controls under the current global filters, using Workspace workspaceStatus
  */
 export function getMemberFilterOptions(project, teamId = "", controls = []) {
   const roster = teamId

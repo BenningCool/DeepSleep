@@ -1,5 +1,5 @@
 export const UNASSIGNED_MEMBER_KEY = "__unassigned__";
-export const UNASSIGNED_OWNER_LABEL = "未分配";
+export const UNASSIGNED_OWNER_LABEL = "Unassigned";
 
 const OWNER_COLOR_PALETTE = [
   { bg: "#deebff", text: "#0747a6", border: "#85a8ff" },

@@ -98,20 +98,20 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
       <header className="page-header">
         <div>
           <p className="page-eyebrow">New Engagement Setup</p>
-          <h2>创建审计项目</h2>
+          <h2>Create Audit Project</h2>
           <p className="page-lead">
-            填写项目基本信息与成员邮箱。创建后生成邀请链接（演示模式），并进入项目详情页。
+            Enter project information and member emails. Invite links are generated in demo mode, then you will enter Project Details.
           </p>
         </div>
-        <button className="button" type="button" onClick={onCancel}>返回项目列表</button>
+        <button className="button" type="button" onClick={onCancel}>Back to Project List</button>
       </header>
 
       <form className="create-form" onSubmit={handleSubmit}>
         <div className="form-panel">
-          <h3>项目属性</h3>
+          <h3>Project Attributes</h3>
           <div className="form-grid two-col">
             <label className="field">
-              <span className="label">团队 Team *</span>
+              <span className="label">Team *</span>
               <select value={form.team} onChange={(e) => updateField("team", e.target.value)}>
                 {TEAMS.map((item) => (
                   <option key={item.id} value={item.id}>{item.label} · {item.hint}</option>
@@ -120,7 +120,7 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
             </label>
 
             <label className="field">
-              <span className="label">项目性质 Engagement *</span>
+              <span className="label">Engagement Type Engagement *</span>
               <select
                 value={form.engagementType}
                 onChange={(e) => updateField("engagementType", e.target.value)}
@@ -132,7 +132,7 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
             </label>
 
             <label className="field">
-              <span className="label">项目类型 Type *</span>
+              <span className="label">Project Type Type *</span>
               <select
                 value={form.projectType}
                 onChange={(e) => updateField("projectType", e.target.value)}
@@ -146,7 +146,7 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
             </label>
 
             <label className="field">
-              <span className="label">行业 Industry *</span>
+              <span className="label">Industry Industry *</span>
               <select
                 value={form.industry}
                 onChange={(e) => updateField("industry", e.target.value)}
@@ -162,29 +162,29 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
             </label>
 
             <label className="field full">
-              <span className="label">客户名称 Client Name *</span>
+              <span className="label">Client Name Client Name *</span>
               <input
                 required
                 maxLength="80"
                 value={form.clientName}
                 onChange={(e) => updateField("clientName", e.target.value)}
-                placeholder="例如：某银行股份有限公司"
+                placeholder="Example: ABC Bank Co., Ltd."
               />
             </label>
 
             <label className="field full">
-              <span className="label">项目名称 Project Name *</span>
+              <span className="label">Project Name Project Name *</span>
               <input
                 required
                 maxLength="80"
                 value={form.name}
                 onChange={(e) => updateField("name", e.target.value)}
-                placeholder="例如：某银行 2026 年度 IT 审计"
+                placeholder="Example: ABC Bank 2026 IT Audit"
               />
             </label>
 
             <label className="field">
-              <span className="label">计划开始日期 Start Date *</span>
+              <span className="label">Planned Start Date Start Date *</span>
               <input
                 type="date"
                 value={form.startDate}
@@ -193,21 +193,21 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
             </label>
 
             <label className="field">
-              <span className="label">项目报告日 Report Date</span>
+              <span className="label">Report Date Report Date</span>
               <input
                 type="date"
                 value={form.reportDate}
                 onChange={(e) => updateField("reportDate", e.target.value)}
               />
-              <span className="field-hint">选填，可稍后在项目详情中补充</span>
+              <span className="field-hint">Optional. Can be added later in Project Details.</span>
             </label>
           </div>
         </div>
 
         <div className="form-panel">
-          <h3>项目成员 Members</h3>
+          <h3>Project Members Members</h3>
           <p className="panel-note">
-            Partner 邮箱不可与 Manager / In-charge 重复。创建后将生成邀请链接供复制分享。
+            Partner email cannot duplicate Manager or In-charge. Invite links will be generated for sharing after creation.
           </p>
 
           <div className="form-grid two-col">
@@ -247,7 +247,7 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
                 type="email"
                 value={form.smEmail}
                 onChange={(e) => updateField("smEmail", e.target.value)}
-                placeholder="可选"
+                placeholder="Optional"
               />
             </label>
           </div>
@@ -256,7 +256,7 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
             <div className="staff-head">
               <span className="label">Staff</span>
               <button className="button subtle" type="button" onClick={addStaffRow}>
-                + 添加 Staff
+                + Add Staff
               </button>
             </div>
             {form.staffEmails.map((email, index) => (
@@ -265,13 +265,13 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
                   type="email"
                   value={email}
                   onChange={(e) => updateStaff(index, e.target.value)}
-                  placeholder="staff@firm.com（可选）"
+                  placeholder="staff@firm.com(Optional)"
                 />
                 {form.staffEmails.length > 1 ? (
                   <button
                     className="button icon"
                     type="button"
-                    aria-label="删除"
+                    aria-label="Delete"
                     onClick={() => removeStaffRow(index)}
                   >
                     ×
@@ -284,9 +284,9 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
 
         {showSpecialists ? (
           <div className="form-panel">
-            <h3>Specialist 团队</h3>
+            <h3>Specialist Teams</h3>
             <p className="panel-note">
-              Audit team 项目可邀请 ITA / Tax / FRM 专家组。Lead 接受邀请后进入成员管理页补充 Specialist team staff。
+              Audit team projects can invite ITA / Tax / FRM specialist groups. After the Lead accepts the invite, they can add Specialist team staff in Member Management.
             </p>
 
             <div className="specialist-grid">
@@ -309,7 +309,7 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
                     {entry.enabled ? (
                       <div className="specialist-fields">
                         <label className="field">
-                          <span className="label">Lead 角色 *</span>
+                          <span className="label">Lead Role *</span>
                           <select
                             value={entry.leadRole}
                             onChange={(e) => updateSpecialist(item.id, { leadRole: e.target.value })}
@@ -320,7 +320,7 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
                           </select>
                         </label>
                         <label className="field">
-                          <span className="label">Lead 邮箱 *</span>
+                          <span className="label">Lead Email *</span>
                           <input
                             type="email"
                             value={entry.leadEmail}
@@ -338,9 +338,9 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
         ) : null}
 
         <div className="form-actions">
-          <button className="button" type="button" onClick={onCancel} disabled={submitting}>取消</button>
+          <button className="button" type="button" onClick={onCancel} disabled={submitting}>Cancel</button>
           <button className="button primary" type="submit" disabled={submitting}>
-            {submitting ? "创建中..." : "确认创建项目"}
+            {submitting ? "Creating..." : "Create Project"}
           </button>
         </div>
       </form>

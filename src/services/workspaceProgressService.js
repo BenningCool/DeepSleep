@@ -66,17 +66,17 @@ export const FIELD_REVIEW_STATUS = {
 
 const RAWTC_FACTORS = [
   { id: "substantive_not_sufficient", label: "Substantive procedures alone will not be sufficient" },
-  { id: "transaction_changes", label: "交易数量或性质发生变化" },
-  { id: "history_of_errors", label: "相关科目存在历史错报" },
-  { id: "prior_deficiencies", label: "以前年度或相关测试发现缺陷" },
-  { id: "complex_control", label: "控制性质复杂" },
-  { id: "infrequent_operation", label: "控制运行频率较低" },
-  { id: "other_controls_reliance", label: "依赖其他控制的有效性" },
-  { id: "operator_competence", label: "控制执行人或监控人胜任能力存在疑虑" },
-  { id: "key_personnel_change", label: "关键控制人员发生变化" },
-  { id: "significant_judgement", label: "控制运行涉及重大判断" },
-  { id: "process_change", label: "控制或流程运行方式发生变化" },
-  { id: "information_reliability", label: "控制依赖信息的可靠性重要" }
+  { id: "transaction_changes", label: "Changes in transaction volume or nature" },
+  { id: "history_of_errors", label: "Related account has a history of errors" },
+  { id: "prior_deficiencies", label: "Prior-year or related testing deficiencies identified" },
+  { id: "complex_control", label: "Control is complex" },
+  { id: "infrequent_operation", label: "Control operates infrequently" },
+  { id: "other_controls_reliance", label: "Relies on the effectiveness of other controls" },
+  { id: "operator_competence", label: "Concerns over competence of control operator or monitor" },
+  { id: "key_personnel_change", label: "Changes in key control personnel" },
+  { id: "significant_judgement", label: "Significant judgment involved in control operation" },
+  { id: "process_change", label: "Changes in how the control or process operates" },
+  { id: "information_reliability", label: "Reliability of information used by the control is important" }
 ];
 
 const CONTROL_ATTRIBUTE_ROWS = [
@@ -88,33 +88,33 @@ const DEFAULT_WORKSPACE_PHASES = [
   {
     id: "tod",
     label: "TOD",
-    description: "设计有效性测试：理解流程、确认控制设计、沉淀访谈与设计证据。",
+    description: "Design effectiveness testing: understand process, confirm control design, and retain interview/design evidence.",
     nodes: [
       {
         id: "tod-minutes",
-        label: "上传 TOD 会议纪要",
+        label: "Upload TOD Meeting Minutes",
         type: "upload_minutes",
         required: true,
         category: MATERIAL_CATEGORY.MEETING_MINUTES
       },
       {
         id: "tod-objective",
-        label: "TOD 测试目标",
+        label: "TOD Test Objective",
         type: "text",
         required: true,
-        placeholder: "说明本测试点的设计有效性测试目标。",
+        placeholder: "Describe the design effectiveness objective for this test point.",
         legacyField: "objective"
       },
       {
         id: "tod-process",
-        label: "流程理解与控制描述",
+        label: "Process Understanding and Control Description",
         type: "text",
         required: true,
-        placeholder: "记录流程理解、控制频率、控制人和关键系统。"
+        placeholder: "Document process understanding, control frequency, control owner, and key systems."
       },
       {
         id: "tod-spp",
-        label: "TOD支持性材料",
+        label: "TOD Supporting Materials",
         type: "upload_spp",
         required: true,
         category: MATERIAL_CATEGORY.SPP
@@ -124,51 +124,51 @@ const DEFAULT_WORKSPACE_PHASES = [
   {
     id: "toe",
     label: "TOE",
-    description: "运行有效性测试：完成样本、执行测试、记录结论。",
+    description: "Operating effectiveness testing: complete samples, execute testing, and document conclusions.",
     nodes: [
       {
         id: "toe-sample",
-        label: "样本信息",
+        label: "Sample Information",
         type: "text",
         required: true,
-        placeholder: "记录样本量、期间、抽样口径。",
+        placeholder: "Document sample size, period, and sampling criteria.",
         legacyField: "sampleInfo"
       },
       {
         id: "toe-procedure",
-        label: "TOE 测试程序",
+        label: "TOE Test Procedures",
         type: "text",
         required: true,
-        placeholder: "记录检查、重新执行、穿行或核对步骤。",
+        placeholder: "Document inspection, reperformance, walkthrough, or reconciliation steps.",
         legacyField: "procedure"
       },
       {
         id: "toe-execution",
-        label: "执行过程记录",
+        label: "Execution Notes",
         type: "text",
         required: true,
-        placeholder: "记录样本逐项执行过程和关键判断。"
+        placeholder: "Document step-by-step sample execution and key judgments."
       },
       {
         id: "toe-spp",
-        label: "上传TOE支持性材料",
+        label: "Upload TOE Supporting Materials",
         type: "upload_spp",
         required: true,
         category: MATERIAL_CATEGORY.SPP
       },
       {
         id: "toe-minutes",
-        label: "上传 TOE 会议纪要",
+        label: "Upload TOE Meeting Minutes",
         type: "upload_minutes",
         required: true,
         category: MATERIAL_CATEGORY.MEETING_MINUTES
       },
       {
         id: "toe-result",
-        label: "TOE 测试结论",
+        label: "TOE Test Conclusion",
         type: "text",
         required: true,
-        placeholder: "记录 TOE 结论。",
+        placeholder: "Document TOE conclusion.",
         legacyField: "result"
       }
     ]
@@ -179,122 +179,122 @@ const GITC_WORKSPACE_PHASES = [
   {
     id: "tod",
     label: "TOD",
-    description: "GITC 设计有效性：上传制度、生成 Design、记录访谈实施情况并完成 Test of One。",
+    description: "GITC design effectiveness: upload policy, generate Design, record interview implementation, and complete Test of One.",
     nodes: [
       {
         id: "gitc-tod-policy",
-        label: "上传制度",
+        label: "Upload Policy",
         type: "upload_policy",
         required: true,
         category: MATERIAL_CATEGORY.POLICY,
-        actionLabel: "上传制度",
+        actionLabel: "Upload Policy",
         accept: WORD_FILE_ACCEPT,
         acceptedFileKind: "word",
-        fileHint: "仅支持 Word（.doc/.docx）"
+        fileHint: "Word files only (.doc/.docx)"
       },
       {
         id: "gitc-tod-design",
-        label: "自动生成 Design",
+        label: "Auto-generate Design",
         type: "generated_text",
         required: true,
         dependsOnNodeId: "gitc-tod-policy",
         generationKind: "design",
-        placeholder: "上传制度后自动生成 Design 草稿，保存后计入完成度。"
+        placeholder: "After policy upload, a Design draft is generated automatically. Save to count it as complete."
       },
       {
         id: "gitc-tod-minutes",
-        label: "上传会议纪要",
+        label: "Upload Meeting Minutes",
         type: "upload_minutes",
         required: true,
         category: MATERIAL_CATEGORY.MEETING_MINUTES,
-        actionLabel: "上传纪要"
+        actionLabel: "Upload Minutes"
       },
       {
         id: "gitc-tod-implementation",
-        label: "自动生成 Implementation",
+        label: "Auto-generate Implementation",
         type: "generated_text",
         required: true,
         dependsOnNodeId: "gitc-tod-minutes",
         generationKind: "implementation",
-        placeholder: "上传会议纪要后自动生成 Implementation 草稿，保存后计入完成度。"
+        placeholder: "After meeting minutes upload, an Implementation draft is generated automatically. Save to count it as complete."
       },
       {
         id: "gitc-tod-supporting-material",
-        label: "上传支持性材料",
+        label: "Upload Supporting Materials",
         type: "upload_supporting_material",
         required: true,
         category: MATERIAL_CATEGORY.SUPPORTING_MATERIAL,
-        actionLabel: "上传支持性材料"
+        actionLabel: "Upload Supporting Materials"
       },
       {
         id: "gitc-tod-test-of-one",
-        label: "填写 Test of One 样本表",
+        label: "Complete Test of One Sample Table",
         type: "generated_text",
         required: true,
         dependsOnNodeId: "gitc-tod-supporting-material",
         generationKind: "test_of_one",
         builderKind: "test_of_one_table",
-        placeholder: "手动填写样本字段和样本信息后生成 Test of One 表格，保存后计入完成度。"
+        placeholder: "Manually define sample fields and sample information, then generate the Test of One table. Save to count it as complete."
       }
     ]
   },
   {
     id: "toe",
     label: "TOE",
-    description: "GITC 运行有效性：上传需求和样本清单，生成抽样样本，发送并完成抄写。",
+    description: "GITC operating effectiveness: upload requirements and sample list, generate selections, send sample request, and complete transcription.",
     nodes: [
       {
         id: "gitc-toe-requirement-list",
-        label: "上传需求清单",
+        label: "Upload Requirement List",
         type: "upload_requirement_list",
         required: true,
         category: MATERIAL_CATEGORY.REQUIREMENT_LIST,
-        actionLabel: "上传需求清单"
+        actionLabel: "Upload Requirement List"
       },
       {
         id: "gitc-toe-sample-pool",
-        label: "上传样本清单",
+        label: "Upload Sample List",
         type: "upload_sample_pool",
         required: true,
         category: MATERIAL_CATEGORY.SAMPLE_POOL,
-        actionLabel: "上传样本清单",
+        actionLabel: "Upload Sample List",
         requiresExportPath: true,
-        exportPathLabel: "客户导出清单路径",
-        exportPathPlaceholder: "例如：客户系统 / 程序变更 / 2025变更清单导出.xlsx"
+        exportPathLabel: "Client Export Path",
+        exportPathPlaceholder: "Example: Client system / Program changes / 2025 change list export.xlsx"
       },
       {
         id: "gitc-toe-sampling",
-        label: "自动抽样生成抽样样本",
+        label: "Auto-generate Sample Selection",
         type: "generated_file",
         required: true,
         dependsOnNodeId: "gitc-toe-sample-pool",
         generationKind: "sampling",
         fileKind: "sampling_excel",
-        placeholder: "上传样本清单后自动生成 25 个抽样样本 Excel，保存后计入完成度。"
+        placeholder: "After uploading the sample list, the system generates an Excel file with 25 selected samples. Save to count it as complete."
       },
       {
         id: "gitc-toe-send-sample",
-        label: "是否发送样本",
+        label: "Send Sample Request",
         type: "send_toggle",
         required: true
       },
       {
         id: "gitc-toe-returned-sample-support",
-        label: "上传客户返回的样本支持性材料",
+        label: "Upload Returned Sample Supporting Materials",
         type: "upload_returned_sample_support",
         required: true,
         category: MATERIAL_CATEGORY.RETURNED_SAMPLE_SUPPORT,
-        actionLabel: "上传返回材料"
+        actionLabel: "Upload Returned Materials"
       },
       {
         id: "gitc-toe-transcription",
-        label: "填写样本抄写表",
+        label: "Complete Sample Transcription Table",
         type: "generated_text",
         required: true,
         dependsOnNodeId: "gitc-toe-returned-sample-support",
         generationKind: "transcription",
         builderKind: "sample_transcription_table",
-        placeholder: "手动填写样本字段并录入多个样本后，点击生成抄写表格，保存后计入完成度。"
+        placeholder: "Manually define sample fields and enter multiple samples, then generate the transcription table. Save to count it as complete."
       }
     ]
   }
@@ -304,62 +304,104 @@ const ITAC_WORKSPACE_PHASES = [
   {
     id: "tod",
     label: "TOD",
-    description: "ITAC 测试执行：上传会议纪要，生成 Implementation，记录配置/代码支持材料并完成 Test of One 样本表。",
+    description: "ITAC test execution: upload meeting minutes, generate process description, record configuration/code support, and complete the Test of One sample table.",
     nodes: [
       {
         id: "itac-tod-minutes",
-        label: "上传会议纪要",
+        label: "Upload Meeting Minutes",
         type: "upload_minutes",
         required: true,
         category: MATERIAL_CATEGORY.MEETING_MINUTES,
-        actionLabel: "上传纪要"
+        actionLabel: "Upload Minutes"
       },
       {
         id: "itac-tod-implementation",
-        label: "自动生成 Implementation",
+        label: "Auto-generate Process Description",
         type: "generated_text",
         required: true,
         dependsOnNodeId: "itac-tod-minutes",
         generationKind: "implementation",
-        placeholder: "上传会议纪要后自动生成 Implementation 草稿，保存后计入完成度。"
+        placeholder: "After meeting minutes upload, a process description is generated automatically. Save to count it as complete."
       },
       {
         id: "itac-tod-supporting-material",
-        label: "上传配置/代码支持性材料",
+        label: "Upload Configuration / Code Supporting Materials",
         type: "upload_supporting_material",
         required: true,
         category: MATERIAL_CATEGORY.SUPPORTING_MATERIAL,
-        actionLabel: "上传支持性材料",
+        actionLabel: "Upload Supporting Materials",
         supportKindOptions: [
-          { value: "configuration", label: "配置" },
-          { value: "code", label: "代码" }
+          { value: "configuration", label: "Configuration" },
+          { value: "code", label: "Code" }
         ],
         defaultSupportingMaterialKind: "configuration"
       },
       {
         id: "itac-tod-test-of-one-support",
-        label: "上传 Test of One 支持性材料",
+        label: "Upload Test of One Supporting Materials",
         type: "upload_test_of_one_support",
         required: true,
         category: MATERIAL_CATEGORY.SUPPORTING_MATERIAL,
-        actionLabel: "上传 Test of One 支持材料",
+        actionLabel: "Upload Test of One Materials",
         defaultSupportingMaterialKind: "test_of_one"
       },
       {
         id: "itac-tod-test-of-one",
-        label: "填写 Test of One 样本表",
+        label: "Complete Test of One Sample Table",
         type: "generated_text",
         required: true,
         dependsOnNodeId: "itac-tod-test-of-one-support",
         generationKind: "test_of_one",
         builderKind: "itac_test_of_one_table",
-        placeholder: "手动填写样本字段并填写样本信息后生成 Test of One 表格，保存后计入完成度。"
+        placeholder: "Manually define sample fields and enter sample information, then generate the Test of One table. Save to count it as complete."
       }
     ]
   }
 ];
 
 export const WORKSPACE_PHASES = DEFAULT_WORKSPACE_PHASES;
+
+const WORKSPACE_NODE_SUBTITLES = {
+  "tod-minutes": "Upload TOD meeting minutes",
+  "tod-objective": "TOD test objective",
+  "tod-process": "Process understanding and control description",
+  "tod-spp": "TOD supporting materials",
+  "toe-sample": "Sample information",
+  "toe-procedure": "TOE test procedure",
+  "toe-execution": "Execution record",
+  "toe-spp": "Upload TOE supporting materials",
+  "toe-minutes": "Upload TOE meeting minutes",
+  "toe-result": "TOE test conclusion",
+  "gitc-tod-policy": "Upload policy document",
+  "gitc-tod-design": "Auto-generate Design",
+  "gitc-tod-minutes": "Upload meeting minutes",
+  "gitc-tod-implementation": "Auto-generate Implementation",
+  "gitc-tod-supporting-material": "Upload supporting materials",
+  "gitc-tod-test-of-one": "Complete Test of One sample table",
+  "gitc-toe-requirement-list": "Upload requirement list",
+  "gitc-toe-sample-pool": "Upload sample list",
+  "gitc-toe-sampling": "Auto-generate sampled items",
+  "gitc-toe-send-sample": "Send samples",
+  "gitc-toe-returned-sample-support": "Upload returned sample supporting materials",
+  "gitc-toe-transcription": "Complete sample transcription table",
+  "itac-tod-minutes": "Upload meeting minutes",
+  "itac-tod-implementation": "Auto-generate process description",
+  "itac-tod-supporting-material": "Upload configuration/code supporting materials",
+  "itac-tod-test-of-one-support": "Upload Test of One supporting materials",
+  "itac-tod-test-of-one": "Complete Test of One sample table"
+};
+
+export function getWorkspaceNodeSubtitle(node = {}) {
+  if (node.subtitle) return node.subtitle;
+  if (WORKSPACE_NODE_SUBTITLES[node.id]) return WORKSPACE_NODE_SUBTITLES[node.id];
+  if (node.type === "generated_file") return "Auto-generate file";
+  if (node.type === "generated_text") return "Auto-generate text";
+  if (node.type === "send_toggle") return "Action confirmation";
+  if (node.type?.startsWith("upload")) return "Upload supporting material";
+  if (node.type === "structured") return "Structured form";
+  if (node.type === "text") return "Text input";
+  return "Workspace step";
+}
 
 export function getWorkspacePhases(controlType = "") {
   const normalized = String(controlType).toUpperCase();
@@ -502,10 +544,10 @@ function normalizeMaterial(material = {}) {
     supportingMaterialKind: material.supportingMaterialKind || "",
     phaseId: material.phaseId || material.phase || "general",
     nodeId: material.nodeId || "",
-    name: material.name || "未命名材料",
+    name: material.name || "Untitled Material",
     fileType: material.fileType || "",
     size: material.size || 0,
-    uploadedBy: material.uploadedBy || "成员",
+    uploadedBy: material.uploadedBy || "Member",
     uploadedAt: material.uploadedAt || nowIso(),
     status: material.status || "submitted"
   };
@@ -537,7 +579,7 @@ function normalizeExtraTextFields(extraTextFields = {}) {
     if (!Array.isArray(fields)) return result;
     result[nodeId] = fields.map((field) => ({
       id: field.id || `txt_${Math.random().toString(36).slice(2, 9)}`,
-      label: field.label || "补充说明",
+      label: field.label || "Additional Notes",
       value: field.value || "",
       createdAt: field.createdAt || nowIso()
     }));
@@ -731,11 +773,11 @@ export function inferControlType(task = {}) {
     task.auditDomain
   ].filter(Boolean).join(" ").toLowerCase();
 
-  if (source.includes("itac") || source.includes("应用控制") || source.includes("自动化控制")) {
+  if (source.includes("itac") || source.includes("Application Control") || source.includes("Automated Control")) {
     return "ITAC";
   }
 
-  if (source.includes("itgc") || source.includes("gitc") || source.includes("访问管理") || source.includes("变更管理")) {
+  if (source.includes("itgc") || source.includes("gitc") || source.includes("Access Management") || source.includes("Change Management")) {
     return "GITC";
   }
 
@@ -863,6 +905,7 @@ function buildPhaseProgress(record, controlType = "") {
       return {
         ...node,
         phaseId: phase.id,
+        subtitle: getWorkspaceNodeSubtitle(node),
         dueDate: record.nodeDueDates?.[node.id] || "",
         status,
         value: node.type === "text" || node.type === "generated_text" ? textValueForNode(record, node) : "",
@@ -898,7 +941,7 @@ function buildPhaseProgress(record, controlType = "") {
   };
 }
 
-/** 首个未完成 required 节点；若全部完成则返回最后一个节点 */
+/** First incomplete required node; returns the last node when all required nodes are complete. */
 function resolveCurrentWorkspaceNode(phases = []) {
   for (const phase of phases) {
     const requiredNodes = (phase.nodes || []).filter((node) => node.required !== false);
@@ -1068,8 +1111,8 @@ function buildSnapshotItem(task, record, allTasks) {
     id: task.id,
     title: task.title,
     controlType: inferControlType(task),
-    owner: task.owner || "未分配",
-    assigneeEmail: task.owner || "未分配",
+    owner: task.owner || "Unassigned",
+    assigneeEmail: task.owner || "Unassigned",
     auditPhase: task.auditPhase || "",
     taskStatus: task.status || "todo",
     progressStatus: detail.progressStatus,
@@ -1183,7 +1226,7 @@ export function upsertControlProgress(controlId, patch, projectId = "") {
   return clone(nextRecord);
 }
 
-/** 删除项目时清理工作台进度（按 projectId 分区 + 遗留 flat records） */
+/** Clear workspace progress for a deleted project, including project partitions and legacy flat records. */
 export function deleteProjectWorkspaceProgress(projectId, controlIds = []) {
   if (!projectId) return;
 

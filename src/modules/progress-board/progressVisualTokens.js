@@ -1,8 +1,8 @@
 import { PROGRESS_STATUS } from "../../services/workspaceProgressService";
 
 /**
- * 进度看板视觉 token（全页统一：KPI / 环形图 / 图例 / pill 同色）
- * 未开始=琥珀警示 · 测试中=蓝 · 已完成=绿 · 逾期=红
+ * Progress Board visual tokens shared by KPI cards, donut charts, legends, and pills.
+ * Not Started=amber · Testing=blue · Completed=green · Overdue=red
  */
 export const WORKSPACE_STATUS_VISUAL = {
   [PROGRESS_STATUS.NOT_STARTED]: {

@@ -27,7 +27,7 @@ export function TaskCard({ task, onOpen }) {
     >
       <div className="card-meta">
         <span className={`pill ${task.priority.toLowerCase()}`}>{task.priority}</span>
-        {task.scopeCritical ? <span className="pill critical">关键</span> : null}
+        {task.scopeCritical ? <span className="pill critical">Critical</span> : null}
         {task.scopeGenerated ? (
           <>
             <span className={`pill control-type ${controlType.toLowerCase()}`}>{controlType}</span>
@@ -43,7 +43,7 @@ export function TaskCard({ task, onOpen }) {
       <h4 className="card-title">{task.title}</h4>
       <p className="card-desc">{task.description}</p>
       <div className="card-footer">
-        <span>{task.id} · {task.comments?.length || 0} 批注</span>
+        <span>{task.id} · {task.comments?.length || 0} Comments</span>
         <span className="avatar" title={task.owner}>{initials(task.owner)}</span>
       </div>
     </article>

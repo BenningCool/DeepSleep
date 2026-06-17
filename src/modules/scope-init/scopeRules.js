@@ -17,12 +17,12 @@ export const LEGACY_AUDIT_PHASE_MAP = {
 };
 
 export const CRITICAL_PHASE_LABELS = {
-  "scope-confirm": "Scope 确认",
-  "risk-assessment": "风险评估",
-  "control-design": "控制设计",
-  "control-test": "控制测试",
-  "deficiency-review": "缺陷评估",
-  "wrap-up": "项目收尾"
+  "scope-confirm": "Scope Confirmation",
+  "risk-assessment": "Risk Assessment",
+  "control-design": "Control Design",
+  "control-test": "Control Testing",
+  "deficiency-review": "Deficiency Evaluation",
+  "wrap-up": "Project Wrap-up"
 };
 
 export function normalizeAuditPhase(phase) {
@@ -35,12 +35,12 @@ export function labelOfAuditPhase(phase) {
 }
 
 export const WORKFLOW_STEPS = [
-  { id: "scope-confirm", label: "Scope 确认", critical: true },
-  { id: "risk-assessment", label: "风险评估", critical: true },
-  { id: "control-design", label: "控制设计", critical: false },
-  { id: "control-test", label: "控制测试", critical: false },
-  { id: "deficiency-review", label: "缺陷评估", critical: true },
-  { id: "wrap-up", label: "项目收尾", critical: true }
+  { id: "scope-confirm", label: "Scope Confirmation", critical: true },
+  { id: "risk-assessment", label: "Risk Assessment", critical: true },
+  { id: "control-design", label: "Control Design", critical: false },
+  { id: "control-test", label: "Control Testing", critical: false },
+  { id: "deficiency-review", label: "Deficiency Evaluation", critical: true },
+  { id: "wrap-up", label: "Project Wrap-up", critical: true }
 ];
 
 export function isScopeCriticalTask(task) {
@@ -102,20 +102,20 @@ export function validateStatusTransition(task, nextStatus, allTasks = []) {
   if (isScopeCriticalTask(task) && nextIndex - currentIndex > 1) {
     const skipped = COLUMNS.slice(currentIndex + 1, nextIndex)
       .map((column) => column.title)
-      .join("、");
+      .join(", ");
 
     return {
       allowed: false,
-      message: `「${task.title}」为关键审计步骤，不可跳过：${skipped}。请按阶段逐步推进。`
+      message: `"${task.title}" is a critical audit step and cannot skip: ${skipped}. Move through stages sequentially.`
     };
   }
 
   const blockers = getBlockingPredecessors(task, allTasks, nextStatus);
   if (blockers.length) {
-    const names = blockers.map((item) => `「${item.title}」`).join("、");
+    const names = blockers.map((item) => `"${item.title}"`).join(", ");
     return {
       allowed: false,
-      message: `请先完成前置关键步骤 ${names}，再推进「${task.title}」。`
+      message: `Complete prerequisite critical steps first: ${names} before moving "${task.title}".`
     };
   }
 
@@ -127,16 +127,16 @@ export function getWorkflowHint(task, allTasks = []) {
 
   const parts = [];
   if (isScopeCriticalTask(task)) {
-    parts.push(`关键步骤 · ${labelOfAuditPhase(task.auditPhase)}`);
+    parts.push(`Critical step · ${labelOfAuditPhase(task.auditPhase)}`);
   }
 
-  parts.push(`当前阶段：${columnTitle(task.status)}`);
+  parts.push(`Current stage: ${columnTitle(task.status)}`);
 
   const blockers = getBlockingPredecessors(task, allTasks, task.status);
   if (blockers.length) {
-    parts.push(`待完成前置：${blockers.map((item) => item.title).join("、")}`);
+    parts.push(`Pending prerequisites: ${blockers.map((item) => item.title).join(", ")}`);
   } else if (isScopeCriticalTask(task)) {
-    parts.push("不可跨列跳转");
+    parts.push("Cannot skip columns");
   }
 
   return parts.join(" · ");

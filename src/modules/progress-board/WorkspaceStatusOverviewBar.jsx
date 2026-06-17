@@ -28,7 +28,7 @@ export function formatWorkspaceStatusSummary(breakdown) {
 }
 
 /**
- * 与进度看板「状态概述」环形图同一口径（workspaceStatus 三态），横向分段柱展现。
+ * Uses the same basis as the Progress Board Status Overview donut chart: three workspaceStatus states rendered as a horizontal segmented bar.
  */
 export function WorkspaceStatusOverviewBar({
   breakdown,
@@ -74,7 +74,7 @@ const COMPLETION_FILL_COLOR = WORKSPACE_STATUS_SEGMENTS.find(
 )?.color || "#36b37e";
 
 /**
- * 组内成员进度：柱体填充 = 已完成控制点 / 总数；仅全完成时满条。三态明细见辅文。
+ * Team Member Progress: bar fill equals completed controls / total, reaching full width only when all controls are complete. Three-state details appear in supporting text.
  */
 export function MemberCompletionProgressBar({
   breakdown,
@@ -99,7 +99,7 @@ export function MemberCompletionProgressBar({
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={percent}
-      aria-label={`已完成 ${breakdown[PROGRESS_STATUS.COMPLETED] || 0}/${total}`}
+      aria-label={`Completed ${breakdown[PROGRESS_STATUS.COMPLETED] || 0}/${total}`}
     >
       <span style={{ width: `${percent}%`, background: COMPLETION_FILL_COLOR }} />
     </div>

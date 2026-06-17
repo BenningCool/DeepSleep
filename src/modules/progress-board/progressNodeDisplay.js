@@ -24,7 +24,7 @@ export function formatNodeProgressCounts(control) {
   return `${formatNodeProgressPhaseCounts(control)} · ${percent}%`;
 }
 
-/** 按工作台阶段顺序收集全部节点的预计完成日 */
+/** Collect planned due dates for all nodes in workspace phase order */
 export function collectNodeDueDateEntries(detail) {
   const phases = detail?.phases || [];
   if (phases.length) {
@@ -49,9 +49,9 @@ export function collectNodeDueDateEntries(detail) {
 export function formatCurrentNodeHeadline(control) {
   if (!control?.currentNodeLabel) return "—";
   if (control.allNodesComplete) {
-    return `已完成 · ${control.currentNodeLabel}`;
+    return `Completed · ${control.currentNodeLabel}`;
   }
-  return `当前 · ${control.currentNodeLabel}`;
+  return `Current · ${control.currentNodeLabel}`;
 }
 
 export function formatNodePhaseSummary(control) {

@@ -19,18 +19,18 @@ function ProjectCardProgress({ project, tasks }) {
 
   if (!total) {
     return (
-      <div className="project-card-progress" aria-label="状态概述">
+      <div className="project-card-progress" aria-label="Status Overview">
         <WorkspaceStatusOverviewBar breakdown={breakdown} pending />
-        <p className="project-card-progress-meta muted">暂无控制点</p>
+        <p className="project-card-progress-meta muted">No Controls Yet</p>
       </div>
     );
   }
 
   return (
-    <div className="project-card-progress" aria-label="状态概述">
+    <div className="project-card-progress" aria-label="Status Overview">
       <div className="project-card-progress-head">
-        <span>状态概述</span>
-        <strong>{total} 控制点</strong>
+        <span>Status Overview</span>
+        <strong>{total} Controls</strong>
       </div>
       <WorkspaceStatusOverviewBar breakdown={breakdown} />
       <p className="project-card-progress-meta">{formatWorkspaceStatusSummary(breakdown)}</p>
@@ -51,7 +51,7 @@ function ProjectCard({ project, tasks, active, onOpen }) {
         <span className="team-pill">{labelOfTeam(project.team)}</span>
         <span className="engagement-pill">{labelOfEngagement(project.engagementType)}</span>
       </div>
-      <p className="project-card-client">{project.clientName || "未填写客户"}</p>
+      <p className="project-card-client">{project.clientName || "Client Not Provided"}</p>
       <h3>{project.name}</h3>
       <p>{labelOfProjectType(project.projectType)}</p>
       <div className="project-card-meta">
@@ -64,7 +64,7 @@ function ProjectCard({ project, tasks, active, onOpen }) {
       <ProjectCardProgress project={project} tasks={tasks} />
       <div className="project-card-footer">
         <span className="scope-badge defined">
-          {controlCount ? `${controlCount} 控制点` : "暂无控制点"}
+          {controlCount ? `${controlCount} Controls` : "No Controls Yet"}
         </span>
         <span>{countActiveMembers(project)} members</span>
       </div>
@@ -92,31 +92,31 @@ export function ProjectsHomePage({
       <header className="page-header">
         <div>
           <p className="page-eyebrow">Engagement Portfolio</p>
-          <h2>项目列表</h2>
+          <h2>Project List</h2>
         </div>
-        <button className="button primary" type="button" onClick={onCreate}>新建项目</button>
+        <button className="button primary" type="button" onClick={onCreate}>Create Project</button>
       </header>
 
       {projects.length ? (
         <>
           <div className="list-toolbar">
             <label className="search-field">
-              <span className="label">搜索项目</span>
+              <span className="label">Search Projects</span>
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="客户、项目名、行业、成员邮箱、Specialist..."
+                placeholder="Client, project name, industry, member email, Specialist..."
               />
             </label>
             <label className="sort-field">
-              <span className="label">排序</span>
+              <span className="label">Sort</span>
               <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
                 {PROJECT_SORT_OPTIONS.map((option) => (
                   <option key={option.id} value={option.id}>{option.label}</option>
                 ))}
               </select>
             </label>
-            <span className="list-count">{visibleProjects.length} / {projects.length} 个项目</span>
+            <span className="list-count">{visibleProjects.length} / {projects.length} projects</span>
           </div>
 
           {visibleProjects.length ? (
@@ -133,16 +133,16 @@ export function ProjectsHomePage({
             </div>
           ) : (
             <div className="empty-state large">
-              <h3>没有匹配的项目</h3>
-              <p>试试其他关键词，或清空搜索框查看全部项目。</p>
+              <h3>No Matching Projects</h3>
+              <p>Try another keyword, or clear the search box to view all projects.</p>
             </div>
           )}
         </>
       ) : (
         <div className="empty-state large">
-          <h3>还没有项目</h3>
-          <p>创建第一个审计项目，填写客户名称、基本信息并邀请 Partner / Manager / In-charge。</p>
-          <button className="button primary" type="button" onClick={onCreate}>创建项目</button>
+          <h3>No Projects Yet</h3>
+          <p>Create the first audit project, enter client and basic information, and invite Partner / Manager / In-charge.</p>
+          <button className="button primary" type="button" onClick={onCreate}>Create Project</button>
         </div>
       )}
     </section>

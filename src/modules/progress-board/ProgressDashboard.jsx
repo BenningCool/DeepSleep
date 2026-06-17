@@ -25,9 +25,9 @@ function NodeProgressOverviewRow({ row }) {
       <div className="progress-node-overview-head">
         <strong>{row.label}</strong>
         <span>
-          {row.completedNodes}/{row.totalNodes || 0} 节点 · {row.percent}%
+          {row.completedNodes}/{row.totalNodes || 0} Node · {row.percent}%
           {" · "}
-          {row.testPointCount} 测试点
+          {row.testPointCount} Test Points
         </span>
       </div>
       <div
@@ -36,7 +36,7 @@ function NodeProgressOverviewRow({ row }) {
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={row.percent}
-        aria-label={`${row.label} 节点完成度 ${row.percent}%`}
+        aria-label={`${row.label} Node Completion ${row.percent}%`}
       >
         <span
           className={`progress-node-overview-fill ${isComplete ? "is-complete" : ""}`}
@@ -115,7 +115,7 @@ function KpiTypeSplit({ typeSplit }) {
   if (!typeSplit) return null;
 
   return (
-    <ul className="progress-kpi-type-split" aria-label="GITC 与 ITAC 分布">
+    <ul className="progress-kpi-type-split" aria-label="GITC and ITAC Distribution">
       {["GITC", "ITAC"].map((type) => (
         <li key={type}>
           <span className="progress-kpi-type-name">{type}</span>
@@ -141,7 +141,7 @@ function StatusKpiCard({
   badge = "",
   extraClassName = "",
   muted = false,
-  subject = "测试点"
+  subject = "Test Points"
 }) {
   const numericValue = typeof value === "number" ? value : 0;
   const hasValue = numericValue > 0;
@@ -158,7 +158,7 @@ function StatusKpiCard({
         badge ? "has-badge" : "",
         muted ? "is-muted" : ""
       ].filter(Boolean).join(" ")}
-      aria-label={percent ? `${label} ${value}，占 ${percent}` : `${label} ${value}`}
+      aria-label={percent ? `${label} ${value} accounts for ${percent}` : `${label} ${value}`}
     >
       <span className={`progress-kpi-icon icon-${iconType}`} aria-hidden="true">
         <KpiIcon type={iconType} />
@@ -208,7 +208,7 @@ export function ProgressDashboard({
   const totalControls = breakdown.total || 0;
 
   return (
-    <section className="progress-dashboard" aria-label="进度摘要仪表盘">
+    <section className="progress-dashboard" aria-label="Progress Summary Dashboard">
       <div className="progress-dashboard-kpi-section">
         <header className="progress-dashboard-kpi-head">
           <h3>{DASHBOARD_KPI_SECTION.title}</h3>
@@ -240,7 +240,7 @@ export function ProgressDashboard({
             : null}
           tone={hasPlanDue && kpis.overdue > 0 ? "due-risk-alert" : "status-overdue-idle"}
           alert
-          badge={hasPlanDue && kpis.overdue > 0 ? "需跟进" : ""}
+          badge={hasPlanDue && kpis.overdue > 0 ? "Needs Follow-up" : ""}
           extraClassName={hasPlanDue ? "is-overdue-kpi" : ""}
           muted={!hasPlanDue}
           subject=""
@@ -277,7 +277,7 @@ export function ProgressDashboard({
                     <div>
                       <strong>{item.title}</strong>
                       <p className="progress-activity-meta">
-                        节点 {item.nodeLabel}
+                        Node {item.nodeLabel}
                         {item.tod ? ` · TOD ${item.tod.completedNodes}/${item.tod.totalNodes}` : ""}
                         {item.toe ? ` · TOE ${item.toe.completedNodes}/${item.toe.totalNodes}` : ""}
                         {" · "}

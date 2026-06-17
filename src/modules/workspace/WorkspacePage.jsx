@@ -8,32 +8,33 @@ import {
   addWorkspaceMaterial,
   getControlProgressDetail,
   getControlProgressSnapshot,
+  getWorkspaceNodeSubtitle,
   getWorkspacePhases,
   removeWorkspaceMaterial,
   upsertControlProgress
 } from "../../services/workspaceProgressService";
 
 const WORKSPACE_PROGRESS_LABELS = {
-  [PROGRESS_STATUS.NOT_STARTED]: "未开始",
-  [PROGRESS_STATUS.IN_PROGRESS]: "测试中",
-  [PROGRESS_STATUS.COMPLETED]: "已完成"
+  [PROGRESS_STATUS.NOT_STARTED]: "Not Started",
+  [PROGRESS_STATUS.IN_PROGRESS]: "Testing",
+  [PROGRESS_STATUS.COMPLETED]: "Completed"
 };
 
 const MATERIAL_LABELS = {
   [MATERIAL_CATEGORY.SPP]: "SPP",
-  [MATERIAL_CATEGORY.MEETING_MINUTES]: "会议纪要",
-  [MATERIAL_CATEGORY.EVIDENCE]: "测试资料",
-  [MATERIAL_CATEGORY.POLICY]: "制度",
-  [MATERIAL_CATEGORY.SUPPORTING_MATERIAL]: "支持性材料",
-  [MATERIAL_CATEGORY.REQUIREMENT_LIST]: "需求清单",
-  [MATERIAL_CATEGORY.SAMPLE_POOL]: "样本池",
-  [MATERIAL_CATEGORY.RETURNED_SAMPLE_SUPPORT]: "客户返回材料"
+  [MATERIAL_CATEGORY.MEETING_MINUTES]: "Meeting Minutes",
+  [MATERIAL_CATEGORY.EVIDENCE]: "Test Evidence",
+  [MATERIAL_CATEGORY.POLICY]: "Policy",
+  [MATERIAL_CATEGORY.SUPPORTING_MATERIAL]: "Supporting Materials",
+  [MATERIAL_CATEGORY.REQUIREMENT_LIST]: "Requirement List",
+  [MATERIAL_CATEGORY.SAMPLE_POOL]: "Sample Population",
+  [MATERIAL_CATEGORY.RETURNED_SAMPLE_SUPPORT]: "Client Returned Materials"
 };
 
 const REVIEW_DOT_LABELS = {
-  [FIELD_REVIEW_STATUS.OPEN]: "待回复",
-  [FIELD_REVIEW_STATUS.REPLIED]: "已回复",
-  [FIELD_REVIEW_STATUS.ACCEPTED]: "已接受"
+  [FIELD_REVIEW_STATUS.OPEN]: "Awaiting Reply",
+  [FIELD_REVIEW_STATUS.REPLIED]: "Replied",
+  [FIELD_REVIEW_STATUS.ACCEPTED]: "Accepted"
 };
 
 const WORD_FILE_MIME_TYPES = new Set([
@@ -46,46 +47,48 @@ const DEFAULT_TRANSCRIPTION_FIELD_COUNT = 4;
 const AI_GENERATION_DELAY_MS = 3000;
 const SAMPLING_EXCEL_ROW_COUNT = 25;
 const SAMPLING_EXCEL_COLUMNS = [
-  { key: "sequence", label: "序号" },
-  { key: "sampleId", label: "抽样样本编号" },
-  { key: "populationItem", label: "样本池记录" },
-  { key: "sourcePool", label: "来源样本池" },
-  { key: "samplingMethod", label: "抽样方法" },
-  { key: "status", label: "状态" }
+  { key: "sequence", label: "No." },
+  { key: "sampleId", label: "Selected Sample ID" },
+  { key: "populationItem", label: "Population Record" },
+  { key: "sourcePool", label: "Source Population" },
+  { key: "samplingMethod", label: "Sampling Method" },
+  { key: "status", label: "Status" }
 ];
 
-const DEMO_GITC_DESIGN_TEXT = `2025年9月10日，审计方通过询问被审计单位IT部信息安全相关负责人，了解到公司针对程序变更的管理流程制定了相应的信息安全制度；通过获取并检查《软件变更管理制度》，审计方发现公司对此作出如下规定：
-变更流程：
-第四条  系统变更过程类似软件开发，大致可分为四个阶段：任务提交和接受、任务实现、任务验收和程序发布上线。
-第五条  需求部门提出系统变更需求，并将变更需求整理成《IT需求申请单》，由业务人员提交到内部流程系统，经过审核后流转至运维人员，由运维人员填写运维需求汇总描述后自动创建需求管理系统中的需求记录。
-第六条  由IT内部人员通过需求评审会议对需求记录进行分析，并提出系统变更建议。
-第七条  相关IT部门根据自行开发、合作开发和外包开发的不同要求组织实现系统变更需求，将需求提交至内部开发人员、合作开发商或外包开发商，产生供发布的程序。
-第八条  实现过程应按照软件开发过程规定进行。系统变更过程应遵循软件开发过程统一的编码标准，并经过测试验收才能上线。
-紧急变更流程：
-第九条  对于紧急变更，需求部门可以通过电子邮件形式、工作群沟通提出申请。
-第十条  IT部根据重要性和紧迫性作出判断，确定其优先级和影响程度，并进行相应处理。
-第十一条  紧急变更过程由专责部门或人员启动紧急修改变更程序。IT部应对紧急变更的处理进行规范的文档记录。
-第十二条  在紧急事件处理完成后，必须在一周内补办正式、完整的流程。
-审计方未发现异常。`;
+const DEMO_GITC_DESIGN_TEXT = `On September 10, 2025, through inquiry with the auditee's IT information security owner, the audit team understood that the company has established information security policies for program change management. By obtaining and inspecting the Software Change Management Policy, the audit team noted the following requirements:
+Change process:
+Article 4: The system change process is similar to software development and generally includes four stages: request submission and acceptance, implementation, acceptance testing, and production release.
+Article 5: The requesting department raises the system change request and prepares an IT requirement request. Business users submit it to the internal workflow system. After approval, it is routed to IT operations. IT operations completes the operations requirement summary, after which the requirement management system automatically creates a requirement record.
+Article 6: IT personnel analyze requirement records through requirement review meetings and provide system change recommendations.
+Article 7: Relevant IT departments implement system changes based on whether development is internal, joint, or outsourced. Requirements are submitted to internal developers, partners, or outsourcing vendors to produce releasable programs.
+Article 8: Implementation must follow the software development process. System changes must follow unified coding standards and pass testing and acceptance before production release.
+Emergency change process:
+Article 9: For emergency changes, requesting departments may submit requests by email or work group communication.
+Article 10: IT evaluates importance and urgency, determines priority and impact, and handles the change accordingly.
+Article 11: Emergency changes are initiated by designated departments or personnel through emergency change procedures. IT must document emergency change handling in a standardized manner.
+Article 12: After emergency handling is completed, a formal and complete process must be completed within one week.
+No exception was noted by the audit team.`;
 
-const DEMO_GITC_IMPLEMENTATION_TEXT = `通过询问被审计单位信息技术部系统开发相关人员，审计方了解到在2025年01月01日-2025年09月04日现场审计时点，相关业务系统对于程序变更的管理流程如下：
-①需求提出：
-对于非BUG类需求：由业务部门提出变更需求，并将变更需求整理成《IT需求申请单》或者业务联系单，由业务人员提交至内部流程系统，经业务部门相关领导审核后流转至运维人员。由运维人员基于业务需求转化并填写运维需求单，流程系统中的运维需求创建后自动关联至需求管理平台，并创建开发需求，此时需求进入“待评审”状态，正式进入开发生命周期；
+const DEMO_GITC_IMPLEMENTATION_TEXT = `Through inquiry with the auditee's IT system development personnel, the audit team understood the program change management process for the relevant business systems as of the fieldwork period from 2025-01-01 to 2025-09-04:
+1. Requirement initiation:
+For non-bug requirements, the business department raises the change request and prepares an IT requirement request or business request form. Business users submit it to the internal workflow system. After business leadership approval, it is routed to IT operations. IT operations converts the business request into an operations requirement. Once created in the workflow system, the operations requirement is automatically linked to the requirement management platform and a development requirement is created. The item then enters Pending Review status and formally enters the development lifecycle.
 
-对于BUG类需求：当业务部门发现问题，直接反馈给IT运维人员。IT运维人员确认该问题为系统BUG后，在需求/缺陷管理平台中创建BUG记录，并指派给对应开发人员，此时需求进入“待评审”状态；
+For bug requirements, the business department reports the issue directly to IT operations. After IT operations confirms the issue is a system bug, a bug record is created in the requirement/defect management platform and assigned to the relevant developer. The item then enters Pending Review status.
 
-②需求评审：
-每周四及周五，开发团队召开“需求评审会”，对需求/缺陷管理平台中“待评审”的需求和BUG进行评估、澄清和排期；
-③制定开发计划：
-每周一，开发负责人根据需求评审结果指定本周的开发计划，明确各项任务的负责人和预计完成时间；
-④开发与测试：
-开发人员根据开发计划进行编码开发。开发完成后，由IT运维人员在测试环境中进行功能测试，测试通过后，任务状态在需求/缺陷管理平台中更新为“已解决”；
-⑤代码合并：
-由开发组长将各开发人员在各自开发分支上的代码合并到代码仓库的主干分支上，准备发布；
-⑥系统发布：
-每周二及周四为固定的发布时间，由发布人员在发布平台上点击“发布”按钮，发布平台会自动从代码仓库拉取已经合并好的主干代码，并将其部署到生产环境；
-⑦发布后验证：
-发布完成后，发布人员会通知IT运维人员在生产环境对本次发布的功能或修复的BUG进行最终验证，确保上线内容无误。`;
+2. Requirement review:
+Every Thursday and Friday, the development team holds a requirement review meeting to evaluate, clarify, and schedule requirements and bugs in Pending Review status.
+3. Development planning:
+Every Monday, the development lead prepares the weekly development plan based on review results, defining owners and expected completion dates.
+4. Development and testing:
+Developers complete coding based on the plan. After development, IT operations performs functional testing in the test environment. Once testing passes, the requirement/defect management platform status is updated to Resolved.
+5. Code merge:
+The development team lead merges code from developers' branches into the main branch, preparing for release.
+6. System release:
+Tuesday and Thursday are fixed release days. Release personnel click Release in the release platform. The platform automatically pulls merged main-branch code from the repository and deploys it to production.
+7. Post-release verification:
+After release, release personnel notify IT operations to verify the released features or bug fixes in production and confirm the release is accurate.`;
+
+const DEMO_ITAC_PROCESS_DESCRIPTION_TEXT = "The ERP configuration logic is as follows: for sales orders transmitted through the interface, the system automatically validates the order and routes it to the All-Network Order List, which represents the effective sales order report. For manually entered sales orders, users must select the option to skip system validation, meaning the order must go through manual approval. Only when the approval status reaches 100, indicating approval completed, can the order be included in the All-Network Order List and treated as an effective sales order.";
 
 const emptyDetail = {
   id: "",
@@ -186,8 +189,8 @@ function normalizeMemberOptions(project) {
 }
 
 function formatDateTime(value) {
-  if (!value) return "未更新";
-  return new Intl.DateTimeFormat("zh-CN", {
+  if (!value) return "Not updated";
+  return new Intl.DateTimeFormat("en-US", {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
@@ -200,12 +203,12 @@ function statusClass(status) {
 }
 
 function materialLabel(category) {
-  return MATERIAL_LABELS[category] || "材料";
+  return MATERIAL_LABELS[category] || "Material";
 }
 
 function supportingMaterialKindLabel(kind) {
-  if (kind === "configuration") return "配置";
-  if (kind === "code") return "代码";
+  if (kind === "configuration") return "Configuration";
+  if (kind === "code") return "Code";
   if (kind === "test_of_one") return "Test of One";
   return "";
 }
@@ -213,14 +216,14 @@ function supportingMaterialKindLabel(kind) {
 function materialDisplayLabel(item) {
   const base = materialLabel(item.category);
   const kind = supportingMaterialKindLabel(item.supportingMaterialKind);
-  return kind ? `${base}（${kind}）` : base;
+  return kind ? `${base}(${kind})` : base;
 }
 
 function uploadLabel(node) {
   if (node.actionLabel) return node.actionLabel;
-  if (node.type === "upload_spp") return "上传 SPP";
-  if (node.type === "upload_minutes") return "上传纪要";
-  return "上传资料";
+  if (node.type === "upload_spp") return "Upload SPP";
+  if (node.type === "upload_minutes") return "Upload Minutes";
+  return "Upload Evidence";
 }
 
 function isWordUploadNode(node) {
@@ -268,24 +271,24 @@ function isTableBuilderNode(node) {
 }
 
 function tableTitleForBuilder(node) {
-  if (node?.builderKind === "sample_transcription_table") return "样本抄写";
+  if (node?.builderKind === "sample_transcription_table") return "Sample Transcription";
   if (node?.builderKind === "itac_test_of_one_table") return "ITAC Test of One";
   return "Test of One";
 }
 
 function tableGenerateButtonLabel(node) {
-  if (node?.builderKind === "sample_transcription_table") return "生成抄写表格";
-  return "生成 Test of One 表格";
+  if (node?.builderKind === "sample_transcription_table") return "Generate Transcription Table";
+  return "Generate Test of One Table";
 }
 
 function tableBuilderHelp(node) {
   if (node?.builderKind === "sample_transcription_table") {
-    return "先手动填写样本字段，再按字段逐行录入多个样本，全部填完后点击生成抄写表格。";
+    return "Manually define sample fields, then enter multiple samples row by row. After all rows are complete, click Generate Transcription Table.";
   }
   if (node?.builderKind === "itac_test_of_one_table") {
-    return "先手动填写 ITAC 样本字段，再填写一个完整样本，生成 Test of One 表格。";
+    return "Manually define ITAC sample fields, then enter one complete sample and generate the Test of One table.";
   }
-  return "先手动填写样本字段，再填写一个完整样本，生成 Test of One 表格。";
+  return "Manually define sample fields, then enter one complete sample and generate the Test of One table.";
 }
 
 function shouldAutoGenerateTable(node) {
@@ -406,13 +409,13 @@ function responseText(value) {
   return typeof value === "string" ? value : "";
 }
 
-function sanitizeFileName(value = "抽样样本") {
-  const normalized = String(value || "抽样样本")
+function sanitizeFileName(value = "Selected Sample") {
+  const normalized = String(value || "Selected Sample")
     .replace(/[\\/:*?"<>|]+/g, "-")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
-  return normalized || "抽样样本";
+  return normalized || "Selected Sample";
 }
 
 function excelEscape(value) {
@@ -428,7 +431,7 @@ function buildExcelWorkbookHtml(file) {
     ? file.columns
     : SAMPLING_EXCEL_COLUMNS;
   const rows = Array.isArray(file?.rows) ? file.rows : [];
-  const title = file?.sheetName || "抽样样本";
+  const title = file?.sheetName || "Selected Sample";
 
   return `<!doctype html>
 <html>
@@ -464,7 +467,7 @@ function downloadExcelFile(file) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = file.fileName || "抽样样本.xls";
+  link.download = file.fileName || "Selected Sample.xls";
   document.body.appendChild(link);
   link.click();
   link.remove();
@@ -532,7 +535,7 @@ function ProgressMeter({ completed, total, label }) {
 
 function MaterialList({ items, onRemove }) {
   if (!items.length) {
-    return <p className="workspace-empty-line">暂无材料</p>;
+    return <p className="workspace-empty-line">No materials yet</p>;
   }
 
   return (
@@ -547,7 +550,7 @@ function MaterialList({ items, onRemove }) {
             </span>
           </div>
           <button className="button subtle" type="button" onClick={() => onRemove(item.id)}>
-            移除
+            Remove
           </button>
         </li>
       ))}
@@ -713,15 +716,15 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
     const owner = createDraft.owner.trim();
 
     if (!title) {
-      onToast?.("请填写测试点名称。");
+      onToast?.("Enter a test point name.");
       return;
     }
     if (!owner) {
-      onToast?.("请先指派项目组成员。");
+      onToast?.("Assign a project team member first.");
       return;
     }
     if (!createDraft.firstDueDate) {
-      onToast?.("请先选择第一个节点预计完成日期。");
+      onToast?.("Select the first node due date first.");
       return;
     }
 
@@ -738,7 +741,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
     });
 
     if (!createdTask?.id) {
-      onToast?.("新建测试点失败。");
+      onToast?.("Create Test Point failed.");
       return;
     }
 
@@ -750,7 +753,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
     setSelectedId(createdTask.id);
     setRefreshToken((value) => value + 1);
     setCreateOpen(false);
-    onToast?.("测试点已创建。");
+    onToast?.("Test point created.");
   }
 
   useEffect(() => {
@@ -810,8 +813,8 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
       [key]: true
     }));
     notify(node.type === "generated_file"
-      ? "AI 正在生成抽样 Excel，约 3 秒后更新。"
-      : "AI 正在生成草稿，约 3 秒后更新。");
+      ? "AI is generating the sampling Excel. It will update in about 3 seconds."
+      : "AI is generating the draft. It will update in about 3 seconds.");
 
     generationTimersRef.current[key] = window.setTimeout(() => {
       setDraftResponses((current) => ({
@@ -871,7 +874,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
           ...(current.extraTextFields?.[nodeId] || []),
           {
             id: `txt_${Date.now().toString(36)}`,
-            label: "补充说明",
+            label: "Additional Notes",
             value: "",
             createdAt: new Date().toISOString()
           }
@@ -928,7 +931,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
     if (!review?.reply?.trim()) return;
     updateFieldReview(fieldKey, {
       status: FIELD_REVIEW_STATUS.REPLIED,
-      repliedBy: selectedControl?.owner || "成员"
+      repliedBy: selectedControl?.owner || "Member"
     });
   }
 
@@ -949,7 +952,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
       }
     };
     setDetail(nextDetail);
-    persist(nextDetail, "工作台内容已保存，模块 3 进度接口已更新。");
+    persist(nextDetail, "Workspace content saved. Module 3 progress API has been updated.");
     setDraftResponses({});
   }
 
@@ -961,7 +964,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
     setDraftResponses({});
     setTestOfOneBuilders({});
     setSupportingMaterialKinds({});
-    notify("已取消未保存修改。");
+    notify("Unsaved changes canceled.");
   }
 
   function generatedTargetsForUploadNode(uploadNode) {
@@ -972,12 +975,12 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
   }
 
   function materialSummary(items = []) {
-    if (!items.length) return "暂无材料";
-    return items.map((item) => `${item.name || "未命名材料"}${item.size ? ` (${Math.round(item.size / 1024)} KB)` : ""}`).join("、");
+    if (!items.length) return "No materials yet";
+    return items.map((item) => `${item.name || "Untitled Material"}${item.size ? ` (${Math.round(item.size / 1024)} KB)` : ""}`).join(", ");
   }
 
   function buildGeneratedText(node, materials = []) {
-    const controlTitle = selectedControl?.title || "当前测试点";
+    const controlTitle = selectedControl?.title || "Current Test Point";
     const source = materialSummary(materials);
     const generatedAt = formatDateTime(new Date().toISOString());
 
@@ -986,7 +989,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
     }
     if (node.generationKind === "implementation") {
       if (node.id.startsWith("itac-")) {
-        return `Implementation 草稿\n测试点：${controlTitle}\n依据会议纪要：${source}\n\n系统根据会议纪要整理控制执行人、控制频率、关键配置或代码对象、执行证据来源和实施结论。请复核访谈内容是否足以支持该 ITAC 已按设计实施。`;
+        return DEMO_ITAC_PROCESS_DESCRIPTION_TEXT;
       }
       return DEMO_GITC_IMPLEMENTATION_TEXT;
     }
@@ -994,17 +997,17 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
       return "";
     }
     if (node.generationKind === "sampling") {
-      return `抽样样本草稿\n测试点：${controlTitle}\n依据样本池：${source}\n\n系统模拟抽样结果：Sample-01、Sample-08、Sample-15、Sample-22、Sample-30。\n生成时间：${generatedAt}\n请复核样本池期间、总体完整性和样本数量。`;
+      return `Selected Sample Draft\nTest point: ${controlTitle}\nBased on sample population: ${source}\n\nSystem simulated sampling result: Sample-01, Sample-08, Sample-15, Sample-22, Sample-30.\nGenerated at: ${generatedAt}\nPlease review the sample population period, population completeness, and sample size.`;
     }
     if (node.generationKind === "transcription") {
       if (node.builderKind === "sample_transcription_table") return "";
-      return `测试抄写草稿\n测试点：${controlTitle}\n依据客户返回材料：${source}\n\n系统根据客户返回的样本支持性材料模拟完成抄写，整理每个样本的控制属性、支持证据和初步测试结果。请复核抄写内容与附件是否一致。`;
+      return `Test Transcription Draft\nTest point: ${controlTitle}\nBased on returned client materials: ${source}\n\nThe system simulated transcription from the returned sample support, organizing each sample's control attributes, supporting evidence, and preliminary test result. Please review whether the transcription is consistent with the attachments.`;
     }
-    return `自动生成草稿\n测试点：${controlTitle}\n依据材料：${source}\n生成时间：${generatedAt}`;
+    return `Auto-generated Draft\nTest point: ${controlTitle}\nBased on materials: ${source}\nGenerated at: ${generatedAt}`;
   }
 
   function buildGeneratedFile(node, materials = []) {
-    const controlTitle = selectedControl?.title || "当前测试点";
+    const controlTitle = selectedControl?.title || "Current Test Point";
     const generatedAtIso = new Date().toISOString();
     const sourcePool = materialSummary(materials);
     const sourceBase = sanitizeFileName(materials[0]?.name || "sample-pool");
@@ -1012,9 +1015,9 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
     if (node.fileKind === "sampling_excel") {
       return {
         kind: "sampling_excel",
-        fileName: `${sanitizeFileName(controlTitle)}-抽样样本.xls`,
+        fileName: `${sanitizeFileName(controlTitle)}-Selected Sample.xls`,
         fileType: "application/vnd.ms-excel",
-        sheetName: "抽样样本",
+        sheetName: "Selected Sample",
         generatedAt: generatedAtIso,
         rowCount: SAMPLING_EXCEL_ROW_COUNT,
         columns: SAMPLING_EXCEL_COLUMNS,
@@ -1023,15 +1026,15 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
           sampleId: `SAMPLE-${String(index + 1).padStart(3, "0")}`,
           populationItem: `${sourceBase}-ROW-${String((index + 1) * 7).padStart(4, "0")}`,
           sourcePool,
-          samplingMethod: "系统随机抽样（Demo）",
-          status: "待发送"
+          samplingMethod: "System random sampling (Demo)",
+          status: "Pending Send"
         }))
       };
     }
 
     return {
       kind: node.fileKind || "generated_file",
-      fileName: `${sanitizeFileName(controlTitle)}-生成文件.xls`,
+      fileName: `${sanitizeFileName(controlTitle)}-generated-file.xls`,
       fileType: "application/vnd.ms-excel",
       generatedAt: generatedAtIso,
       columns: SAMPLING_EXCEL_COLUMNS,
@@ -1051,7 +1054,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
       scheduleGeneratedDraft(
         node,
         () => buildGeneratedText(node, materials),
-        "AI 草稿已生成，点击 Save 后计入进度。"
+        "AI draft generated. Click Save to count toward progress."
       );
       return "delayed";
     }
@@ -1072,14 +1075,14 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
   function regenerateGeneratedNode(node) {
     const sourceMaterials = detail.materials.filter((item) => item.nodeId === node.dependsOnNodeId);
     if (!sourceMaterials.length) {
-      notify("请先上传该节点所需材料。");
+      notify("Upload the material required by this node first.");
       return;
     }
     const mode = setGeneratedDraft(node, sourceMaterials);
     if (mode === "delayed") return;
     notify(node.type === "generated_file"
-      ? "已生成抽样 Excel，点击 Save 后计入进度。"
-      : "已重新生成草稿，点击 Save 后计入进度。");
+      ? "Sampling Excel generated. Click Save to count toward progress."
+      : "Draft regenerated. Click Save to count toward progress.");
   }
 
   function supportingMaterialKindForNode(node) {
@@ -1103,7 +1106,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
       ? selectedFiles.filter(isWordFile)
       : selectedFiles;
     if (files.length !== selectedFiles.length) {
-      notify(`${node.label}仅支持 Word 文件（.doc/.docx）。`);
+      notify(`${node.label} only supports Word files (.doc/.docx).`);
     }
     if (!files.length) {
       event.target.value = "";
@@ -1117,7 +1120,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
       name: file.name,
       fileType: file.type,
       size: file.size,
-      uploadedBy: selectedControl.owner || "成员",
+      uploadedBy: selectedControl.owner || "Member",
       uploadedAt: new Date().toISOString()
     }));
     files.forEach((file) => {
@@ -1129,7 +1132,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
         name: file.name,
         fileType: file.type,
         size: file.size,
-        uploadedBy: selectedControl.owner || "成员"
+        uploadedBy: selectedControl.owner || "Member"
       }, project?.id || selectedTask?.projectId || "");
     });
     event.target.value = "";
@@ -1140,9 +1143,9 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
     setDetail(getControlProgressDetail(selectedControl.id, selectedTask, tasks));
     refresh();
     if (files.length && hasDelayedGeneration) {
-      notify(`已记录 ${files.length} 个${materialLabel(node.category)}，AI 正在生成草稿。`);
+      notify(`Recorded ${files.length} ${materialLabel(node.category)}, AI is generating the draft.`);
     } else if (files.length) {
-      notify(`已记录 ${files.length} 个${materialLabel(node.category)}。`);
+      notify(`Recorded ${files.length} ${materialLabel(node.category)}.`);
     }
   }
 
@@ -1154,7 +1157,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
       project?.id || selectedTask?.projectId || ""
     );
     refresh();
-    notify("材料记录已移除。");
+    notify("Material record removed.");
   }
 
   function materialsForNode(node) {
@@ -1206,11 +1209,11 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
     const builder = testOfOneBuilderForNode(node);
     const table = buildTestOfOneTable(builder, node);
     if (!table) {
-      notify("请先填写至少一个完整样本。");
+      notify("Enter at least one complete sample first.");
       return;
     }
     updateGeneratedDraft(node.id, table);
-    notify(`${tableTitleForBuilder(node)}表格已生成，点击 Save 后计入进度。`);
+    notify(`${tableTitleForBuilder(node)} table generated. Click Save to count toward progress.`);
   }
 
   function updateTableFieldLabel(node, fieldId, value) {
@@ -1307,7 +1310,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
       }
     };
     setDetail(nextDetail);
-    persist(nextDetail, nextSent ? "样本已标记为发送。" : "样本发送标记已取消。");
+    persist(nextDetail, nextSent ? "Sample request marked as sent." : "Sample request send mark canceled.");
   }
 
   function structuredFieldKey(node, field) {
@@ -1360,29 +1363,29 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
     return (
       <div className="workspace-review-thread">
         <div className="workspace-review-thread-head">
-          <strong>复核意见</strong>
+          <strong>Review Comment</strong>
           <span className={`workspace-review-state ${review.status}`}>
-            {REVIEW_DOT_LABELS[review.status] || "待处理"}
+            {REVIEW_DOT_LABELS[review.status] || "Pending"}
           </span>
         </div>
         <textarea
           rows="2"
           value={review.comment}
           onChange={(event) => updateFieldReview(fieldKey, { comment: event.target.value })}
-          placeholder="输入 reviewer 复核意见。"
+          placeholder="Enter reviewer comment."
         />
         <textarea
           rows="2"
           value={review.reply}
           onChange={(event) => updateFieldReview(fieldKey, { reply: event.target.value })}
-          placeholder="回复复核意见。"
+          placeholder="Reply to review comment."
         />
         <div className="workspace-review-actions">
           <button className="button subtle" type="button" onClick={() => submitReviewReply(fieldKey)}>
-            回复
+            Reply
           </button>
           <button className="button success" type="button" onClick={() => acceptFieldReview(fieldKey)}>
-            接受
+            Accept
           </button>
         </div>
       </div>
@@ -1401,7 +1404,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
             <button
               className="workspace-text-menu-button"
               type="button"
-              aria-label="文本框操作"
+              aria-label="Text box actions"
               onClick={() => setOpenTextMenuKey(menuOpen ? "" : fieldKey)}
             >
               ...
@@ -1410,17 +1413,17 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
               <button
                 className={`workspace-comment-dot ${review.status}`}
                 type="button"
-                aria-label={REVIEW_DOT_LABELS[review.status] || "复核意见"}
+                aria-label={REVIEW_DOT_LABELS[review.status] || "Review Comment"}
                 onClick={() => setOpenReviewKey(openReviewKey === fieldKey ? "" : fieldKey)}
               />
             ) : null}
             {menuOpen ? (
               <div className="workspace-text-menu">
                 <button type="button" onClick={() => addExtraTextField(node.id)}>
-                  新增文本框
+                  Add Text Box
                 </button>
                 <button type="button" onClick={() => addFieldReview(fieldKey)}>
-                  添加复核意见
+                  Add Review Comment
                 </button>
               </div>
             ) : null}
@@ -1451,7 +1454,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
             <button
               className="workspace-text-menu-button"
               type="button"
-              aria-label="表格操作"
+              aria-label="Table actions"
               onClick={() => setOpenTextMenuKey(menuOpen ? "" : fieldKey)}
             >
               ...
@@ -1460,14 +1463,14 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
               <button
                 className={`workspace-comment-dot ${review.status}`}
                 type="button"
-                aria-label={REVIEW_DOT_LABELS[review.status] || "复核意见"}
+                aria-label={REVIEW_DOT_LABELS[review.status] || "Review Comment"}
                 onClick={() => setOpenReviewKey(openReviewKey === fieldKey ? "" : fieldKey)}
               />
             ) : null}
             {menuOpen ? (
               <div className="workspace-text-menu">
                 <button type="button" onClick={() => addFieldReview(fieldKey)}>
-                  添加复核意见
+                  Add Review Comment
                 </button>
               </div>
             ) : null}
@@ -1496,7 +1499,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
             </table>
           </div>
         ) : (
-          <p className="workspace-empty-line">生成后将在这里显示实际表格。</p>
+          <p className="workspace-empty-line">The generated table will appear here.</p>
         )}
 
         {renderReviewThread(fieldKey)}
@@ -1581,7 +1584,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
             value={responseText(value)}
             onChange={(event) => updateStructuredField(node, field, event.target.value)}
           >
-            <option value="">请选择</option>
+            <option value="">Select</option>
             {(field.options || []).map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -1709,19 +1712,19 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
     return (
       <div className="workspace-test-one-builder">
         <div className="workspace-test-one-fields">
-          <span>样本字段</span>
+          <span>Sample Fields</span>
           <div className="workspace-field-name-list">
             {builder.fields.map((field, fieldIndex) => (
               <div className="workspace-field-name-row" key={field.id}>
-                <span>字段 {fieldIndex + 1}</span>
+                <span>Field {fieldIndex + 1}</span>
                 <input
                   type="text"
                   value={field.label || ""}
                   onChange={(event) => updateTableFieldLabel(node, field.id, event.target.value)}
-                  placeholder="手动填写字段名"
+                  placeholder="Enter field name"
                 />
                 <button className="button subtle" type="button" onClick={() => removeTableField(node, field.id)}>
-                  移除
+                  Remove
                 </button>
               </div>
             ))}
@@ -1733,17 +1736,17 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
             <table>
               <thead>
                 <tr>
-                  <th>样本</th>
+                  <th>Sample</th>
                   {fields.map((field) => (
                     <th key={field.id}>{field.label}</th>
                   ))}
-                  <th>操作</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {builder.rows.map((row, rowIndex) => (
                   <tr key={row.id}>
-                    <th>样本 {rowIndex + 1}</th>
+                    <th>Sample {rowIndex + 1}</th>
                     {fields.map((field) => (
                       <td key={field.id}>
                         <input
@@ -1756,7 +1759,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
                     ))}
                     <td>
                       <button className="button subtle" type="button" onClick={() => removeTestOfOneRow(node, row.id)}>
-                        移除
+                        Remove
                       </button>
                     </td>
                   </tr>
@@ -1765,15 +1768,15 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
             </table>
           </div>
         ) : (
-          <p className="workspace-empty-line">先填写至少一个样本字段，系统会在下方生成录入表。</p>
+          <p className="workspace-empty-line">Enter at least one sample field. The system will generate the entry table below.</p>
         )}
 
         <div className="workspace-test-one-actions">
           <button className="button subtle" type="button" onClick={() => addTableField(node)}>
-            新增字段
+            Add Field
           </button>
           <button className="button subtle" type="button" onClick={() => addTestOfOneRow(node)}>
-            新增样本
+            Add Sample
           </button>
           <button className="button primary" type="button" onClick={() => generateTableDraft(node)}>
             {tableGenerateButtonLabel(node)}
@@ -1793,25 +1796,25 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
       <div className="workspace-generated-node">
         <div className="workspace-generated-actions">
           <button className="button subtle" type="button" onClick={() => regenerateGeneratedNode(node)}>
-            重新生成 Excel
+            Regenerate Excel
           </button>
-          {hasDraft ? <span>未保存文件</span> : null}
+          {hasDraft ? <span>Unsaved file</span> : null}
         </div>
 
         {file ? (
           <div className="workspace-generated-file">
             <div>
-              <strong>{file.fileName || "抽样样本.xls"}</strong>
+              <strong>{file.fileName || "Selected Sample.xls"}</strong>
               <span>
-                {rowCount} 个抽样样本 · Excel · 生成时间 {formatDateTime(file.generatedAt)}
+                {rowCount} Selected Sample · Excel · Generated at {formatDateTime(file.generatedAt)}
               </span>
             </div>
             <button className="button primary" type="button" onClick={() => downloadExcelFile(file)}>
-              下载 Excel
+              Download Excel
             </button>
           </div>
         ) : (
-          <p className="workspace-empty-line">上传样本清单后点击“重新生成 Excel”，系统会自动生成 25 个抽样样本。</p>
+          <p className="workspace-empty-line">After uploading the sample list, click “Regenerate Excel” and the system will generate 25 selected samples.</p>
         )}
       </div>
     );
@@ -1826,14 +1829,14 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
       <div className="workspace-generated-node">
         <div className="workspace-generated-actions">
           {isTableBuilderNode(node) ? (
-            <span>按样本字段填表生成{tableTitleForBuilder(node)}</span>
+            <span>Complete the table by sample fields to generate {tableTitleForBuilder(node)}</span>
           ) : (
             <button className="button subtle" type="button" onClick={() => regenerateGeneratedNode(node)} disabled={generating}>
-              {generating ? "AI 生成中..." : "重新生成"}
+              {generating ? "AI generating..." : "Regenerate"}
             </button>
           )}
-          {generating ? <span className="workspace-ai-generating">正在读取材料并生成草稿</span> : null}
-          {hasDraft ? <span>未保存草稿</span> : null}
+          {generating ? <span className="workspace-ai-generating">Reading materials and generating draft</span> : null}
+          {hasDraft ? <span>Unsaved draft</span> : null}
         </div>
         {isTableBuilderNode(node) ? renderTestOfOneBuilder(node) : null}
         {isTableBuilderNode(node) ? (
@@ -1864,7 +1867,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
         >
           {sent ? sendState.sentBy || "SENT" : "Send"}
         </button>
-        {sent ? <span>已发送 · {formatDateTime(sendState.sentAt)}</span> : <span>未发送</span>}
+        {sent ? <span>Sent · {formatDateTime(sendState.sentAt)}</span> : <span>Not sent</span>}
       </div>
     );
   }
@@ -1873,14 +1876,14 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
     <section className="workspace-page">
       <header className="page-header">
         <div>
-          <p className="page-eyebrow">Workspace · 测试点执行工作台</p>
-          <h2>{project?.clientName || project?.name || "项目工作台"}</h2>
+          <p className="page-eyebrow">Workspace · Test Point Execution Workspace</p>
+          <h2>{project?.clientName || project?.name || "Project Workspace"}</h2>
         </div>
         <div className="workspace-stats">
-          <WorkspaceStat value={stats.total} label="测试点" />
-          <WorkspaceStat value={stats.nodeProgress} label="节点进度" />
-          <WorkspaceStat value={stats.testing} label="测试中" />
-          <WorkspaceStat value={stats.completed} label="已完成" />
+          <WorkspaceStat value={stats.total} label="Test Points" />
+          <WorkspaceStat value={stats.nodeProgress} label="Node Progress" />
+          <WorkspaceStat value={stats.testing} label="Testing" />
+          <WorkspaceStat value={stats.completed} label="Completed" />
         </div>
       </header>
 
@@ -1888,18 +1891,18 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
         <aside className="workspace-list-panel">
           <div className="panel-toolbar">
             <div>
-              <h3>测试点清单</h3>
+              <h3>Test Point List</h3>
             </div>
             <button className="button primary" type="button" onClick={openCreateDialog}>
-              新建测试点
+              Create Test Point
             </button>
           </div>
 
           <div className="workspace-filter-grid">
             <label className="field">
-              <span className="label">负责人</span>
+              <span className="label">Owner</span>
               <select value={ownerFilter} onChange={(event) => setOwnerFilter(event.target.value)}>
-                <option value="">全部</option>
+                <option value="">All</option>
                 {owners.map((owner) => (
                   <option key={owner} value={owner}>{owner}</option>
                 ))}
@@ -1907,9 +1910,9 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
             </label>
 
             <label className="field">
-              <span className="label">类型</span>
+              <span className="label">Type</span>
               <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
-                <option value="">全部</option>
+                <option value="">All</option>
                 <option value="GITC">GITC</option>
                 <option value="ITAC">ITAC</option>
                 <option value="TASK">TASK</option>
@@ -1917,9 +1920,9 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
             </label>
 
             <label className="field full">
-              <span className="label">进度状态</span>
+              <span className="label">Progress Status</span>
               <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-                <option value="">全部状态</option>
+                <option value="">All Statuses</option>
                 {Object.entries(WORKSPACE_PROGRESS_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>{label}</option>
                 ))}
@@ -1932,7 +1935,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
                 checked={actionOnly}
                 onChange={(event) => setActionOnly(event.target.checked)}
               />
-              <span>仅看未完成 / 待处理</span>
+              <span>Show incomplete / action items only</span>
             </label>
           </div>
 
@@ -1969,14 +1972,14 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
                     ))}
                   </div>
                   <small>
-                    制度 {control.policyCount || 0} · 纪要 {control.meetingMinutesCount || 0} · 支持 {control.supportingMaterialCount || control.sppCount || 0}
+                    Policy {control.policyCount || 0} · Minutes {control.meetingMinutesCount || 0} · Support {control.supportingMaterialCount || control.sppCount || 0}
                   </small>
                 </button>
               );
             }) : (
               <div className="empty-state compact">
-                <h3>暂无可记录的测试点</h3>
-                <p>点击「新建测试点」添加控制点，或调整左侧筛选条件。</p>
+                <h3>No Test Points Yet</h3>
+                <p>Click Create Test Point to add a control, or adjust filters.</p>
               </div>
             )}
           </div>
@@ -1992,7 +1995,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
                   </span>
                   <h3>{selectedControl.title}</h3>
                   <p>
-                    {selectedControl.owner} · 最近更新 {formatDateTime(detail.updatedAt)}
+                    {selectedControl.owner} · Updated {formatDateTime(detail.updatedAt)}
                   </p>
                 </div>
                 <span className={`progress-pill ${statusClass(detailDisplayStatus)}`}>
@@ -2002,7 +2005,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
 
               <div className="workspace-progress-summary">
                 <ProgressMeter
-                  label="总进度"
+                  label="Overall"
                   completed={detail.completedNodes || 0}
                   total={detail.totalNodes || 0}
                 />
@@ -2056,7 +2059,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
                             </span>
                             <div>
                               <strong>{node.label}</strong>
-                              <span>{node.type}</span>
+                              <span>{getWorkspaceNodeSubtitle(node)}</span>
                             </div>
                           </div>
 
@@ -2085,7 +2088,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
                               node,
                               fieldKey: `${node.id}::${field.id}`,
                               value: field.value,
-                              placeholder: field.label || "补充说明",
+                              placeholder: field.label || "Additional Notes",
                               onChange: (value) => updateExtraTextField(node.id, field.id, value)
                             }))
                           ) : null}
@@ -2123,12 +2126,12 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
                               {node.fileHint ? <p className="node-note">{node.fileHint}</p> : null}
                               {node.requiresExportPath ? (
                                 <label className="workspace-export-path">
-                                  <span>{node.exportPathLabel || "客户导出清单路径"}</span>
+                                  <span>{node.exportPathLabel || "Client Export Path"}</span>
                                   <input
                                     type="text"
                                     value={uploadNodeResponse(node).exportPath || ""}
                                     onChange={(event) => updateUploadExportPath(node, event.target.value)}
-                                    placeholder={node.exportPathPlaceholder || "填写客户导出清单路径"}
+                                    placeholder={node.exportPathPlaceholder || "Enter client export path"}
                                   />
                                 </label>
                               ) : null}
@@ -2153,8 +2156,8 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
             </>
           ) : (
             <div className="empty-state large">
-              <h3>暂无测试点</h3>
-              <p>当前项目还没有可记录的测试点。</p>
+              <h3>No Test Points</h3>
+              <p>This project has no test points to document yet.</p>
             </div>
           )}
         </section>
@@ -2165,26 +2168,26 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
           <form className="workspace-modal" onSubmit={createControlTask}>
             <div className="workspace-modal-head">
               <div>
-                <h3>新建测试点</h3>
-                <p>选择类型后自动生成节点预计完成时间，保存后同步给模块 3。</p>
+                <h3>Create Test Point</h3>
+                <p>Select a type to generate node due dates automatically. After saving, they sync to Module 3.</p>
               </div>
               <button className="button subtle" type="button" onClick={closeCreateDialog}>
-                关闭
+                Close
               </button>
             </div>
 
             <div className="workspace-create-grid">
               <label className="field full">
-                <span className="label">测试点名称</span>
+                <span className="label">Test Point Name</span>
                 <input
                   value={createDraft.title}
                   onChange={(event) => setCreateDraft((current) => ({ ...current, title: event.target.value }))}
-                  placeholder="例如：APD-1 Password"
+                  placeholder="Example: APD-1 Password"
                 />
               </label>
 
               <label className="field">
-                <span className="label">测试点类型</span>
+                <span className="label">Test Point Type</span>
                 <select
                   value={createDraft.controlType}
                   onChange={(event) => updateCreateType(event.target.value)}
@@ -2196,7 +2199,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
               </label>
 
               <label className="field">
-                <span className="label">指派成员</span>
+                <span className="label">Assignee</span>
                 {memberOptions.length ? (
                   <select
                     value={createDraft.owner}
@@ -2218,7 +2221,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
               </label>
 
               <label className="field">
-                <span className="label">第一个节点预计完成日期</span>
+                <span className="label">First Node Due Date</span>
                 <input
                   type="date"
                   value={createDraft.firstDueDate}
@@ -2229,14 +2232,14 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
 
             <div className="workspace-due-table">
               <div className="workspace-due-table-head">
-                <span>节点</span>
-                <span>预计完成日期</span>
+                <span>Node</span>
+                <span>Due Date</span>
               </div>
               {createNodes.map((node, index) => (
                 <label className="workspace-due-row" key={node.id}>
                   <span>
                     <strong>{index + 1}. {node.label}</strong>
-                    <small>{node.phaseLabel} · {node.type}</small>
+                    <small>{node.phaseLabel} · {getWorkspaceNodeSubtitle(node)}</small>
                   </span>
                   <input
                     type="date"
