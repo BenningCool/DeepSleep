@@ -1,24 +1,51 @@
-import { useMemo, useState } from "react";
-import { DASHBOARD_CARD_LABELS, DASHBOARD_KPI_LABELS, labelOfWorkspaceStatus } from "../../data/progressLabels";
+import { useMemo } from "react";
+import { DASHBOARD_CARD_LABELS, DASHBOARD_KPI_LABELS, DASHBOARD_KPI_SECTION } from "../../data/progressLabels";
 import { PROGRESS_STATUS } from "../../services/workspaceProgressService";
 import {
-  buildDonutStyle,
   computeDashboardKpis,
+  computeNodeProgressOverviewRows,
+  computeTypeSplitForControls,
   computeWorkspaceStatusBreakdown,
-  CONTROL_TYPE_FILTER_TABS,
-  countControlsByType,
-  filterControlsByControlType,
+  filterControlsByWorkspaceStatus,
+  filterOverdueControls,
   formatActivityTime,
   formatSharePercent,
-  getRecentActivity,
-  WORKSPACE_STATUS_SEGMENTS
+  getRecentActivity
 } from "./progressDashboardUtils";
 import { countControlsWithPlanDue } from "./progressDueUtils";
-import { workspaceStatusClass } from "./progressVisualTokens";
 import { ControlNodeProgressCard } from "./ControlNodeProgressCard";
 import { ProgressOwnerLabel } from "./ProgressOwnerLabel";
 import { TeamMemberProgressCard } from "./TeamMemberProgressCard";
-import { formatWorkspaceStatusSummary } from "./WorkspaceStatusOverviewBar";
+
+function NodeProgressOverviewRow({ row }) {
+  const isComplete = row.totalNodes > 0 && row.percent >= 100;
+
+  return (
+    <div className="progress-node-overview-row">
+      <div className="progress-node-overview-head">
+        <strong>{row.label}</strong>
+        <span>
+          {row.completedNodes}/{row.totalNodes || 0} 节点 · {row.percent}%
+          {" · "}
+          {row.testPointCount} 测试点
+        </span>
+      </div>
+      <div
+        className="progress-node-overview-track"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={row.percent}
+        aria-label={`${row.label} 节点完成度 ${row.percent}%`}
+      >
+        <span
+          className={`progress-node-overview-fill ${isComplete ? "is-complete" : ""}`}
+          style={{ width: `${row.percent}%` }}
+        />
+      </div>
+    </div>
+  );
+}
 
 const KPI_STATUS_CONFIG = [
   {
@@ -84,16 +111,37 @@ function KpiIcon({ type }) {
   );
 }
 
+function KpiTypeSplit({ typeSplit }) {
+  if (!typeSplit) return null;
+
+  return (
+    <ul className="progress-kpi-type-split" aria-label="GITC 与 ITAC 分布">
+      {["GITC", "ITAC"].map((type) => (
+        <li key={type}>
+          <span className="progress-kpi-type-name">{type}</span>
+          <span className="progress-kpi-type-stat">
+            {typeSplit[type].count}
+            {" · "}
+            {typeSplit[type].percent}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function StatusKpiCard({
   iconType,
   label,
   value,
   percent,
+  typeSplit,
   tone,
   alert = false,
   badge = "",
   extraClassName = "",
-  muted = false
+  muted = false,
+  subject = "测试点"
 }) {
   const numericValue = typeof value === "number" ? value : 0;
   const hasValue = numericValue > 0;
@@ -112,12 +160,16 @@ function StatusKpiCard({
       ].filter(Boolean).join(" ")}
       aria-label={percent ? `${label} ${value}，占 ${percent}` : `${label} ${value}`}
     >
-      {badge ? <span className="progress-kpi-badge">{badge}</span> : null}
       <span className={`progress-kpi-icon icon-${iconType}`} aria-hidden="true">
         <KpiIcon type={iconType} />
       </span>
       <div className="progress-kpi-copy">
-        <span className="progress-kpi-label">{label}</span>
+        <div className="progress-kpi-label-row">
+          <span className="progress-kpi-label">{label}</span>
+          {badge ? <span className="progress-kpi-badge inline">{badge}</span> : null}
+        </div>
+        {subject ? <span className="progress-kpi-subject">{subject}</span> : null}
+        <KpiTypeSplit typeSplit={typeSplit} />
       </div>
       <div className="progress-kpi-stat">
         <strong className="progress-kpi-value">{value}</strong>
@@ -139,35 +191,32 @@ export function ProgressDashboard({
   onOwnerFilterChange,
   onSelectControl
 }) {
-  const [statusOverviewType, setStatusOverviewType] = useState("ALL");
-
   const breakdown = computeWorkspaceStatusBreakdown(summaryControls);
-  const overviewControls = useMemo(
-    () => filterControlsByControlType(summaryControls, statusOverviewType),
-    [summaryControls, statusOverviewType]
-  );
-  const overviewBreakdown = useMemo(
-    () => computeWorkspaceStatusBreakdown(overviewControls),
-    [overviewControls]
-  );
-  const overviewTypeCounts = useMemo(
-    () => countControlsByType(summaryControls),
+  const nodeProgressRows = useMemo(
+    () => computeNodeProgressOverviewRows(summaryControls),
     [summaryControls]
   );
 
   const kpis = computeDashboardKpis(summaryControls, taskMap);
+  const overdueControls = useMemo(
+    () => filterOverdueControls(summaryControls, taskMap),
+    [summaryControls, taskMap]
+  );
   const activity = getRecentActivity(detailControls);
-  const donutStyle = buildDonutStyle(overviewBreakdown);
   const hasPlanDue = countControlsWithPlanDue(summaryControls, taskMap) > 0;
   const overdueValue = hasPlanDue ? kpis.overdue : "—";
   const totalControls = breakdown.total || 0;
-  const overviewTotal = overviewBreakdown.total || 0;
 
   return (
     <section className="progress-dashboard" aria-label="进度摘要仪表盘">
-      <div className="progress-dashboard-kpi-row">
+      <div className="progress-dashboard-kpi-section">
+        <header className="progress-dashboard-kpi-head">
+          <h3>{DASHBOARD_KPI_SECTION.title}</h3>
+        </header>
+        <div className="progress-dashboard-kpi-row">
         {KPI_STATUS_CONFIG.map((item) => {
-          const count = breakdown[item.id] || 0;
+          const statusControls = filterControlsByWorkspaceStatus(summaryControls, item.id);
+          const count = statusControls.length;
           return (
             <StatusKpiCard
               key={item.id}
@@ -175,6 +224,7 @@ export function ProgressDashboard({
               label={DASHBOARD_KPI_LABELS[item.labelKey]}
               value={count}
               percent={formatSharePercent(count, totalControls)}
+              typeSplit={computeTypeSplitForControls(statusControls, count)}
               tone={item.tone}
               alert={item.id === PROGRESS_STATUS.NOT_STARTED}
             />
@@ -185,72 +235,30 @@ export function ProgressDashboard({
           label={DASHBOARD_KPI_LABELS.overdue}
           value={overdueValue}
           percent={hasPlanDue ? formatSharePercent(kpis.overdue, totalControls) : undefined}
+          typeSplit={hasPlanDue
+            ? computeTypeSplitForControls(overdueControls, kpis.overdue)
+            : null}
           tone={hasPlanDue && kpis.overdue > 0 ? "due-risk-alert" : "status-overdue-idle"}
           alert
           badge={hasPlanDue && kpis.overdue > 0 ? "需跟进" : ""}
           extraClassName={hasPlanDue ? "is-overdue-kpi" : ""}
           muted={!hasPlanDue}
+          subject=""
         />
+        </div>
       </div>
 
       <div className="progress-dashboard-top-grid">
-        <article className="progress-dashboard-card">
-          <header className="progress-dashboard-card-head stacked">
+        <article className="progress-dashboard-card progress-node-overview-card">
+          <header className="progress-dashboard-card-head">
             <div>
-              <h3>{DASHBOARD_CARD_LABELS.statusOverview}</h3>
-              <p className="panel-note">{DASHBOARD_CARD_LABELS.statusOverviewLead}</p>
-            </div>
-            <div
-              className="progress-type-tabs compact"
-              role="tablist"
-              aria-label="状态概述控制点类型"
-            >
-              {CONTROL_TYPE_FILTER_TABS.map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={statusOverviewType === tab.id}
-                  className={`filter-chip ${statusOverviewType === tab.id ? "active" : ""}`}
-                  onClick={() => setStatusOverviewType(tab.id)}
-                >
-                  {tab.label}
-                  <span className="tab-count">{overviewTypeCounts[tab.id] ?? 0}</span>
-                </button>
-              ))}
+              <h3>{DASHBOARD_CARD_LABELS.nodeProgressOverview}</h3>
             </div>
           </header>
-          <div className="progress-donut-wrap">
-            <div
-              className="progress-donut"
-              style={donutStyle}
-              role="img"
-              aria-label={formatWorkspaceStatusSummary(overviewBreakdown)}
-            >
-              <div className="progress-donut-hole">
-                <strong>{overviewBreakdown.total}</strong>
-                <span>{DASHBOARD_CARD_LABELS.controlTotal}</span>
-              </div>
-            </div>
-            <ul className="progress-donut-legend">
-              {WORKSPACE_STATUS_SEGMENTS.map((segment) => {
-                const count = overviewBreakdown[segment.id] || 0;
-                return (
-                  <li key={segment.id}>
-                    <div
-                      className={`legend-chip readonly status-${workspaceStatusClass(segment.id)}`}
-                    >
-                      <span className="legend-swatch" style={{ background: segment.color }} />
-                      {labelOfWorkspaceStatus(segment.id)}
-                      <span className="legend-stat">
-                        <strong>{count}</strong>
-                        <span className="legend-percent">{formatSharePercent(count, overviewTotal)}</span>
-                      </span>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+          <div className="progress-node-overview-list">
+            {nodeProgressRows.map((row) => (
+              <NodeProgressOverviewRow key={row.id} row={row} />
+            ))}
           </div>
         </article>
 

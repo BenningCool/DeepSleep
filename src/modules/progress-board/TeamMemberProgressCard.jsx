@@ -25,7 +25,7 @@ function MemberProgressRow({ row }) {
         <strong>
           {total
             ? `${completedCount}/${total} 已完成 · ${percent}%`
-            : "0 控制点"}
+            : "0 测试点"}
         </strong>
       </div>
       {total ? (
@@ -36,7 +36,7 @@ function MemberProgressRow({ row }) {
       ) : (
         <>
           <MemberCompletionProgressBar breakdown={row.breakdown} pending />
-          <p className="progress-member-meta muted">暂无控制点</p>
+          <p className="progress-member-meta muted">暂无测试点</p>
         </>
       )}
     </div>
@@ -61,7 +61,6 @@ export function TeamMemberProgressCard({
       <header className="progress-dashboard-card-head">
         <div>
           <h3>{DASHBOARD_CARD_LABELS.teamMemberProgress}</h3>
-          <p className="panel-note">{DASHBOARD_CARD_LABELS.teamMemberProgressLead}</p>
         </div>
       </header>
       <div className="progress-member-list">

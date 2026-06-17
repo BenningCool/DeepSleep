@@ -224,10 +224,10 @@ export function ProgressBoardPage({
       <table className="progress-table">
         <thead>
           <tr>
-            <th>控制点</th>
+            <th>测试点</th>
             <th>负责人</th>
             <th>负责组</th>
-            <th>控制点状态</th>
+            <th>测试点状态</th>
             <th>节点进度</th>
           </tr>
         </thead>
@@ -301,9 +301,6 @@ export function ProgressBoardPage({
         <div>
           <p className="page-eyebrow">Progress Board · 项目进度看板</p>
           <h2>{project.clientName || project.name}</h2>
-          <p className="page-lead">
-            摘要仪表盘 + 控制点明细：底稿进度来自工作台 snapshot。三态 KPI + 逾期风险，便于合伙人/经理鸟瞰全局。
-          </p>
         </div>
       </header>
 
@@ -345,7 +342,7 @@ export function ProgressBoardPage({
       <div className="progress-main-grid">
         <section className="progress-table-panel">
           <div className="progress-table-head">
-            <h3>控制点列表</h3>
+            <h3>测试点列表</h3>
             {groupFilteredControls.length ? (
               <div className="progress-table-tools">
                 <ProgressOwnerFilter
@@ -376,12 +373,12 @@ export function ProgressBoardPage({
               ownerFilter
                 ? PROGRESS_LIST_LABELS.filterEmpty
                 : controlTypeTab === "ALL"
-                  ? "当前筛选下暂无控制点。"
-                  : `当前筛选下暂无 ${controlTypeTab === "OTHER" ? "其他" : controlTypeTab} 控制点。`
+                  ? "当前筛选下暂无测试点。"
+                  : `当前筛选下暂无 ${controlTypeTab === "OTHER" ? "其他" : controlTypeTab} 测试点。`
             )
           ) : (
             <div className="empty-state compact">
-              <p>暂无控制点，请在工作台新建测试点或调整筛选条件。</p>
+              <p>暂无测试点，请在工作台新建测试点或调整筛选条件。</p>
             </div>
           )}
         </section>
@@ -404,7 +401,7 @@ export function ProgressBoardPage({
 
                 <div className="progress-dual-status">
                   <div className="dual-status-row">
-                    <span className="dual-status-label">控制点状态</span>
+                    <span className="dual-status-label">测试点状态</span>
                     <div className="progress-status-value">
                       <span className={`progress-pill workspace-status ${statusClass(selectedControl.workspaceStatus)}`}>
                         {labelOfWorkspaceStatus(selectedControl.workspaceStatus)}
@@ -458,7 +455,7 @@ export function ProgressBoardPage({
             </div>
           ) : (
             <div className="progress-drawer-placeholder">
-              <p>选择控制点或点击「近期动态」「需关注事项」中的条目，查看只读详情。</p>
+              <p>选择测试点或点击「近期动态」「需关注事项」中的条目，查看只读详情。</p>
             </div>
           )}
         </aside>

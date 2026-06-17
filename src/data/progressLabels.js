@@ -32,24 +32,33 @@ export const DASHBOARD_KPI_LABELS = {
   overdueAwaitingData: "计划完成日同步后展示"
 };
 
+export const DASHBOARD_KPI_SECTION = {
+  title: "测试点进度",
+  lead: "按工作台底稿三态汇总当前筛选下的测试点；卡片小字为 GITC / ITAC 数量及占该状态比例。"
+};
+
 export const PROGRESS_LIST_LABELS = {
   allMembers: "全部成员",
   memberFilter: "负责人筛选",
-  filterEmpty: "当前筛选条件下暂无控制点，请调整状态、逾期或成员筛选。"
+  filterEmpty: "当前筛选条件下暂无测试点，请调整状态、逾期或成员筛选。"
 };
 
 export const DASHBOARD_CARD_LABELS = {
-  statusOverview: "状态概述",
-  statusOverviewLead: "按工作台底稿三态汇总当前筛选下的控制点。",
-  controlTotal: "控制点",
-  viewAllControls: "查看全部控制点",
+  nodeProgressOverview: "测试节点进度",
+  nodeProgressOverviewLead: "来自工作台 snapshot 的 completedNodes / totalNodes，按当前筛选汇总整体节点完成度。",
+  nodeProgressCenterLabel: "节点完成度",
+  nodeProgressCompleted: "已完成节点",
+  nodeProgressRemaining: "未完成节点",
+  nodeProgressTestPoints: "测试点",
+  controlTotal: "测试点",
+  viewAllControls: "查看全部测试点",
   recentActivity: "近期动态",
   recentActivityLead: "按工作台最近保存时间排序",
   recentActivityEmpty: "尚无动态。在工作台保存测试点后，将在此显示最近更新。",
-  controlNodeProgress: "控制点节点进度",
-  controlNodeProgressEmpty: "当前类型下暂无控制点。",
+  controlNodeProgress: "测试点节点进度",
+  controlNodeProgressEmpty: "当前类型下暂无测试点。",
   teamMemberProgress: "组内成员进度",
-  teamMemberProgressLead: "跟随页顶负责组筛选；仅展示 In-charge 与 Staff 及其负责的控制点；柱体为已完成占比，下方为三态明细。",
+  teamMemberProgressLead: "跟随页顶负责组筛选；仅展示 In-charge 与 Staff 及其负责的测试点；柱体为已完成占比，下方为三态明细。",
   teamMemberProgressEmpty: "当前组暂无成员。",
   teamMemberProgressUnassigned: "未分配",
   blockedNote: "被阻塞"
@@ -57,7 +66,7 @@ export const DASHBOARD_CARD_LABELS = {
 
 export const ATTENTION_LABELS = {
   panelTitle: "需关注事项",
-  panelLead: "仅汇总计划逾期与长期未启动的控制点，便于安排跟进优先级。",
+  panelLead: "仅汇总计划逾期与长期未启动的测试点，便于安排跟进优先级。",
   overdueTitle: "计划逾期",
   staleTitle: "长期未开始",
   overdueBadge: "已逾期",

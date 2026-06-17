@@ -58,6 +58,35 @@ export function countControlsByType(controls = []) {
   };
 }
 
+export const KPI_CONTROL_TYPES = ["GITC", "ITAC"];
+
+/** 某状态桶内 GITC / ITAC 数量及占该桶比例 */
+export function computeTypeSplitForControls(controls = [], bucketTotal = controls.length) {
+  const total = bucketTotal || 0;
+  return KPI_CONTROL_TYPES.reduce((acc, type) => {
+    const count = controls.filter((control) => control.controlType === type).length;
+    acc[type] = {
+      count,
+      percent: formatSharePercent(count, total)
+    };
+    return acc;
+  }, {});
+}
+
+export function filterControlsByWorkspaceStatus(controls = [], status) {
+  return controls.filter(
+    (control) => (control.workspaceStatus || PROGRESS_STATUS.NOT_STARTED) === status
+  );
+}
+
+export function filterOverdueControls(controls = [], taskMap = {}) {
+  return controls.filter((control) => {
+    if (control.workspaceStatus === PROGRESS_STATUS.COMPLETED) return false;
+    const task = taskMap[control.id];
+    return daysOverdueForControl(control, task) > 0;
+  });
+}
+
 /** 各控制点节点完成度（completedNodes / totalNodes） */
 export function computeControlNodeProgressRows(controls = []) {
   return controls
@@ -78,6 +107,67 @@ export function computeControlNodeProgressRows(controls = []) {
       if (left.percent !== right.percent) return left.percent - right.percent;
       return left.title.localeCompare(right.title, "zh-CN");
     });
+}
+
+const NODE_PROGRESS_COMPLETED_COLOR = "#00875a";
+const NODE_PROGRESS_REMAINING_COLOR = "#ebecf0";
+
+/** 汇总 snapshot 节点进度（completedNodes / totalNodes） */
+export function computeAggregateNodeProgress(controls = []) {
+  let completedNodes = 0;
+  let totalNodes = 0;
+
+  controls.forEach((control) => {
+    completedNodes += control.completedNodes || 0;
+    totalNodes += control.totalNodes || 0;
+  });
+
+  const remainingNodes = Math.max(totalNodes - completedNodes, 0);
+
+  return {
+    completedNodes,
+    totalNodes,
+    remainingNodes,
+    percent: totalNodes ? Math.round((completedNodes / totalNodes) * 100) : 0,
+    testPointCount: controls.length
+  };
+}
+
+export function computeNodeProgressByControlType(controls = []) {
+  return KPI_CONTROL_TYPES.reduce((acc, type) => {
+    const typed = controls.filter((control) => control.controlType === type);
+    acc[type] = computeAggregateNodeProgress(typed);
+    return acc;
+  }, {});
+}
+
+export function computeNodeProgressOverviewRows(controls = []) {
+  const all = computeAggregateNodeProgress(controls);
+  const byType = computeNodeProgressByControlType(controls);
+
+  return [
+    { id: "ALL", label: "全部", ...all },
+    { id: "GITC", label: "GITC", ...byType.GITC },
+    { id: "ITAC", label: "ITAC", ...byType.ITAC }
+  ];
+}
+
+export function buildNodeProgressDonutStyle(completedNodes, totalNodes) {
+  if (!totalNodes) {
+    return { background: NODE_PROGRESS_REMAINING_COLOR };
+  }
+
+  const completedPct = (completedNodes / totalNodes) * 100;
+  if (completedPct <= 0) {
+    return { background: NODE_PROGRESS_REMAINING_COLOR };
+  }
+  if (completedPct >= 100) {
+    return { background: NODE_PROGRESS_COMPLETED_COLOR };
+  }
+
+  return {
+    background: `conic-gradient(${NODE_PROGRESS_COMPLETED_COLOR} 0% ${completedPct}%, ${NODE_PROGRESS_REMAINING_COLOR} ${completedPct}% 100%)`
+  };
 }
 
 export function buildDonutStyle(breakdown) {

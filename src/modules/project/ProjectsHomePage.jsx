@@ -93,9 +93,6 @@ export function ProjectsHomePage({
         <div>
           <p className="page-eyebrow">Engagement Portfolio</p>
           <h2>项目列表</h2>
-          <p className="page-lead">
-            像 JIRA 一样快速检索多项目，但更轻量：聚焦客户、行业、成员与控制点进度。
-          </p>
         </div>
         <button className="button primary" type="button" onClick={onCreate}>新建项目</button>
       </header>

@@ -51,9 +51,6 @@ export function Sidebar({
         </div>
       ) : null}
 
-      <div className="sidebar-footer">
-        审计友好 · 轻量协作 · 数据保存在当前浏览器
-      </div>
     </aside>
   );
 }
