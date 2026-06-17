@@ -2415,6 +2415,66 @@ button {
   font-weight: 800;
 }
 
+.workspace-generated-actions .workspace-ai-generating {
+  color: var(--blue);
+}
+
+.workspace-generated-actions button:disabled {
+  cursor: progress;
+  opacity: 0.72;
+}
+
+.workspace-generated-file {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.workspace-generated-file div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.workspace-generated-file strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspace-generated-file span {
+  color: var(--subtle);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.workspace-export-path {
+  display: grid;
+  gap: 6px;
+}
+
+.workspace-export-path span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.workspace-export-path input {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
 .workspace-test-one-builder {
   display: grid;
   gap: 10px;

@@ -241,7 +241,7 @@ const GITC_WORKSPACE_PHASES = [
   {
     id: "toe",
     label: "TOE",
-    description: "GITC 运行有效性：上传需求和样本池，生成抽样样本，发送并完成抄写。",
+    description: "GITC 运行有效性：上传需求和样本清单，生成抽样样本，发送并完成抄写。",
     nodes: [
       {
         id: "gitc-toe-requirement-list",
@@ -253,20 +253,24 @@ const GITC_WORKSPACE_PHASES = [
       },
       {
         id: "gitc-toe-sample-pool",
-        label: "上传客户提供的样本池",
+        label: "上传样本清单",
         type: "upload_sample_pool",
         required: true,
         category: MATERIAL_CATEGORY.SAMPLE_POOL,
-        actionLabel: "上传样本池"
+        actionLabel: "上传样本清单",
+        requiresExportPath: true,
+        exportPathLabel: "客户导出清单路径",
+        exportPathPlaceholder: "例如：客户系统 / 程序变更 / 2025变更清单导出.xlsx"
       },
       {
         id: "gitc-toe-sampling",
         label: "自动抽样生成抽样样本",
-        type: "generated_text",
+        type: "generated_file",
         required: true,
         dependsOnNodeId: "gitc-toe-sample-pool",
         generationKind: "sampling",
-        placeholder: "上传样本池后自动生成抽样样本，保存后计入完成度。"
+        fileKind: "sampling_excel",
+        placeholder: "上传样本清单后自动生成 25 个抽样样本 Excel，保存后计入完成度。"
       },
       {
         id: "gitc-toe-send-sample",
@@ -617,6 +621,20 @@ function hasTextForNode(record, node) {
   return Boolean(textValueForNode(record, node).trim());
 }
 
+function hasGeneratedFileForNode(record, node) {
+  const value = record.nodeResponses?.[node.id];
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  if (node.fileKind && value.kind !== node.fileKind) return false;
+  return Array.isArray(value.rows) && value.rows.length > 0;
+}
+
+function exportPathForNode(record, node) {
+  const value = record.nodeResponses?.[node.id];
+  if (typeof value === "string") return value.trim();
+  if (!value || typeof value !== "object" || Array.isArray(value)) return "";
+  return String(value.exportPath || "").trim();
+}
+
 function responseValue(record, key) {
   return record.nodeResponses?.[key];
 }
@@ -760,6 +778,10 @@ function getNodeStatus(record, phase, node) {
     return hasTextForNode(record, node) ? NODE_STATUS.COMPLETED : NODE_STATUS.PENDING;
   }
 
+  if (node.type === "generated_file") {
+    return hasGeneratedFileForNode(record, node) ? NODE_STATUS.COMPLETED : NODE_STATUS.PENDING;
+  }
+
   if (node.type === "structured") {
     return isStructuredNodeComplete(record, node) ? NODE_STATUS.COMPLETED : NODE_STATUS.PENDING;
   }
@@ -771,13 +793,15 @@ function getNodeStatus(record, phase, node) {
   }
 
   if (node.type?.startsWith("upload")) {
-    return getMaterials(
+    const hasMaterials = getMaterials(
       record,
       node.category,
       phase.id,
       node.id,
       supportingMaterialKindFilterForNode(node)
-    ).length
+    ).length > 0;
+    const hasRequiredExportPath = !node.requiresExportPath || Boolean(exportPathForNode(record, node));
+    return hasMaterials && hasRequiredExportPath
       ? NODE_STATUS.COMPLETED
       : NODE_STATUS.PENDING;
   }
@@ -842,7 +866,9 @@ function buildPhaseProgress(record, controlType = "") {
         dueDate: record.nodeDueDates?.[node.id] || "",
         status,
         value: node.type === "text" || node.type === "generated_text" ? textValueForNode(record, node) : "",
+        file: node.type === "generated_file" ? record.nodeResponses?.[node.id] || null : undefined,
         values: node.type === "structured" ? getStructuredValues(record, node) : undefined,
+        exportPath: node.requiresExportPath ? exportPathForNode(record, node) : undefined,
         sendState: node.type === "send_toggle" ? record.nodeResponses?.[node.id] || null : undefined,
         materialCount: materials.length
       };

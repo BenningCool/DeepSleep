@@ -910,6 +910,66 @@
       font-weight: 800;
     }
 
+    .generated-actions .ai-generating {
+      color: var(--blue);
+    }
+
+    .generated-actions button:disabled {
+      cursor: progress;
+      opacity: 0.72;
+    }
+
+    .generated-file {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .generated-file div {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .generated-file strong {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .generated-file span {
+      color: var(--subtle);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .export-path {
+      display: grid;
+      gap: 6px;
+    }
+
+    .export-path span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .export-path input {
+      width: 100%;
+      min-height: 38px;
+      padding: 8px 10px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      font: inherit;
+    }
+
     .test-one-builder {
       display: grid;
       gap: 10px;
@@ -1508,7 +1568,6 @@
             <div class="panel-toolbar">
               <div>
                 <h3>测试点清单</h3>
-                <p class="panel-note">一张卡片代表一个 GITC / ITAC 测试点</p>
               </div>
               <button class="button primary" id="openCreateControl" type="button">新建测试点</button>
             </div>
@@ -1629,6 +1688,50 @@
       [REVIEW_STATUS.SIGNED_OFF]: "已签核"
     };
 
+    const AI_GENERATION_DELAY_MS = 3000;
+    const SAMPLING_EXCEL_ROW_COUNT = 25;
+    const SAMPLING_EXCEL_COLUMNS = [
+      { key: "sequence", label: "序号" },
+      { key: "sampleId", label: "抽样样本编号" },
+      { key: "populationItem", label: "样本池记录" },
+      { key: "sourcePool", label: "来源样本池" },
+      { key: "samplingMethod", label: "抽样方法" },
+      { key: "status", label: "状态" }
+    ];
+
+    const DEMO_GITC_DESIGN_TEXT = `2025年9月10日，审计方通过询问被审计单位IT部信息安全相关负责人，了解到公司针对程序变更的管理流程制定了相应的信息安全制度；通过获取并检查《软件变更管理制度》，审计方发现公司对此作出如下规定：
+变更流程：
+第四条  系统变更过程类似软件开发，大致可分为四个阶段：任务提交和接受、任务实现、任务验收和程序发布上线。
+第五条  需求部门提出系统变更需求，并将变更需求整理成《IT需求申请单》，由业务人员提交到内部流程系统，经过审核后流转至运维人员，由运维人员填写运维需求汇总描述后自动创建需求管理系统中的需求记录。
+第六条  由IT内部人员通过需求评审会议对需求记录进行分析，并提出系统变更建议。
+第七条  相关IT部门根据自行开发、合作开发和外包开发的不同要求组织实现系统变更需求，将需求提交至内部开发人员、合作开发商或外包开发商，产生供发布的程序。
+第八条  实现过程应按照软件开发过程规定进行。系统变更过程应遵循软件开发过程统一的编码标准，并经过测试验收才能上线。
+紧急变更流程：
+第九条  对于紧急变更，需求部门可以通过电子邮件形式、工作群沟通提出申请。
+第十条  IT部根据重要性和紧迫性作出判断，确定其优先级和影响程度，并进行相应处理。
+第十一条  紧急变更过程由专责部门或人员启动紧急修改变更程序。IT部应对紧急变更的处理进行规范的文档记录。
+第十二条  在紧急事件处理完成后，必须在一周内补办正式、完整的流程。
+审计方未发现异常。`;
+
+    const DEMO_GITC_IMPLEMENTATION_TEXT = `通过询问被审计单位信息技术部系统开发相关人员，审计方了解到在2025年01月01日-2025年09月04日现场审计时点，相关业务系统对于程序变更的管理流程如下：
+①需求提出：
+对于非BUG类需求：由业务部门提出变更需求，并将变更需求整理成《IT需求申请单》或者业务联系单，由业务人员提交至内部流程系统，经业务部门相关领导审核后流转至运维人员。由运维人员基于业务需求转化并填写运维需求单，流程系统中的运维需求创建后自动关联至需求管理平台，并创建开发需求，此时需求进入“待评审”状态，正式进入开发生命周期；
+
+对于BUG类需求：当业务部门发现问题，直接反馈给IT运维人员。IT运维人员确认该问题为系统BUG后，在需求/缺陷管理平台中创建BUG记录，并指派给对应开发人员，此时需求进入“待评审”状态；
+
+②需求评审：
+每周四及周五，开发团队召开“需求评审会”，对需求/缺陷管理平台中“待评审”的需求和BUG进行评估、澄清和排期；
+③制定开发计划：
+每周一，开发负责人根据需求评审结果指定本周的开发计划，明确各项任务的负责人和预计完成时间；
+④开发与测试：
+开发人员根据开发计划进行编码开发。开发完成后，由IT运维人员在测试环境中进行功能测试，测试通过后，任务状态在需求/缺陷管理平台中更新为“已解决”；
+⑤代码合并：
+由开发组长将各开发人员在各自开发分支上的代码合并到代码仓库的主干分支上，准备发布；
+⑥系统发布：
+每周二及周四为固定的发布时间，由发布人员在发布平台上点击“发布”按钮，发布平台会自动从代码仓库拉取已经合并好的主干代码，并将其部署到生产环境；
+⑦发布后验证：
+发布完成后，发布人员会通知IT运维人员在生产环境对本次发布的功能或修复的BUG进行最终验证，确保上线内容无误。`;
+
     const MATERIAL_LABELS = {
       [MATERIAL_CATEGORY.SPP]: "SPP",
       [MATERIAL_CATEGORY.MEETING_MINUTES]: "会议纪要",
@@ -1711,11 +1814,11 @@
       {
         id: "toe",
         label: "TOE",
-        description: "GITC 运行有效性：上传需求和样本池，生成抽样样本，发送并完成抄写。",
+        description: "GITC 运行有效性：上传需求和样本清单，生成抽样样本，发送并完成抄写。",
         nodes: [
           { id: "gitc-toe-requirement-list", label: "上传需求清单", type: "upload_requirement_list", required: true, category: MATERIAL_CATEGORY.REQUIREMENT_LIST, actionLabel: "上传需求清单" },
-          { id: "gitc-toe-sample-pool", label: "上传客户提供的样本池", type: "upload_sample_pool", required: true, category: MATERIAL_CATEGORY.SAMPLE_POOL, actionLabel: "上传样本池" },
-          { id: "gitc-toe-sampling", label: "自动抽样生成抽样样本", type: "generated_text", required: true, dependsOnNodeId: "gitc-toe-sample-pool", generationKind: "sampling", placeholder: "上传样本池后自动生成抽样样本，保存后计入完成度。" },
+          { id: "gitc-toe-sample-pool", label: "上传样本清单", type: "upload_sample_pool", required: true, category: MATERIAL_CATEGORY.SAMPLE_POOL, actionLabel: "上传样本清单", requiresExportPath: true, exportPathLabel: "客户导出清单路径", exportPathPlaceholder: "例如：客户系统 / 程序变更 / 2025变更清单导出.xlsx" },
+          { id: "gitc-toe-sampling", label: "自动抽样生成抽样样本", type: "generated_file", required: true, dependsOnNodeId: "gitc-toe-sample-pool", generationKind: "sampling", fileKind: "sampling_excel", placeholder: "上传样本清单后自动生成 25 个抽样样本 Excel，保存后计入完成度。" },
           { id: "gitc-toe-send-sample", label: "是否发送样本", type: "send_toggle", required: true },
           { id: "gitc-toe-returned-sample-support", label: "上传客户返回的样本支持性材料", type: "upload_returned_sample_support", required: true, category: MATERIAL_CATEGORY.RETURNED_SAMPLE_SUPPORT, actionLabel: "上传返回材料" },
           { id: "gitc-toe-transcription", label: "填写样本抄写表", type: "generated_text", required: true, dependsOnNodeId: "gitc-toe-returned-sample-support", generationKind: "transcription", builderKind: "sample_transcription_table", placeholder: "手动填写样本字段并录入多个样本后，点击生成抄写表格，保存后计入完成度。" }
@@ -1746,10 +1849,29 @@
         taskStatus: "done",
         blockers: [],
         nodeResponses: {
-          "gitc-tod-design": "Design 草稿\n访问管理制度定义了入职、转岗、离职和季度权限复核控制，覆盖用户访问授权和定期复核要求。",
-          "gitc-tod-implementation": "Implementation 草稿\n访谈纪要显示控制由 IT 管理员和业务负责人按月执行，系统保留审批和复核痕迹。",
+          "gitc-tod-design": DEMO_GITC_DESIGN_TEXT,
+          "gitc-tod-implementation": DEMO_GITC_IMPLEMENTATION_TEXT,
           "gitc-tod-test-of-one": "Test of One\n\n| 样本编号 | 请求/工单编号 | 审批记录 | 账号创建/变更时间 | 权限分配结果 |\n| --- | --- | --- | --- | --- |\n| AM-001 | REQ-2026-014 | 已取得业务负责人审批 | 2026-03-14 10:32 | 与审批权限一致 |",
-          "gitc-toe-sampling": "抽样样本草稿\nSample-01、Sample-08、Sample-15、Sample-22、Sample-30。",
+          "gitc-toe-sample-pool": {
+            exportPath: "客户系统 / 程序变更 / 2025变更清单导出.xlsx"
+          },
+          "gitc-toe-sampling": {
+            kind: "sampling_excel",
+            fileName: "GITC-访问管理控制测试-抽样样本.xls",
+            fileType: "application/vnd.ms-excel",
+            sheetName: "抽样样本",
+            generatedAt: new Date().toISOString(),
+            rowCount: SAMPLING_EXCEL_ROW_COUNT,
+            columns: SAMPLING_EXCEL_COLUMNS,
+            rows: Array.from({ length: SAMPLING_EXCEL_ROW_COUNT }, (_, index) => ({
+              sequence: index + 1,
+              sampleId: `SAMPLE-${String(index + 1).padStart(3, "0")}`,
+              populationItem: `访问管理样本池-ROW-${String((index + 1) * 7).padStart(4, "0")}`,
+              sourcePool: "访问管理样本池.xlsx (428 KB)",
+              samplingMethod: "系统随机抽样（Demo）",
+              status: "待发送"
+            }))
+          },
           "gitc-toe-send-sample": {
             sent: true,
             sentBy: "AL",
@@ -1892,6 +2014,8 @@
     let draftResponses = {};
     let testOfOneBuilders = {};
     let supportKindSelections = {};
+    let generatingNodes = {};
+    let generationTimers = {};
     let filters = {
       owner: "",
       type: "",
@@ -2142,11 +2266,23 @@
       if (node.type === "text" || node.type === "generated_text") {
         return control.nodeResponses[node.id]?.trim() ? NODE_STATUS.COMPLETED : NODE_STATUS.PENDING;
       }
+      if (node.type === "generated_file") {
+        const value = control.nodeResponses[node.id];
+        return value && typeof value === "object" && Array.isArray(value.rows) && value.rows.length
+          ? NODE_STATUS.COMPLETED
+          : NODE_STATUS.PENDING;
+      }
       if (node.type === "send_toggle") {
         return control.nodeResponses[node.id]?.sent ? NODE_STATUS.COMPLETED : NODE_STATUS.PENDING;
       }
       if (node.type.startsWith("upload")) {
-        return nodeMaterials(control, node, phaseId).length ? NODE_STATUS.COMPLETED : NODE_STATUS.PENDING;
+        const hasMaterials = nodeMaterials(control, node, phaseId).length > 0;
+        const response = control.nodeResponses?.[node.id];
+        const exportPath = typeof response === "string"
+          ? response.trim()
+          : String(response?.exportPath || "").trim();
+        const hasRequiredExportPath = !node.requiresExportPath || Boolean(exportPath);
+        return hasMaterials && hasRequiredExportPath ? NODE_STATUS.COMPLETED : NODE_STATUS.PENDING;
       }
       if (node.type === "review") {
         return reviewReached(control.reviewStatus, node.threshold) ? NODE_STATUS.COMPLETED : NODE_STATUS.PENDING;
@@ -2308,7 +2444,7 @@
               <span>${control.owner}</span>
             </div>
             <strong>${control.title}</strong>
-            <span>${control.auditPhase} · 看板状态 ${control.taskStatus}</span>
+            <span>${control.auditPhase}</span>
             <div class="progress-row">
               <span class="status-pill ${statusClass(status)}">${PROGRESS_LABELS[status]}</span>
               <span>${progress.completedNodes}/${progress.totalNodes}</span>
@@ -2347,7 +2483,7 @@
           <div>
             <span class="tag ${control.controlType.toLowerCase()}">${control.controlType}</span>
             <h3>${control.title}</h3>
-            <p>${control.owner} · 看板状态 ${control.taskStatus} · 最近更新 ${formatDateTime(control.updatedAt)}</p>
+            <p>${control.owner} · 最近更新 ${formatDateTime(control.updatedAt)}</p>
           </div>
           <span class="status-pill ${statusClass(status)}">${PROGRESS_LABELS[status]}</span>
         </div>
@@ -2395,6 +2531,7 @@
     function renderNode(control, node, phaseId) {
       const status = nodeStatus(control, node, phaseId);
       const value = control.nodeResponses[node.id] || "";
+      const uploadResponse = value && typeof value === "object" && !Array.isArray(value) ? value : {};
       const extraTextFields = control.extraTextFields?.[node.id] || [];
       const materials = node.type.startsWith("upload") ? nodeMaterials(control, node, phaseId) : [];
       return `
@@ -2424,6 +2561,7 @@
             })).join("")}
           ` : ""}
           ${node.type === "generated_text" ? renderGeneratedNode(control, node) : ""}
+          ${node.type === "generated_file" ? renderGeneratedFileNode(control, node) : ""}
           ${node.type === "send_toggle" ? renderSendToggleNode(control, node) : ""}
           ${node.type.startsWith("upload") ? `
             <div class="node-upload">
@@ -2433,6 +2571,12 @@
                 <input type="file" multiple ${node.accept ? `accept="${node.accept}"` : ""} data-upload-node="${node.id}" data-upload-phase="${phaseId}" data-upload-category="${node.category}" />
               </label>
               ${node.fileHint ? `<p class="node-note">${node.fileHint}</p>` : ""}
+              ${node.requiresExportPath ? `
+                <label class="export-path">
+                  <span>${node.exportPathLabel || "客户导出清单路径"}</span>
+                  <input type="text" value="${escapeHtml(uploadResponse.exportPath || "")}" placeholder="${escapeHtml(node.exportPathPlaceholder || "填写客户导出清单路径")}" data-export-path-node="${node.id}" />
+                </label>
+              ` : ""}
               ${materials.length ? `
                 <ul class="material-list">
                   ${materials.map((item) => `
@@ -2464,6 +2608,42 @@
         ...(draftResponses[control.id] || {}),
         [nodeId]: value
       };
+    }
+
+    function generationKeyFor(control, nodeId) {
+      return `${control.id}:${nodeId}`;
+    }
+
+    function isDelayedGenerationNode(node) {
+      return node?.type === "generated_text"
+        && (node.generationKind === "design" || node.generationKind === "implementation");
+    }
+
+    function isGeneratingNode(control, node) {
+      return Boolean(generatingNodes[generationKeyFor(control, node.id)]);
+    }
+
+    function clearGenerationTimers() {
+      Object.values(generationTimers).forEach((timerId) => window.clearTimeout(timerId));
+      generationTimers = {};
+      generatingNodes = {};
+    }
+
+    function scheduleGeneratedDraft(control, node, createValue) {
+      if (!isDelayedGenerationNode(node)) return false;
+      const key = generationKeyFor(control, node.id);
+      if (generationTimers[key]) window.clearTimeout(generationTimers[key]);
+      generatingNodes[key] = true;
+      renderDetail();
+      showToast("AI 正在生成草稿，约 3 秒后更新。");
+      generationTimers[key] = window.setTimeout(() => {
+        setDraft(control, node.id, createValue());
+        delete generatingNodes[key];
+        delete generationTimers[key];
+        renderDetail();
+        showToast("AI 草稿已生成，Save 后计入进度。");
+      }, AI_GENERATION_DELAY_MS);
+      return true;
     }
 
     const DEFAULT_TABLE_FIELD_COUNT = 3;
@@ -2524,8 +2704,7 @@
     }
 
     function shouldAutoGenerateTable(node) {
-      return node?.builderKind === "test_of_one_table"
-        || node?.builderKind === "itac_test_of_one_table";
+      return false;
     }
 
     function testOfOneBuilderFor(control, nodeId) {
@@ -2708,12 +2887,14 @@
     function renderGeneratedNode(control, node) {
       const draft = draftFor(control, node.id);
       const value = draft ?? control.nodeResponses[node.id] ?? "";
+      const generating = isGeneratingNode(control, node);
       return `
         <div class="generated-node">
           <div class="generated-actions">
             ${isTableBuilderNode(node)
               ? `<span>按样本字段填表生成${tableTitleForBuilder(node)}</span>`
-              : `<button class="button subtle" type="button" data-regenerate-node="${node.id}">重新生成</button>`}
+              : `<button class="button subtle" type="button" data-regenerate-node="${node.id}" ${generating ? "disabled" : ""}>${generating ? "AI 生成中..." : "重新生成"}</button>`}
+            ${generating ? `<span class="ai-generating">正在读取材料并生成草稿</span>` : ""}
             ${draft !== undefined ? `<span>未保存草稿</span>` : ""}
           </div>
           ${isTableBuilderNode(node) ? renderTestOfOneBuilder(control, node) : ""}
@@ -2726,6 +2907,29 @@
                 placeholder: node.placeholder || "",
                 draft: true
               })}
+        </div>
+      `;
+    }
+
+    function renderGeneratedFileNode(control, node) {
+      const draft = draftFor(control, node.id);
+      const file = draft ?? control.nodeResponses[node.id] ?? null;
+      const hasFile = file && typeof file === "object" && Array.isArray(file.rows);
+      return `
+        <div class="generated-node">
+          <div class="generated-actions">
+            <button class="button subtle" type="button" data-regenerate-node="${node.id}">重新生成 Excel</button>
+            ${draft !== undefined ? `<span>未保存文件</span>` : ""}
+          </div>
+          ${hasFile ? `
+            <div class="generated-file">
+              <div>
+                <strong>${escapeHtml(file.fileName || "抽样样本.xls")}</strong>
+                <span>${file.rows.length} 个抽样样本 · Excel · 生成时间 ${formatDateTime(file.generatedAt)}</span>
+              </div>
+              <button class="button primary" type="button" data-download-generated-file="${node.id}">下载 Excel</button>
+            </div>
+          ` : `<p class="empty-line">上传样本清单后点击“重新生成 Excel”，系统会自动生成 25 个抽样样本。</p>`}
         </div>
       `;
     }
@@ -2810,7 +3014,8 @@
 
     function generatedTargetsForUploadNode(control, uploadNodeId) {
       return allNodesFor(control).filter((node) => (
-        node.type === "generated_text" && node.dependsOnNodeId === uploadNodeId
+        (node.type === "generated_text" || node.type === "generated_file")
+          && node.dependsOnNodeId === uploadNodeId
       ));
     }
 
@@ -2841,13 +3046,13 @@
       const generatedAt = formatDateTime(new Date().toISOString());
 
       if (node.generationKind === "design") {
-        return `Design 草稿\n测试点：${title}\n依据制度：${source}\n\n系统根据上传制度识别控制目标、关键控制活动、控制频率、责任人与证据要求。请复核制度条款是否完整覆盖该 GITC 控制设计。`;
+        return DEMO_GITC_DESIGN_TEXT;
       }
       if (node.generationKind === "implementation") {
         if (node.id.startsWith("itac-")) {
           return `Implementation 草稿\n测试点：${title}\n依据会议纪要：${source}\n\n系统根据会议纪要整理控制执行人、控制频率、关键配置或代码对象、执行证据来源和实施结论。请复核访谈内容是否足以支持该 ITAC 已按设计实施。`;
         }
-        return `Implementation 草稿\n测试点：${title}\n依据会议纪要：${source}\n\n系统根据会议纪要整理控制执行方式、访谈对象、执行频率和系统支持情况。请确认访谈结论是否支持控制已按设计实施。`;
+        return DEMO_GITC_IMPLEMENTATION_TEXT;
       }
       if (node.generationKind === "test_of_one") {
         return "";
@@ -2862,13 +3067,54 @@
       return `自动生成草稿\n测试点：${title}\n依据材料：${source}\n生成时间：${generatedAt}`;
     }
 
+    function buildGeneratedFile(control, node, materials = []) {
+      const title = control?.title || "当前测试点";
+      const sourcePool = materialSummary(materials);
+      const sourceBase = sanitizeFileName(materials[0]?.name || "sample-pool");
+      const generatedAt = new Date().toISOString();
+
+      if (node.fileKind === "sampling_excel") {
+        return {
+          kind: "sampling_excel",
+          fileName: `${sanitizeFileName(title)}-抽样样本.xls`,
+          fileType: "application/vnd.ms-excel",
+          sheetName: "抽样样本",
+          generatedAt,
+          rowCount: SAMPLING_EXCEL_ROW_COUNT,
+          columns: SAMPLING_EXCEL_COLUMNS,
+          rows: Array.from({ length: SAMPLING_EXCEL_ROW_COUNT }, (_, index) => ({
+            sequence: index + 1,
+            sampleId: `SAMPLE-${String(index + 1).padStart(3, "0")}`,
+            populationItem: `${sourceBase}-ROW-${String((index + 1) * 7).padStart(4, "0")}`,
+            sourcePool,
+            samplingMethod: "系统随机抽样（Demo）",
+            status: "待发送"
+          }))
+        };
+      }
+
+      return {
+        kind: node.fileKind || "generated_file",
+        fileName: `${sanitizeFileName(title)}-生成文件.xls`,
+        fileType: "application/vnd.ms-excel",
+        generatedAt,
+        columns: SAMPLING_EXCEL_COLUMNS,
+        rows: []
+      };
+    }
+
     function regenerateGeneratedNode(control, node) {
       const sourceMaterials = control.materials.filter((item) => item.nodeId === node.dependsOnNodeId);
       if (!sourceMaterials.length) {
         showToast("请先上传该节点所需材料。");
         return false;
       }
-      setDraft(control, node.id, buildGeneratedText(control, node, sourceMaterials));
+      if (scheduleGeneratedDraft(control, node, () => buildGeneratedText(control, node, sourceMaterials))) {
+        return "delayed";
+      }
+      setDraft(control, node.id, node.type === "generated_file"
+        ? buildGeneratedFile(control, node, sourceMaterials)
+        : buildGeneratedText(control, node, sourceMaterials));
       return true;
     }
 
@@ -2907,12 +3153,68 @@
       `;
     }
 
+    function sanitizeFileName(value = "抽样样本") {
+      const normalized = String(value || "抽样样本")
+        .replace(/[\\/:*?"<>|]+/g, "-")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+      return normalized || "抽样样本";
+    }
+
     function escapeHtml(value) {
       return String(value || "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;");
+    }
+
+    function buildExcelWorkbookHtml(file) {
+      const columns = Array.isArray(file?.columns) && file.columns.length
+        ? file.columns
+        : SAMPLING_EXCEL_COLUMNS;
+      const rows = Array.isArray(file?.rows) ? file.rows : [];
+      const title = file?.sheetName || "抽样样本";
+      return `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    table { border-collapse: collapse; }
+    th, td { border: 1px solid #999; padding: 6px 8px; }
+    th { background: #dbeafe; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <table>
+    <caption>${escapeHtml(title)}</caption>
+    <thead>
+      <tr>${columns.map((column) => `<th>${escapeHtml(column.label)}</th>`).join("")}</tr>
+    </thead>
+    <tbody>
+      ${rows.map((row) => `
+        <tr>${columns.map((column) => `<td>${escapeHtml(row[column.key])}</td>`).join("")}</tr>
+      `).join("")}
+    </tbody>
+  </table>
+</body>
+</html>`;
+    }
+
+    function downloadExcelFile(file) {
+      if (!file?.rows?.length) return;
+      const blob = new Blob([buildExcelWorkbookHtml(file)], {
+        type: "application/vnd.ms-excel;charset=utf-8"
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = file.fileName || "抽样样本.xls";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
     }
 
     function selectedControl() {
@@ -3084,9 +3386,14 @@
           status: "submitted"
         }));
         uploadedMaterials.forEach((materialItem) => control.materials.unshift(materialItem));
+        let hasDelayedGeneration = false;
         generatedTargetsForUploadNode(control, target.dataset.uploadNode).forEach((node) => {
           if (isTableBuilderNode(node)) {
             testOfOneBuilderFor(control, node.id);
+          } else if (isDelayedGenerationNode(node)) {
+            hasDelayedGeneration = scheduleGeneratedDraft(control, node, () => buildGeneratedText(control, node, uploadedMaterials)) || hasDelayedGeneration;
+          } else if (node.type === "generated_file") {
+            setDraft(control, node.id, buildGeneratedFile(control, node, uploadedMaterials));
           } else {
             setDraft(control, node.id, buildGeneratedText(control, node, uploadedMaterials));
           }
@@ -3095,7 +3402,11 @@
         target.value = "";
         persist();
         renderAll();
-        if (files.length) showToast(`已记录 ${files.length} 个材料，相关草稿已生成，Save 后计入进度。`);
+        if (files.length && hasDelayedGeneration) {
+          showToast(`已记录 ${files.length} 个材料，AI 正在生成草稿。`);
+        } else if (files.length) {
+          showToast(`已记录 ${files.length} 个材料，相关草稿已生成，Save 后计入进度。`);
+        }
       }
     });
 
@@ -3114,6 +3425,19 @@
 
       if (event.target.matches("[data-node-response]")) {
         control.nodeResponses[event.target.dataset.nodeResponse] = event.target.value;
+        control.updatedAt = new Date().toISOString();
+        renderStats();
+        renderList();
+        return;
+      }
+
+      if (event.target.matches("[data-export-path-node]")) {
+        const nodeId = event.target.dataset.exportPathNode;
+        const current = control.nodeResponses[nodeId];
+        control.nodeResponses[nodeId] = {
+          ...(current && typeof current === "object" && !Array.isArray(current) ? current : {}),
+          exportPath: event.target.value
+        };
         control.updatedAt = new Date().toISOString();
         renderStats();
         renderList();
@@ -3318,11 +3642,25 @@
       if (regenerateButton) {
         const control = selectedControl();
         const node = control ? findNode(control, regenerateButton.dataset.regenerateNode) : null;
-        if (control && node && regenerateGeneratedNode(control, node)) {
+        const result = control && node ? regenerateGeneratedNode(control, node) : false;
+        if (result === "delayed") return;
+        if (control && node && result) {
           control.updatedAt = new Date().toISOString();
           renderAll();
-          showToast("已重新生成草稿，Save 后计入进度。");
+          showToast(node.type === "generated_file"
+            ? "已生成抽样 Excel，Save 后计入进度。"
+            : "已重新生成草稿，Save 后计入进度。");
         }
+        return;
+      }
+
+      const downloadGeneratedFileButton = event.target.closest("[data-download-generated-file]");
+      if (downloadGeneratedFileButton) {
+        const control = selectedControl();
+        if (!control) return;
+        const nodeId = downloadGeneratedFileButton.dataset.downloadGeneratedFile;
+        const file = draftFor(control, nodeId) ?? control.nodeResponses[nodeId];
+        downloadExcelFile(file);
         return;
       }
 
@@ -3438,6 +3776,7 @@
 
       const selectButton = event.target.closest("[data-select]");
       if (selectButton) {
+        clearGenerationTimers();
         selectedId = selectButton.dataset.select;
         activePhase = "tod";
         openTextMenuKey = "";

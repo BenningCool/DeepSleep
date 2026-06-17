@@ -275,9 +275,42 @@ GITC 专属模板：
 | 阶段 | 节点数 | 内容 |
 | --- | ---: | --- |
 | `tod` | 6 | 上传制度、自动生成 Design、上传会议纪要、自动生成 Implementation、上传支持性材料、手动填写字段并生成 Test of One 表格 |
-| `toe` | 6 | 上传需求清单、上传客户提供的样本池、自动抽样生成抽样样本、是否发送样本、上传客户返回的样本支持性材料、手动填写字段并生成样本抄写表 |
+| `toe` | 6 | 上传需求清单、上传样本清单、自动抽样生成 25 个抽样样本 Excel、是否发送样本、上传客户返回的样本支持性材料、手动填写字段并生成样本抄写表 |
 
-GITC 的生成类节点会在模块 2 本地生成可编辑草稿，但只有用户点击 `Save` 后，草稿才写入 service 并计入 `completedNodes`。其中 `gitc-tod-test-of-one`、`gitc-toe-transcription` 都改为先由操作人员手动填写样本字段名，再按字段录入样本信息并生成表格。模块 2 页面会渲染为实际表格；模块 3 只会看到已经保存进对应 `nodeResponses` 的表格文本，可按表格展示。
+GITC 的生成类节点会在模块 2 本地生成草稿或文件对象，但只有用户点击 `Save` 后，内容才写入 service 并计入 `completedNodes`。其中 `gitc-tod-test-of-one`、`gitc-toe-transcription` 都改为先由操作人员手动填写样本字段名，再按字段录入样本信息并生成表格。模块 2 页面会渲染为实际表格；模块 3 只会看到已经保存进对应 `nodeResponses` 的表格文本，可按表格展示。
+
+`gitc-toe-sampling` 是 `generated_file` 节点，保存后的 `nodeResponses["gitc-toe-sampling"]` 形态为：
+
+```js
+{
+  kind: "sampling_excel",
+  fileName: "PC-1-程序变更-抽样样本.xls",
+  fileType: "application/vnd.ms-excel",
+  sheetName: "抽样样本",
+  generatedAt: "2026-06-17T10:00:00.000Z",
+  rowCount: 25,
+  columns: [
+    { key: "sequence", label: "序号" },
+    { key: "sampleId", label: "抽样样本编号" },
+    { key: "populationItem", label: "样本池记录" },
+    { key: "sourcePool", label: "来源样本池" },
+    { key: "samplingMethod", label: "抽样方法" },
+    { key: "status", label: "状态" }
+  ],
+  rows: [
+    {
+      sequence: 1,
+      sampleId: "SAMPLE-001",
+      populationItem: "sample-pool-ROW-0007",
+      sourcePool: "客户提供的样本池.xlsx (438 KB)",
+      samplingMethod: "系统随机抽样（Demo）",
+      status: "待发送"
+    }
+  ]
+}
+```
+
+模块 3 如需展示抽样结果，可以读取 `nodeResponses["gitc-toe-sampling"].rows`，也可以直接读取 `phases[].nodes[]` 中该节点的 `file.rows`；如只做进度/逾期展示，只需要识别该节点 `status` 和 `dueDate`。
 
 TASK 轻量模板：
 
@@ -341,6 +374,7 @@ FIELD_REVIEW_STATUS = {
 | `text` | 对应 `nodeResponses[node.id]` 或 legacy 字段非空 |
 | `structured` | 对应 `nodeResponses["{nodeId}.{fieldId}"]`；必填字段按字段类型完成规则判断 |
 | `generated_text` | 对应 `nodeResponses[node.id]` 非空。上传依赖材料后模块 2 可生成草稿，但 Save 前不计入完成 |
+| `generated_file` | 对应 `nodeResponses[node.id]` 为文件对象，且 `rows.length > 0`；当前用于 GITC TOE 抽样 Excel |
 | `send_toggle` | 对应 `nodeResponses[node.id].sent === true`；再次点击会取消并扣回完成度 |
 | `upload_spp` | 当前节点下至少有一个 `category = "spp"` 材料 |
 | `upload_minutes` | 当前节点下至少有一个 `category = "meeting_minutes"` 材料 |
@@ -349,9 +383,21 @@ FIELD_REVIEW_STATUS = {
 | `upload_supporting_material` | 当前节点下至少有一个 `category = "supporting_material"` 材料；ITAC 该节点还会记录 `supportingMaterialKind = "configuration" | "code"` |
 | `upload_test_of_one_support` | 当前节点下至少有一个 `category = "supporting_material"` 且 `supportingMaterialKind = "test_of_one"` 的材料 |
 | `upload_requirement_list` | 当前节点下至少有一个 `category = "requirement_list"` 材料 |
-| `upload_sample_pool` | 当前节点下至少有一个 `category = "sample_pool"` 材料 |
+| `upload_sample_pool` | 当前节点下至少有一个 `category = "sample_pool"` 材料；GITC TOE 样本池节点还要求 `nodeResponses["gitc-toe-sample-pool"].exportPath` 非空 |
 | `upload_returned_sample_support` | 当前节点下至少有一个 `category = "returned_sample_support"` 材料 |
 生成表格类节点通过 `builderKind` 区分交互形态：`test_of_one_table` 用于 GITC TOD 单样本 Test of One，`itac_test_of_one_table` 用于 ITAC TOD 单样本 Test of One，`sample_transcription_table` 用于 GITC TOE 多样本抄写。三者都由模块 2 先手动录入字段名，再录入样本值并生成表格；模块 3 不需要实现填表器，只读取保存后的 `nodeResponses[node.id]` 内容并渲染为表格。
+
+GITC TOE 的 `gitc-toe-sample-pool` 会在上传样本清单后要求操作人员补充客户导出清单路径，保存形态为：
+
+```js
+nodeResponses: {
+  "gitc-toe-sample-pool": {
+    exportPath: "客户系统 / 程序变更 / 2025变更清单导出.xlsx"
+  }
+}
+```
+
+该节点只有在样本池材料和 `exportPath` 都存在时才会被 service 标记为 `completed`。
 
 `structured` 字段类型：
 

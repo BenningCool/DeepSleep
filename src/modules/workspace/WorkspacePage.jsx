@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   FIELD_REVIEW_STATUS,
   MATERIAL_CATEGORY,
@@ -43,6 +43,49 @@ const WORD_FILE_MIME_TYPES = new Set([
 
 const DEFAULT_TABLE_FIELD_COUNT = 3;
 const DEFAULT_TRANSCRIPTION_FIELD_COUNT = 4;
+const AI_GENERATION_DELAY_MS = 3000;
+const SAMPLING_EXCEL_ROW_COUNT = 25;
+const SAMPLING_EXCEL_COLUMNS = [
+  { key: "sequence", label: "序号" },
+  { key: "sampleId", label: "抽样样本编号" },
+  { key: "populationItem", label: "样本池记录" },
+  { key: "sourcePool", label: "来源样本池" },
+  { key: "samplingMethod", label: "抽样方法" },
+  { key: "status", label: "状态" }
+];
+
+const DEMO_GITC_DESIGN_TEXT = `2025年9月10日，审计方通过询问被审计单位IT部信息安全相关负责人，了解到公司针对程序变更的管理流程制定了相应的信息安全制度；通过获取并检查《软件变更管理制度》，审计方发现公司对此作出如下规定：
+变更流程：
+第四条  系统变更过程类似软件开发，大致可分为四个阶段：任务提交和接受、任务实现、任务验收和程序发布上线。
+第五条  需求部门提出系统变更需求，并将变更需求整理成《IT需求申请单》，由业务人员提交到内部流程系统，经过审核后流转至运维人员，由运维人员填写运维需求汇总描述后自动创建需求管理系统中的需求记录。
+第六条  由IT内部人员通过需求评审会议对需求记录进行分析，并提出系统变更建议。
+第七条  相关IT部门根据自行开发、合作开发和外包开发的不同要求组织实现系统变更需求，将需求提交至内部开发人员、合作开发商或外包开发商，产生供发布的程序。
+第八条  实现过程应按照软件开发过程规定进行。系统变更过程应遵循软件开发过程统一的编码标准，并经过测试验收才能上线。
+紧急变更流程：
+第九条  对于紧急变更，需求部门可以通过电子邮件形式、工作群沟通提出申请。
+第十条  IT部根据重要性和紧迫性作出判断，确定其优先级和影响程度，并进行相应处理。
+第十一条  紧急变更过程由专责部门或人员启动紧急修改变更程序。IT部应对紧急变更的处理进行规范的文档记录。
+第十二条  在紧急事件处理完成后，必须在一周内补办正式、完整的流程。
+审计方未发现异常。`;
+
+const DEMO_GITC_IMPLEMENTATION_TEXT = `通过询问被审计单位信息技术部系统开发相关人员，审计方了解到在2025年01月01日-2025年09月04日现场审计时点，相关业务系统对于程序变更的管理流程如下：
+①需求提出：
+对于非BUG类需求：由业务部门提出变更需求，并将变更需求整理成《IT需求申请单》或者业务联系单，由业务人员提交至内部流程系统，经业务部门相关领导审核后流转至运维人员。由运维人员基于业务需求转化并填写运维需求单，流程系统中的运维需求创建后自动关联至需求管理平台，并创建开发需求，此时需求进入“待评审”状态，正式进入开发生命周期；
+
+对于BUG类需求：当业务部门发现问题，直接反馈给IT运维人员。IT运维人员确认该问题为系统BUG后，在需求/缺陷管理平台中创建BUG记录，并指派给对应开发人员，此时需求进入“待评审”状态；
+
+②需求评审：
+每周四及周五，开发团队召开“需求评审会”，对需求/缺陷管理平台中“待评审”的需求和BUG进行评估、澄清和排期；
+③制定开发计划：
+每周一，开发负责人根据需求评审结果指定本周的开发计划，明确各项任务的负责人和预计完成时间；
+④开发与测试：
+开发人员根据开发计划进行编码开发。开发完成后，由IT运维人员在测试环境中进行功能测试，测试通过后，任务状态在需求/缺陷管理平台中更新为“已解决”；
+⑤代码合并：
+由开发组长将各开发人员在各自开发分支上的代码合并到代码仓库的主干分支上，准备发布；
+⑥系统发布：
+每周二及周四为固定的发布时间，由发布人员在发布平台上点击“发布”按钮，发布平台会自动从代码仓库拉取已经合并好的主干代码，并将其部署到生产环境；
+⑦发布后验证：
+发布完成后，发布人员会通知IT运维人员在生产环境对本次发布的功能或修复的BUG进行最终验证，确保上线内容无误。`;
 
 const emptyDetail = {
   id: "",
@@ -246,8 +289,7 @@ function tableBuilderHelp(node) {
 }
 
 function shouldAutoGenerateTable(node) {
-  return node?.builderKind === "test_of_one_table"
-    || node?.builderKind === "itac_test_of_one_table";
+  return false;
 }
 
 function normalizeTestOfOneBuilder(builder, node) {
@@ -364,6 +406,71 @@ function responseText(value) {
   return typeof value === "string" ? value : "";
 }
 
+function sanitizeFileName(value = "抽样样本") {
+  const normalized = String(value || "抽样样本")
+    .replace(/[\\/:*?"<>|]+/g, "-")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  return normalized || "抽样样本";
+}
+
+function excelEscape(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function buildExcelWorkbookHtml(file) {
+  const columns = Array.isArray(file?.columns) && file.columns.length
+    ? file.columns
+    : SAMPLING_EXCEL_COLUMNS;
+  const rows = Array.isArray(file?.rows) ? file.rows : [];
+  const title = file?.sheetName || "抽样样本";
+
+  return `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    table { border-collapse: collapse; }
+    th, td { border: 1px solid #999; padding: 6px 8px; }
+    th { background: #dbeafe; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <table>
+    <caption>${excelEscape(title)}</caption>
+    <thead>
+      <tr>${columns.map((column) => `<th>${excelEscape(column.label)}</th>`).join("")}</tr>
+    </thead>
+    <tbody>
+      ${rows.map((row) => `
+        <tr>${columns.map((column) => `<td>${excelEscape(row[column.key])}</td>`).join("")}</tr>
+      `).join("")}
+    </tbody>
+  </table>
+</body>
+</html>`;
+}
+
+function downloadExcelFile(file) {
+  if (!file?.rows?.length) return;
+  const blob = new Blob([buildExcelWorkbookHtml(file)], {
+    type: "application/vnd.ms-excel;charset=utf-8"
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = file.fileName || "抽样样本.xls";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 function syncLegacyTestContent(detail) {
   return {
     objective: responseText(detail.nodeResponses["tod-objective"])
@@ -462,6 +569,8 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
   const [draftResponses, setDraftResponses] = useState({});
   const [testOfOneBuilders, setTestOfOneBuilders] = useState({});
   const [supportingMaterialKinds, setSupportingMaterialKinds] = useState({});
+  const [generatingNodes, setGeneratingNodes] = useState({});
+  const generationTimersRef = useRef({});
   const [createOpen, setCreateOpen] = useState(false);
   const [createDraft, setCreateDraft] = useState(() => {
     const firstDate = todayDate();
@@ -645,6 +754,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
   }
 
   useEffect(() => {
+    clearGenerationTimers();
     setActivePhase("tod");
     setOpenTextMenuKey("");
     setOpenReviewKey("");
@@ -652,6 +762,8 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
     setTestOfOneBuilders({});
     setSupportingMaterialKinds({});
   }, [selectedControl?.id]);
+
+  useEffect(() => () => clearGenerationTimers(false), []);
 
   useEffect(() => {
     if (!detail.phases.length) return;
@@ -666,6 +778,55 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
 
   function refresh() {
     setRefreshToken((value) => value + 1);
+  }
+
+  function generationKeyFor(nodeId, controlId = selectedControl?.id || "") {
+    return `${controlId}:${nodeId}`;
+  }
+
+  function isDelayedGenerationNode(node) {
+    return node?.type === "generated_text"
+      && (node.generationKind === "design" || node.generationKind === "implementation");
+  }
+
+  function isGeneratingNode(node) {
+    return Boolean(generatingNodes[generationKeyFor(node.id)]);
+  }
+
+  function clearGenerationTimers(resetState = true) {
+    Object.values(generationTimersRef.current).forEach((timerId) => window.clearTimeout(timerId));
+    generationTimersRef.current = {};
+    if (resetState) setGeneratingNodes({});
+  }
+
+  function scheduleGeneratedDraft(node, createValue, doneMessage = "") {
+    if (!selectedControl || !isDelayedGenerationNode(node)) return false;
+    const key = generationKeyFor(node.id);
+    if (generationTimersRef.current[key]) {
+      window.clearTimeout(generationTimersRef.current[key]);
+    }
+    setGeneratingNodes((current) => ({
+      ...current,
+      [key]: true
+    }));
+    notify(node.type === "generated_file"
+      ? "AI 正在生成抽样 Excel，约 3 秒后更新。"
+      : "AI 正在生成草稿，约 3 秒后更新。");
+
+    generationTimersRef.current[key] = window.setTimeout(() => {
+      setDraftResponses((current) => ({
+        ...current,
+        [node.id]: createValue()
+      }));
+      setGeneratingNodes((current) => {
+        const next = { ...current };
+        delete next[key];
+        return next;
+      });
+      delete generationTimersRef.current[key];
+      if (doneMessage) notify(doneMessage);
+    }, AI_GENERATION_DELAY_MS);
+    return true;
   }
 
   function persist(nextDetail, message = "") {
@@ -687,6 +848,18 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
         [nodeId]: value
       }
     }));
+  }
+
+  function uploadNodeResponse(node) {
+    const value = detail.nodeResponses?.[node.id];
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
+
+  function updateUploadExportPath(node, exportPath) {
+    updateNodeResponse(node.id, {
+      ...uploadNodeResponse(node),
+      exportPath
+    });
   }
 
   function addExtraTextField(nodeId) {
@@ -793,7 +966,8 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
 
   function generatedTargetsForUploadNode(uploadNode) {
     return (detail.phases || []).flatMap((phase) => phase.nodes || []).filter((node) => (
-      node.type === "generated_text" && node.dependsOnNodeId === uploadNode.id
+      (node.type === "generated_text" || node.type === "generated_file")
+        && node.dependsOnNodeId === uploadNode.id
     ));
   }
 
@@ -808,13 +982,13 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
     const generatedAt = formatDateTime(new Date().toISOString());
 
     if (node.generationKind === "design") {
-      return `Design 草稿\n测试点：${controlTitle}\n依据制度：${source}\n\n系统根据上传制度识别控制目标、关键控制活动、控制频率、责任人与证据要求。请复核制度条款是否完整覆盖该 GITC 控制设计。`;
+      return DEMO_GITC_DESIGN_TEXT;
     }
     if (node.generationKind === "implementation") {
       if (node.id.startsWith("itac-")) {
         return `Implementation 草稿\n测试点：${controlTitle}\n依据会议纪要：${source}\n\n系统根据会议纪要整理控制执行人、控制频率、关键配置或代码对象、执行证据来源和实施结论。请复核访谈内容是否足以支持该 ITAC 已按设计实施。`;
       }
-      return `Implementation 草稿\n测试点：${controlTitle}\n依据会议纪要：${source}\n\n系统根据会议纪要整理控制执行方式、访谈对象、执行频率和系统支持情况。请确认访谈结论是否支持控制已按设计实施。`;
+      return DEMO_GITC_IMPLEMENTATION_TEXT;
     }
     if (node.generationKind === "test_of_one") {
       return "";
@@ -829,18 +1003,70 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
     return `自动生成草稿\n测试点：${controlTitle}\n依据材料：${source}\n生成时间：${generatedAt}`;
   }
 
+  function buildGeneratedFile(node, materials = []) {
+    const controlTitle = selectedControl?.title || "当前测试点";
+    const generatedAtIso = new Date().toISOString();
+    const sourcePool = materialSummary(materials);
+    const sourceBase = sanitizeFileName(materials[0]?.name || "sample-pool");
+
+    if (node.fileKind === "sampling_excel") {
+      return {
+        kind: "sampling_excel",
+        fileName: `${sanitizeFileName(controlTitle)}-抽样样本.xls`,
+        fileType: "application/vnd.ms-excel",
+        sheetName: "抽样样本",
+        generatedAt: generatedAtIso,
+        rowCount: SAMPLING_EXCEL_ROW_COUNT,
+        columns: SAMPLING_EXCEL_COLUMNS,
+        rows: Array.from({ length: SAMPLING_EXCEL_ROW_COUNT }, (_, index) => ({
+          sequence: index + 1,
+          sampleId: `SAMPLE-${String(index + 1).padStart(3, "0")}`,
+          populationItem: `${sourceBase}-ROW-${String((index + 1) * 7).padStart(4, "0")}`,
+          sourcePool,
+          samplingMethod: "系统随机抽样（Demo）",
+          status: "待发送"
+        }))
+      };
+    }
+
+    return {
+      kind: node.fileKind || "generated_file",
+      fileName: `${sanitizeFileName(controlTitle)}-生成文件.xls`,
+      fileType: "application/vnd.ms-excel",
+      generatedAt: generatedAtIso,
+      columns: SAMPLING_EXCEL_COLUMNS,
+      rows: []
+    };
+  }
+
   function setGeneratedDraft(node, materials = []) {
     if (isTableBuilderNode(node)) {
       setTestOfOneBuilders((current) => ({
         ...current,
         [node.id]: current[node.id] || createTestOfOneBuilder(initialFieldCountForTableBuilder(node))
       }));
-      return;
+      return "immediate";
+    }
+    if (isDelayedGenerationNode(node)) {
+      scheduleGeneratedDraft(
+        node,
+        () => buildGeneratedText(node, materials),
+        "AI 草稿已生成，点击 Save 后计入进度。"
+      );
+      return "delayed";
+    }
+    if (node.type === "generated_file") {
+      setDraftResponses((current) => ({
+        ...current,
+        [node.id]: buildGeneratedFile(node, materials)
+      }));
+      return "immediate";
     }
     setDraftResponses((current) => ({
       ...current,
       [node.id]: buildGeneratedText(node, materials)
     }));
+    return "immediate";
   }
 
   function regenerateGeneratedNode(node) {
@@ -849,8 +1075,11 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
       notify("请先上传该节点所需材料。");
       return;
     }
-    setGeneratedDraft(node, sourceMaterials);
-    notify("已重新生成草稿，点击 Save 后计入进度。");
+    const mode = setGeneratedDraft(node, sourceMaterials);
+    if (mode === "delayed") return;
+    notify(node.type === "generated_file"
+      ? "已生成抽样 Excel，点击 Save 后计入进度。"
+      : "已重新生成草稿，点击 Save 后计入进度。");
   }
 
   function supportingMaterialKindForNode(node) {
@@ -904,12 +1133,15 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
       }, project?.id || selectedTask?.projectId || "");
     });
     event.target.value = "";
+    let hasDelayedGeneration = false;
     generatedTargetsForUploadNode(node).forEach((targetNode) => {
-      setGeneratedDraft(targetNode, uploadedMaterials);
+      hasDelayedGeneration = setGeneratedDraft(targetNode, uploadedMaterials) === "delayed" || hasDelayedGeneration;
     });
     setDetail(getControlProgressDetail(selectedControl.id, selectedTask, tasks));
     refresh();
-    if (files.length) {
+    if (files.length && hasDelayedGeneration) {
+      notify(`已记录 ${files.length} 个${materialLabel(node.category)}，AI 正在生成草稿。`);
+    } else if (files.length) {
       notify(`已记录 ${files.length} 个${materialLabel(node.category)}。`);
     }
   }
@@ -939,6 +1171,11 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
 
   function generatedValueForNode(node) {
     return responseText(draftResponses[node.id] ?? detail.nodeResponses[node.id] ?? node.value ?? "");
+  }
+
+  function generatedFileForNode(node) {
+    const value = draftResponses[node.id] ?? detail.nodeResponses[node.id] ?? null;
+    return value && typeof value === "object" && !Array.isArray(value) ? value : null;
   }
 
   function updateGeneratedDraft(nodeId, value) {
@@ -1547,9 +1784,43 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
     );
   }
 
+  function renderGeneratedFileNode(node) {
+    const file = generatedFileForNode(node);
+    const hasDraft = Object.prototype.hasOwnProperty.call(draftResponses, node.id);
+    const rowCount = Array.isArray(file?.rows) ? file.rows.length : 0;
+
+    return (
+      <div className="workspace-generated-node">
+        <div className="workspace-generated-actions">
+          <button className="button subtle" type="button" onClick={() => regenerateGeneratedNode(node)}>
+            重新生成 Excel
+          </button>
+          {hasDraft ? <span>未保存文件</span> : null}
+        </div>
+
+        {file ? (
+          <div className="workspace-generated-file">
+            <div>
+              <strong>{file.fileName || "抽样样本.xls"}</strong>
+              <span>
+                {rowCount} 个抽样样本 · Excel · 生成时间 {formatDateTime(file.generatedAt)}
+              </span>
+            </div>
+            <button className="button primary" type="button" onClick={() => downloadExcelFile(file)}>
+              下载 Excel
+            </button>
+          </div>
+        ) : (
+          <p className="workspace-empty-line">上传样本清单后点击“重新生成 Excel”，系统会自动生成 25 个抽样样本。</p>
+        )}
+      </div>
+    );
+  }
+
   function renderGeneratedNode(node) {
     const value = generatedValueForNode(node);
     const hasDraft = Object.prototype.hasOwnProperty.call(draftResponses, node.id);
+    const generating = isGeneratingNode(node);
 
     return (
       <div className="workspace-generated-node">
@@ -1557,10 +1828,11 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
           {isTableBuilderNode(node) ? (
             <span>按样本字段填表生成{tableTitleForBuilder(node)}</span>
           ) : (
-            <button className="button subtle" type="button" onClick={() => regenerateGeneratedNode(node)}>
-              重新生成
+            <button className="button subtle" type="button" onClick={() => regenerateGeneratedNode(node)} disabled={generating}>
+              {generating ? "AI 生成中..." : "重新生成"}
             </button>
           )}
+          {generating ? <span className="workspace-ai-generating">正在读取材料并生成草稿</span> : null}
           {hasDraft ? <span>未保存草稿</span> : null}
         </div>
         {isTableBuilderNode(node) ? renderTestOfOneBuilder(node) : null}
@@ -1617,7 +1889,6 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
           <div className="panel-toolbar">
             <div>
               <h3>测试点清单</h3>
-              <p className="panel-note">一张卡片代表一个 GITC / ITAC 测试点</p>
             </div>
             <button className="button primary" type="button" onClick={openCreateDialog}>
               新建测试点
@@ -1721,9 +1992,7 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
                   </span>
                   <h3>{selectedControl.title}</h3>
                   <p>
-                    {selectedControl.owner} · 看板状态 {selectedControl.taskStatus}
-                    {" · "}
-                    最近更新 {formatDateTime(detail.updatedAt)}
+                    {selectedControl.owner} · 最近更新 {formatDateTime(detail.updatedAt)}
                   </p>
                 </div>
                 <span className={`progress-pill ${statusClass(detailDisplayStatus)}`}>
@@ -1807,6 +2076,8 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
 
                           {node.type === "generated_text" ? renderGeneratedNode(node) : null}
 
+                          {node.type === "generated_file" ? renderGeneratedFileNode(node) : null}
+
                           {node.type === "send_toggle" ? renderSendToggleNode(node) : null}
 
                           {(node.type === "text" || node.type === "structured") ? (
@@ -1850,6 +2121,17 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
                                 />
                               </label>
                               {node.fileHint ? <p className="node-note">{node.fileHint}</p> : null}
+                              {node.requiresExportPath ? (
+                                <label className="workspace-export-path">
+                                  <span>{node.exportPathLabel || "客户导出清单路径"}</span>
+                                  <input
+                                    type="text"
+                                    value={uploadNodeResponse(node).exportPath || ""}
+                                    onChange={(event) => updateUploadExportPath(node, event.target.value)}
+                                    placeholder={node.exportPathPlaceholder || "填写客户导出清单路径"}
+                                  />
+                                </label>
+                              ) : null}
                               <MaterialList items={nodeMaterials} onRemove={removeMaterial} />
                             </div>
                           ) : null}
