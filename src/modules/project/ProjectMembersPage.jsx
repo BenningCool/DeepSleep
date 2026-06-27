@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ModuleHeading } from "../../components/ModuleHeading";
+import { PAGE_LABELS, PROJECT_SECTION_LABELS } from "../../data/pageLabels";
 import { labelOfRole } from "../../data/projectConstants";
 import { notifyMockInvites } from "./inviteService";
 import {
@@ -284,8 +286,11 @@ export function ProjectMembersPage({
     <section className="page-shell">
       <header className="page-header">
         <div>
-          <p className="page-eyebrow">Member Management</p>
-          <h2>成员管理</h2>
+          <ModuleHeading
+            as="h2"
+            title={PAGE_LABELS.memberManagement.title}
+            titleEn={PAGE_LABELS.memberManagement.titleEn}
+          />
           <p className="page-lead">
             项目「{project.name}」· 当前 {activeCount} 位核心成员。
             修改邮箱后保存，新成员将生成邀请链接（演示模式）。
@@ -306,7 +311,10 @@ export function ProjectMembersPage({
       <div className="members-page-grid">
         <div className="members-edit-column">
           <section className="detail-panel members-editor">
-            <h3>编辑核心成员</h3>
+            <ModuleHeading
+              title={PROJECT_SECTION_LABELS.editCoreMembers.title}
+              titleEn={PROJECT_SECTION_LABELS.editCoreMembers.titleEn}
+            />
             <p className="panel-note">
               Partner 不可与 Manager / In-charge 重复。Manager 与 In-charge 可相同。
             </p>
@@ -393,7 +401,10 @@ export function ProjectMembersPage({
 
           {isAudit ? (
             <section className="detail-panel members-editor">
-              <h3>Specialist 团队</h3>
+              <ModuleHeading
+                title={PROJECT_SECTION_LABELS.specialistTeams.title}
+                titleEn={PROJECT_SECTION_LABELS.specialistTeams.titleEn}
+              />
               <p className="panel-note">
                 仅 Audit team 项目可配置。勾选 ITA / Tax / FRM 专家组并指定 Lead；
                 Lead 接受邀请后在本页补充 Specialist team staff。
@@ -463,7 +474,10 @@ export function ProjectMembersPage({
               className="detail-panel members-editor specialist-staff-panel"
               id="specialist-team-staff"
             >
-              <h3>Specialist team staff</h3>
+              <ModuleHeading
+                title={PROJECT_SECTION_LABELS.specialistTeamStaff.title}
+                titleEn={PROJECT_SECTION_LABELS.specialistTeamStaff.titleEn}
+              />
               <p className="panel-note">
                 {focusedTeam
                   ? `请为 ${labelOfSpecialistTeamStaff(focusedTeam.team)} 补充 Staff；保存后将生成邀请链接。`
@@ -536,7 +550,10 @@ export function ProjectMembersPage({
 
         <div className="members-invite-column">
           <section className="detail-panel">
-            <h3>核心成员邀请</h3>
+            <ModuleHeading
+              title={PROJECT_SECTION_LABELS.coreMemberInvites.title}
+              titleEn={PROJECT_SECTION_LABELS.coreMemberInvites.titleEn}
+            />
             <p className="panel-note">演示模式：复制中英双语邀请链接分享给成员。</p>
             <div className="invite-grid single-col">
               {project.members
@@ -556,7 +573,10 @@ export function ProjectMembersPage({
           {isAudit ? (
             <>
               <section className="detail-panel">
-                <h3>Specialist Lead 邀请</h3>
+                <ModuleHeading
+                  title={PROJECT_SECTION_LABELS.specialistLeadInvites.title}
+                  titleEn={PROJECT_SECTION_LABELS.specialistLeadInvites.titleEn}
+                />
                 <div className="invite-grid single-col">
                   {(project.specialistTeams || []).map((team) => (
                     <InviteCard
@@ -572,7 +592,10 @@ export function ProjectMembersPage({
 
               {(project.specialistTeams || []).length ? (
                 <section className="detail-panel">
-                  <h3>Specialist team staff 邀请</h3>
+                  <ModuleHeading
+                    title={PROJECT_SECTION_LABELS.specialistStaffInvites.title}
+                    titleEn={PROJECT_SECTION_LABELS.specialistStaffInvites.titleEn}
+                  />
                   <p className="panel-note">按已勾选专家组分别生成 Staff 邀请链接。</p>
                   {(project.specialistTeams || []).map((team) => (
                     <div className="specialist-invite-group" key={`staff-invite-${team.id}`}>

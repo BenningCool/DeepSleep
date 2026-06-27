@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { DASHBOARD_CARD_LABELS } from "../../data/progressLabels";
 import { controlTypeClass } from "./progressBoardUtils";
+import { ProgressModuleHeading } from "./ProgressModuleHeading";
 import { ProgressOwnerFilter } from "./ProgressOwnerFilter";
 import { ProgressOwnerLabel } from "./ProgressOwnerLabel";
 import {
@@ -63,7 +64,10 @@ export function ControlNodeProgressCard({
     <article className="progress-dashboard-card progress-node-progress-card">
       <header className="progress-dashboard-card-head stacked">
         <div className="progress-node-progress-head">
-          <h3>{DASHBOARD_CARD_LABELS.controlNodeProgress}</h3>
+          <ProgressModuleHeading
+            title={DASHBOARD_CARD_LABELS.controlNodeProgress}
+            titleEn={DASHBOARD_CARD_LABELS.controlNodeProgressEn}
+          />
           {onOwnerFilterChange ? (
             <ProgressOwnerFilter
               project={project}

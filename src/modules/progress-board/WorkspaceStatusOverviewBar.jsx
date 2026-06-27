@@ -28,7 +28,7 @@ export function formatWorkspaceStatusSummary(breakdown) {
 }
 
 /**
- * 与进度看板「状态概述」环形图同一口径（workspaceStatus 三态），横向分段柱展现。
+ * 与进度看板 KPI / 项目列表状态概述柱同一口径（workspaceStatus 三态），横向分段柱展现。
  */
 export function WorkspaceStatusOverviewBar({
   breakdown,

@@ -2,7 +2,7 @@ import { getControlProgressSnapshot } from "../../services/workspaceProgressServ
 import { computeWorkspaceStatusBreakdown } from "../progress-board/progressDashboardUtils";
 
 /**
- * 项目列表「状态概述」：与进度看板环形图同一 snapshot + computeWorkspaceStatusBreakdown 口径。
+ * 项目列表「状态概述」：与进度看板 **KPI 四格**同一 snapshot + `computeWorkspaceStatusBreakdown` 口径（`workspaceStatus` 三态）。
  */
 export function getProjectWorkspaceStatusOverview(projectId, allTasks = []) {
   if (!projectId) {

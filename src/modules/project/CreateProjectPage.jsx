@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { ModuleHeading } from "../../components/ModuleHeading";
+import { PAGE_LABELS, PROJECT_SECTION_LABELS } from "../../data/pageLabels";
 import {
   ENGAGEMENT_TYPES,
   INDUSTRY_GROUPS,
@@ -97,8 +99,11 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
     <section className="page-shell">
       <header className="page-header">
         <div>
-          <p className="page-eyebrow">New Engagement Setup</p>
-          <h2>创建审计项目</h2>
+          <ModuleHeading
+            as="h2"
+            title={PAGE_LABELS.createProject.title}
+            titleEn={PAGE_LABELS.createProject.titleEn}
+          />
           <p className="page-lead">
             填写项目基本信息与成员邮箱。创建后生成邀请链接（演示模式），并进入项目详情页。
           </p>
@@ -108,7 +113,10 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
 
       <form className="create-form" onSubmit={handleSubmit}>
         <div className="form-panel">
-          <h3>项目属性</h3>
+          <ModuleHeading
+            title={PROJECT_SECTION_LABELS.projectAttributes.title}
+            titleEn={PROJECT_SECTION_LABELS.projectAttributes.titleEn}
+          />
           <div className="form-grid two-col">
             <label className="field">
               <span className="label">团队 Team *</span>
@@ -205,7 +213,10 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
         </div>
 
         <div className="form-panel">
-          <h3>项目成员 Members</h3>
+          <ModuleHeading
+            title={PROJECT_SECTION_LABELS.createMembers.title}
+            titleEn={PROJECT_SECTION_LABELS.createMembers.titleEn}
+          />
           <p className="panel-note">
             Partner 邮箱不可与 Manager / In-charge 重复。创建后将生成邀请链接供复制分享。
           </p>
@@ -284,7 +295,10 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
 
         {showSpecialists ? (
           <div className="form-panel">
-            <h3>Specialist 团队</h3>
+            <ModuleHeading
+              title={PROJECT_SECTION_LABELS.specialistTeams.title}
+              titleEn={PROJECT_SECTION_LABELS.specialistTeams.titleEn}
+            />
             <p className="panel-note">
               Audit team 项目可邀请 ITA / Tax / FRM 专家组。Lead 接受邀请后进入成员管理页补充 Specialist team staff。
             </p>

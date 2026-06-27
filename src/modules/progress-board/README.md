@@ -1,12 +1,12 @@
-# Progress Board Module（进度看板 · v1.6.10）
+# Progress Board Module（进度看板 · v1.6.12）
 
 只读聚合层，消费 `workspaceProgressService` snapshot/detail。
 
 主要页面与组件：
 
-- `ProgressBoardPage.jsx` — 页顶负责组筛选、控制点列表、只读抽屉
-- `ProgressDashboard.jsx` — KPI 四格、状态概述环形图、近期动态
-- `ControlNodeProgressCard.jsx` — 控制点节点进度（含负责人筛选）
+- `ProgressBoardPage.jsx` — 页顶负责组筛选、测试点列表、只读抽屉
+- `ProgressDashboard.jsx` — **测试点进度 KPI 四格**（含 GITC/ITAC 分布）、**测试节点进度**概览、近期动态
+- `ControlNodeProgressCard.jsx` — 测试点节点进度（含负责人筛选）
 - `TeamMemberProgressCard.jsx` — 组内成员进度（IC + Staff）
 - `ProgressOwnerLabel.jsx` / `ProgressOwnerFilter.jsx` — 负责人彩色标签与筛选
 

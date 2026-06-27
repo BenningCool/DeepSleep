@@ -15,6 +15,7 @@ import {
 import { countControlsWithPlanDue } from "./progressDueUtils";
 import { ControlNodeProgressCard } from "./ControlNodeProgressCard";
 import { ProgressOwnerLabel } from "./ProgressOwnerLabel";
+import { ProgressModuleHeading } from "./ProgressModuleHeading";
 import { TeamMemberProgressCard } from "./TeamMemberProgressCard";
 
 function NodeProgressOverviewRow({ row }) {
@@ -211,7 +212,10 @@ export function ProgressDashboard({
     <section className="progress-dashboard" aria-label="进度摘要仪表盘">
       <div className="progress-dashboard-kpi-section">
         <header className="progress-dashboard-kpi-head">
-          <h3>{DASHBOARD_KPI_SECTION.title}</h3>
+          <ProgressModuleHeading
+            title={DASHBOARD_KPI_SECTION.title}
+            titleEn={DASHBOARD_KPI_SECTION.titleEn}
+          />
         </header>
         <div className="progress-dashboard-kpi-row">
         {KPI_STATUS_CONFIG.map((item) => {
@@ -252,7 +256,10 @@ export function ProgressDashboard({
         <article className="progress-dashboard-card progress-node-overview-card">
           <header className="progress-dashboard-card-head">
             <div>
-              <h3>{DASHBOARD_CARD_LABELS.nodeProgressOverview}</h3>
+              <ProgressModuleHeading
+                title={DASHBOARD_CARD_LABELS.nodeProgressOverview}
+                titleEn={DASHBOARD_CARD_LABELS.nodeProgressOverviewEn}
+              />
             </div>
           </header>
           <div className="progress-node-overview-list">
@@ -265,7 +272,10 @@ export function ProgressDashboard({
         <article className="progress-dashboard-card">
           <header className="progress-dashboard-card-head">
             <div>
-              <h3>{DASHBOARD_CARD_LABELS.recentActivity}</h3>
+              <ProgressModuleHeading
+                title={DASHBOARD_CARD_LABELS.recentActivity}
+                titleEn={DASHBOARD_CARD_LABELS.recentActivityEn}
+              />
               <p className="panel-note">{DASHBOARD_CARD_LABELS.recentActivityLead}</p>
             </div>
           </header>

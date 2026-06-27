@@ -1091,6 +1091,13 @@ button {
   font-size: 14px;
 }
 
+.page-meta {
+  margin: 6px 0 0;
+  color: var(--subtle);
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .header-actions {
   display: flex;
   gap: 10px;
@@ -1111,9 +1118,9 @@ button {
   box-shadow: 0 1px 2px rgba(9, 30, 66, 0.06);
 }
 
-.form-panel h3 {
+.form-panel .module-heading h3,
+.detail-panel .module-heading h3 {
   margin: 0 0 14px;
-  font-size: 16px;
 }
 
 .panel-note {
@@ -1675,6 +1682,11 @@ button {
 }
 
 .progress-table-head h3 {
+  margin: 0;
+}
+
+.progress-table-head .progress-module-heading h3,
+.progress-table-head .module-heading h3 {
   margin: 0;
 }
 
@@ -3910,6 +3922,83 @@ button {
   color: var(--ink);
 }
 
+.progress-module-heading,
+.module-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.progress-module-heading-main,
+.module-heading-main {
+  min-width: 0;
+}
+
+.progress-module-heading h3,
+.progress-module-heading h4,
+.module-heading h2,
+.module-heading h3,
+.module-heading h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+.progress-module-heading h4,
+.module-heading h4 {
+  font-size: 14px;
+}
+
+.page-header .module-heading h2 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.progress-module-title-en,
+.module-title-en {
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.page-header .module-heading h2 .module-title-en {
+  font-size: 14px;
+}
+
+.progress-module-title-sep,
+.module-title-sep {
+  color: var(--blue);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.progress-dashboard-card-head .progress-module-heading h3,
+.progress-dashboard-card-head .module-heading h3 {
+  margin: 0;
+}
+
+.progress-detail-block .progress-module-heading h4,
+.progress-detail-block .module-heading h4 {
+  margin: 0 0 8px;
+}
+
+.attention-section-title.progress-module-heading,
+.attention-section-title.module-heading {
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.attention-section-title.progress-module-heading h4,
+.attention-section-title.module-heading h4 {
+  margin: 0;
+}
+
 .progress-kpi-label-row {
   display: flex;
   align-items: center;
@@ -5187,6 +5276,10 @@ button {
 
 .progress-board-page .attention-section-title.overdue {
   color: #bf2600;
+}
+
+.progress-board-page .attention-section-title.overdue h4 {
+  color: inherit;
 }
 
 .progress-board-page .attention-count-badge {

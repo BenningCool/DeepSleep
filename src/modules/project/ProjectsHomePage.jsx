@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { ModuleHeading } from "../../components/ModuleHeading";
+import { PAGE_LABELS } from "../../data/pageLabels";
 import {
   labelOfEngagement,
   labelOfIndustry,
@@ -91,8 +93,11 @@ export function ProjectsHomePage({
     <section className="page-shell">
       <header className="page-header">
         <div>
-          <p className="page-eyebrow">Engagement Portfolio</p>
-          <h2>项目列表</h2>
+          <ModuleHeading
+            as="h2"
+            title={PAGE_LABELS.projectList.title}
+            titleEn={PAGE_LABELS.projectList.titleEn}
+          />
         </div>
         <button className="button primary" type="button" onClick={onCreate}>新建项目</button>
       </header>

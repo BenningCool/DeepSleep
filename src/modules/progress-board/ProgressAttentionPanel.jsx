@@ -1,4 +1,5 @@
 import { ATTENTION_LABELS, labelOfWorkspaceStatus } from "../../data/progressLabels";
+import { ProgressModuleHeading } from "./ProgressModuleHeading";
 import { ProgressOwnerLabel } from "./ProgressOwnerLabel";
 import {
   getOverdueControls,
@@ -28,23 +29,34 @@ export function ProgressAttentionPanel({
       aria-label={ATTENTION_LABELS.panelTitle}
     >
       <header className="attention-panel-head">
-        <h3>{ATTENTION_LABELS.panelTitle}</h3>
+        <ProgressModuleHeading
+          title={ATTENTION_LABELS.panelTitle}
+          titleEn={ATTENTION_LABELS.panelTitleEn}
+        />
         <p className="panel-note">{ATTENTION_LABELS.panelLead}</p>
       </header>
 
       {controls.length && !dueReadyCount ? (
         <div className="attention-section attention-section-awaiting-data">
-          <h4 className="attention-section-title stale">{ATTENTION_LABELS.overdueEmpty}</h4>
+          <ProgressModuleHeading
+            as="h4"
+            className="attention-section-title stale"
+            title={ATTENTION_LABELS.overdueEmpty}
+            titleEn={ATTENTION_LABELS.overdueEmptyEn}
+          />
           <p className="panel-note">{ATTENTION_LABELS.overdueAwaitingData}</p>
         </div>
       ) : null}
 
       {overdueItems.length ? (
         <div className="attention-section attention-section-overdue">
-          <h4 className="attention-section-title overdue">
-            {ATTENTION_LABELS.overdueTitle}
-            <span className="attention-count-badge overdue">{overdueItems.length}</span>
-          </h4>
+          <ProgressModuleHeading
+            as="h4"
+            className="attention-section-title overdue"
+            title={ATTENTION_LABELS.overdueTitle}
+            titleEn={ATTENTION_LABELS.overdueTitleEn}
+            trailing={<span className="attention-count-badge overdue">{overdueItems.length}</span>}
+          />
           <ul className="attention-overdue-list">
             {overdueItems.map(({ control, planDue, overdueDays }) => (
               <li key={control.id}>
@@ -84,10 +96,13 @@ export function ProgressAttentionPanel({
 
       {staleItems.length ? (
         <div className="attention-section attention-section-stale">
-          <h4 className="attention-section-title stale">
-            {ATTENTION_LABELS.staleTitle}
-            <span className="attention-count-badge stale">{staleItems.length}</span>
-          </h4>
+          <ProgressModuleHeading
+            as="h4"
+            className="attention-section-title stale"
+            title={ATTENTION_LABELS.staleTitle}
+            titleEn={ATTENTION_LABELS.staleTitleEn}
+            trailing={<span className="attention-count-badge stale">{staleItems.length}</span>}
+          />
           <ul className="attention-overdue-list">
             {staleItems.map(({ control, task, reason }) => (
               <li key={control.id}>

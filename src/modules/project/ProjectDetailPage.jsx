@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { ModuleHeading } from "../../components/ModuleHeading";
+import { PAGE_LABELS, PROJECT_SECTION_LABELS } from "../../data/pageLabels";
 import {
   labelOfEngagement,
   labelOfIndustry,
@@ -102,10 +104,16 @@ export function ProjectDetailPage({
     <section className="page-shell">
       <header className="page-header">
         <div>
-          <p className="page-eyebrow">{labelOfTeam(project.team)} · {labelOfEngagement(project.engagementType)}</p>
-          <h2>{project.name}</h2>
+          <ModuleHeading
+            as="h2"
+            title={PAGE_LABELS.projectOverview.title}
+            titleEn={PAGE_LABELS.projectOverview.titleEn}
+          />
           <p className="page-lead">
-            {project.clientName || "未填写客户"} · {labelOfProjectType(project.projectType)}
+            {project.name} · {project.clientName || "未填写客户"} · {labelOfProjectType(project.projectType)}
+          </p>
+          <p className="page-meta">
+            {labelOfTeam(project.team)} · {labelOfEngagement(project.engagementType)}
           </p>
         </div>
         <div className="header-actions">
@@ -118,7 +126,10 @@ export function ProjectDetailPage({
       <div className="detail-grid">
         <section className="detail-panel">
           <div className="panel-toolbar">
-            <h3>基本信息</h3>
+            <ModuleHeading
+              title={PROJECT_SECTION_LABELS.basicInfo.title}
+              titleEn={PROJECT_SECTION_LABELS.basicInfo.titleEn}
+            />
             <span className="panel-note">Team / Type / Industry 创建后不可修改</span>
           </div>
 
@@ -181,7 +192,10 @@ export function ProjectDetailPage({
         <section className="detail-panel scope-panel full">
           <div className="panel-toolbar">
             <div>
-              <h3>测试点清单</h3>
+              <ModuleHeading
+                title={PROJECT_SECTION_LABELS.testPointInventory.title}
+                titleEn={PROJECT_SECTION_LABELS.testPointInventory.titleEn}
+              />
               <p className="panel-note">
                 控制点与测试点在工作台维护。创建项目后，请前往工作台新建测试点。
               </p>
@@ -206,7 +220,10 @@ export function ProjectDetailPage({
         <section className="detail-panel full members-summary">
           <div className="panel-toolbar">
             <div>
-              <h3>项目成员</h3>
+              <ModuleHeading
+                title={PROJECT_SECTION_LABELS.projectMembers.title}
+                titleEn={PROJECT_SECTION_LABELS.projectMembers.titleEn}
+              />
               <p className="panel-note">共 {activeMembers.length} 位核心成员</p>
             </div>
             <button className="button primary" type="button" onClick={onOpenMembers}>
@@ -228,7 +245,10 @@ export function ProjectDetailPage({
           <section className="detail-panel full members-summary">
             <div className="panel-toolbar">
               <div>
-                <h3>Specialist 团队</h3>
+                <ModuleHeading
+                  title={PROJECT_SECTION_LABELS.specialistTeams.title}
+                  titleEn={PROJECT_SECTION_LABELS.specialistTeams.titleEn}
+                />
                 <p className="panel-note">
                   Audit team 跨组协作 · 已启用 {specialistTeams.map((t) => labelOfSpecialistTeam(t.team)).join("、")}（Lead 受邀后在成员管理补充 Specialist team staff）
                 </p>
@@ -258,7 +278,10 @@ export function ProjectDetailPage({
         ) : null}
 
         <section className="detail-panel full danger-panel">
-          <h3>删除项目</h3>
+          <ModuleHeading
+            title={PROJECT_SECTION_LABELS.deleteProject.title}
+            titleEn={PROJECT_SECTION_LABELS.deleteProject.titleEn}
+          />
           <p className="panel-note">
             删除后不可恢复，项目成员、控制点与看板任务将一并移除。
           </p>

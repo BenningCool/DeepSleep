@@ -440,14 +440,16 @@ REVIEW_STATUS = {
 }
 ```
 
-`progressStatus` 推导优先级：
+`progressStatus` 推导优先级（**当前 service 实际产出**）：
 
 1. 有 blocker：`blocked`
 2. Reviewer 退回：`needs_rework`
-3. 全部 required 节点完成且所有字段级复核意见 accepted：`completed`
-4. 已提交复核，或全部执行节点完成但未完成复核：`pending_review`
-5. `completedNodes = 0`：`not_started`
+3. 全部 required 节点完成且字段复核均为 `accepted`：`completed`
+4. 已提交复核，或执行节点全部完成但未完成复核：`pending_review`
+5. `completedNodes = 0` 且无工作台输入：`not_started`
 6. 其他：`in_progress`
+
+> 枚举中的 `evidence_submitted` 等值**保留供文案扩展**，当前 `deriveStatusFromProgress` **不会返回** `evidence_submitted`。
 
 `workspaceStatus` 是模块 2 页面用的简化三态：
 
@@ -460,10 +462,13 @@ REVIEW_STATUS = {
 1. 依赖图初始化时调用 `getControlProgressSnapshot(projectId, projectTasks)`。
 2. 用 `controls` 生成图节点，用 `dependencies` 生成边。
 3. 节点主标签显示 `title`，副标签显示 `completedNodes/totalNodes`、`progressPercent` 与 `currentNodeLabel`。
-4. 节点颜色按 `progressStatus`，其中 `blocked` 优先级最高。
+4. **进度看板列表/抽屉/KPI 主状态**按 `workspaceStatus` 三态着色；细态 `progressStatus` 仅作补充文案。
 5. 点击节点时调用 `getControlProgressDetail(controlId, task, projectTasks)`。
-6. 详情抽屉（v1.6.10）展示：**控制点状态**（`workspaceStatus`）、**节点进度**（`currentNodeLabel` + 计数 + 百分比）、计划完成日、**全部节点预计完成日**（`phases[].nodes`）、材料计数；**不展示**看板 `task.status`、字段复核、测试摘要、Planning/Review 旧流程节点。
-7. 模块 2 保存后，模块 3 重新调用 snapshot/detail 即可拿到最新进度。
+6. 详情抽屉（v1.6.10 / v1.6.12）展示：**测试点状态**（`workspaceStatus`）、**节点进度**（`currentNodeLabel` + 计数 + 百分比 + 进度条）、计划完成日、**全部节点预计完成日**（`phases[].nodes`）、材料计数；**不展示**看板 `task.status`、字段复核、测试摘要、Planning/Review 旧流程节点。
+7. **摘要仪表盘（v1.6.12）**：
+   - KPI 四格：按 `workspaceStatus` 统计，可附 GITC/ITAC 分布（`computeTypeSplitForControls`）。
+   - **测试节点进度**概览：按 `completedNodes/totalNodes` 汇总，分 **全部 / GITC / ITAC** 三行横条（`computeNodeProgressOverviewRows`）；**不再**使用 workspaceStatus 环形图。
+8. 模块 2 保存后，模块 3 重新调用 snapshot/detail 即可拿到最新进度。
 
 ## 注意事项
 

@@ -5,6 +5,7 @@ import {
   DRAWER_WORKSPACE_LABELS,
   labelOfProgressStatus,
   labelOfWorkspaceStatus,
+  PROGRESS_BOARD_SECTION_LABELS,
   PROGRESS_LIST_LABELS
 } from "../../data/progressLabels";
 import { labelOfContributorGroup } from "../project/contributorGroup";
@@ -20,6 +21,7 @@ import {
 } from "../../services/workspaceProgressService";
 import { ProgressAttentionPanel } from "./ProgressAttentionPanel";
 import { ProgressDashboard } from "./ProgressDashboard";
+import { ProgressModuleHeading } from "./ProgressModuleHeading";
 import { ControlNodeProgressDisplay } from "./ControlNodeProgressDisplay";
 import { ProgressOwnerLabel } from "./ProgressOwnerLabel";
 import { isControlOverdue } from "./attentionItemsUtils";
@@ -342,7 +344,10 @@ export function ProgressBoardPage({
       <div className="progress-main-grid">
         <section className="progress-table-panel">
           <div className="progress-table-head">
-            <h3>测试点列表</h3>
+            <ProgressModuleHeading
+              title={PROGRESS_BOARD_SECTION_LABELS.testPointList}
+              titleEn={PROGRESS_BOARD_SECTION_LABELS.testPointListEn}
+            />
             {groupFilteredControls.length ? (
               <div className="progress-table-tools">
                 <ProgressOwnerFilter
@@ -424,7 +429,11 @@ export function ProgressBoardPage({
                 </div>
 
                 <div className="progress-detail-block progress-drawer-fill">
-                  <h4>{DRAWER_WORKSPACE_LABELS.workspaceSummary}</h4>
+                  <ProgressModuleHeading
+                    as="h4"
+                    title={DRAWER_WORKSPACE_LABELS.workspaceSummary}
+                    titleEn={DRAWER_WORKSPACE_LABELS.workspaceSummaryEn}
+                  />
                   <p>
                     {ATTENTION_LABELS.dueLabel}：
                     {resolveControlPlanDue(selectedControl, taskMap[selectedControl.id]) || "—"}
@@ -436,7 +445,11 @@ export function ProgressBoardPage({
                 </div>
 
                 <div className="progress-detail-block">
-                  <h4>{DRAWER_WORKSPACE_LABELS.materials}</h4>
+                  <ProgressModuleHeading
+                    as="h4"
+                    title={DRAWER_WORKSPACE_LABELS.materials}
+                    titleEn={DRAWER_WORKSPACE_LABELS.materialsEn}
+                  />
                   <p>{formatMaterialSummary(selectedControl)}</p>
                 </div>
               </div>

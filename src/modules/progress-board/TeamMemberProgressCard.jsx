@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { DASHBOARD_CARD_LABELS } from "../../data/progressLabels";
 import { computeMemberWorkloadRows } from "./memberWorkloadUtils";
+import { ProgressModuleHeading } from "./ProgressModuleHeading";
 import { ProgressOwnerLabel } from "./ProgressOwnerLabel";
 import { UNASSIGNED_MEMBER_KEY } from "./progressOwnerUtils";
 import {
@@ -60,7 +61,10 @@ export function TeamMemberProgressCard({
     <article className="progress-dashboard-card progress-member-card">
       <header className="progress-dashboard-card-head">
         <div>
-          <h3>{DASHBOARD_CARD_LABELS.teamMemberProgress}</h3>
+          <ProgressModuleHeading
+            title={DASHBOARD_CARD_LABELS.teamMemberProgress}
+            titleEn={DASHBOARD_CARD_LABELS.teamMemberProgressEn}
+          />
         </div>
       </header>
       <div className="progress-member-list">
