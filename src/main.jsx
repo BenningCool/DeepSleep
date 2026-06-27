@@ -9,6 +9,8 @@ import { Topbar } from "./components/Topbar";
 import { COLUMNS, STORAGE_KEY } from "./data/mockData";
 import { deleteProjectWorkspaceProgress } from "./services/workspaceProgressService";
 import { ProgressBoardPage } from "./modules/progress-board/ProgressBoardPage";
+import { CommandCenterPage } from "./modules/command-center/CommandCenterPage";
+import { EngagementTypesPage } from "./modules/engagement-types/EngagementTypesPage";
 import { CreateProjectPage } from "./modules/project/CreateProjectPage";
 import { resolveTaskContributorGroup } from "./modules/project/contributorGroup";
 import { ProjectDetailPage } from "./modules/project/ProjectDetailPage";
@@ -26,6 +28,15 @@ import {
 import { migrateTasks } from "./utils/taskStatusMigration";
 import { validateStatusTransition } from "./modules/scope-init/scopeRules";
 import { cloneTasks, columnTitle, nextTaskId } from "./utils/taskUtils";
+import { ensureDemoData } from "./data/seedDemoProjects";
+import {
+  defaultTeamForProjectType,
+  getEngagementTypeProfile
+} from "./data/engagementTypeProfiles";
+import {
+  loadViewAs,
+  saveViewAs
+} from "./data/viewAsPresets";
 
 const emptyTask = {
   title: "",
@@ -54,12 +65,16 @@ function saveTasks(tasks) {
 }
 
 function App() {
-  const [projects, setProjects] = useState(loadProjects);
+  const initialDemo = ensureDemoData();
+  const [projects, setProjects] = useState(initialDemo.projects);
   const [currentProjectId, setCurrentProjectId] = useState(loadCurrentProjectId);
   const [activeView, setActiveView] = useState(
     loadCurrentProjectId() ? "detail" : "home"
   );
-  const [tasks, setTasks] = useState(loadTasks);
+  const [tasks, setTasks] = useState(() => migrateTasks(initialDemo.tasks));
+  const [viewAs, setViewAs] = useState(loadViewAs);
+  const [createPrefill, setCreatePrefill] = useState({ type: "", team: "" });
+  const [progressOwnerOverride, setProgressOwnerOverride] = useState("");
   const [filters, setFilters] = useState({
     search: "",
     priority: "",
@@ -159,7 +174,53 @@ function App() {
     if (view !== "workspace" && view !== "board") {
       setFocusControlId("");
     }
+    if (view !== "progress") {
+      setProgressOwnerOverride("");
+    }
+    if (view === "create") {
+      setCreatePrefill({ type: "", team: "" });
+    }
     setActiveView(view);
+  }
+
+  function handleViewAsChange(nextViewAs) {
+    setViewAs(nextViewAs);
+    saveViewAs(nextViewAs);
+  }
+
+  function openProject(projectId, view = "detail") {
+    setCurrentProjectId(projectId);
+    saveCurrentProjectId(projectId);
+    setActiveView(view);
+    refreshProjects();
+  }
+
+  function openProjectProgress(projectId, ownerEmail = "") {
+    setProgressOwnerOverride(ownerEmail || "");
+    openProject(projectId, "progress");
+  }
+
+  function openMemberProgress(projectId, ownerEmail) {
+    openProjectProgress(projectId, ownerEmail);
+  }
+
+  function startCreateWithType(projectType) {
+    setCreatePrefill({
+      type: projectType,
+      team: defaultTeamForProjectType(projectType)
+    });
+    setActiveView("create");
+  }
+
+  function startCreateAnnual() {
+    setCreatePrefill({ type: "annual", team: "audit" });
+    setActiveView("create");
+  }
+
+  function viewDemoProject(projectType) {
+    const profile = getEngagementTypeProfile(projectType);
+    if (!profile.demoProjectId) return;
+    openProjectProgress(profile.demoProjectId);
   }
 
   function goToWorkspace(controlId = "") {
@@ -205,13 +266,6 @@ function App() {
 
   function refreshProjects() {
     setProjects(loadProjects());
-  }
-
-  function openProject(projectId, view = "detail") {
-    setCurrentProjectId(projectId);
-    saveCurrentProjectId(projectId);
-    setActiveView(view);
-    refreshProjects();
   }
 
   function goHome() {
@@ -354,8 +408,34 @@ function App() {
           projects={projects}
           tasks={tasks}
           currentProjectId={currentProjectId}
-          onCreate={() => setActiveView("create")}
+          onCreate={() => navigateTo("create")}
           onOpen={(projectId) => openProject(projectId, "detail")}
+          onOpenCommand={() => setActiveView("command")}
+        />
+      );
+    }
+
+    if (activeView === "command") {
+      return (
+        <CommandCenterPage
+          projects={projects}
+          tasks={tasks}
+          viewAs={viewAs}
+          onViewAsChange={handleViewAsChange}
+          onOpenProgress={openProjectProgress}
+          onOpenDetail={(projectId) => openProject(projectId, "detail")}
+          onOpenMemberProgress={openMemberProgress}
+          onCreateAnnual={startCreateAnnual}
+          onOpenTypes={() => setActiveView("types")}
+        />
+      );
+    }
+
+    if (activeView === "types") {
+      return (
+        <EngagementTypesPage
+          onViewDemo={viewDemoProject}
+          onCreateWithType={startCreateWithType}
         />
       );
     }
@@ -366,6 +446,8 @@ function App() {
           onCreated={handleProjectCreated}
           onCancel={() => setActiveView(currentProjectId ? "detail" : "home")}
           onToast={setToast}
+          prefillType={createPrefill.type}
+          prefillTeam={createPrefill.team}
         />
       );
     }
@@ -376,8 +458,9 @@ function App() {
           projects={projects}
           tasks={tasks}
           currentProjectId=""
-          onCreate={() => setActiveView("create")}
+          onCreate={() => navigateTo("create")}
           onOpen={(projectId) => openProject(projectId, "detail")}
+          onOpenCommand={() => setActiveView("command")}
         />
       );
     }
@@ -464,6 +547,8 @@ function App() {
           tasks={projectTasks}
           focusControlId={focusControlId}
           dataRefreshKey={progressDataRefreshKey}
+          viewAs={viewAs}
+          ownerFilterOverride={progressOwnerOverride}
           onGoWorkspace={goToWorkspace}
           onGoBoard={goToBoard}
         />

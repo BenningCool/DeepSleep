@@ -14,10 +14,14 @@ export function Sidebar({
 
   const globalNav = [
     { id: "home", icon: "P", label: "项目列表" },
+    { id: "command", icon: "C", label: "指挥中心" },
+    { id: "types", icon: "T", label: "项目类型" },
     { id: "create", icon: "+", label: "新建项目" }
   ];
 
-  const navItems = currentProject ? projectNav : globalNav;
+  const globalViews = new Set(["home", "command", "types", "create"]);
+  const showProjectNav = currentProject && !globalViews.has(activeView);
+  const navItems = showProjectNav ? projectNav : globalNav;
 
   return (
     <aside className="sidebar" aria-label="项目导航">
@@ -43,7 +47,7 @@ export function Sidebar({
         ))}
       </nav>
 
-      {currentProject ? (
+      {showProjectNav ? (
         <div className="sidebar-project-actions">
           <button className="sidebar-link" type="button" onClick={onGoHome}>
             ← 全部项目

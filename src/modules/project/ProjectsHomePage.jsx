@@ -5,15 +5,26 @@ import {
   labelOfEngagement,
   labelOfIndustry,
   labelOfProjectType,
-  labelOfTeam
+  labelOfTeam,
+  PROJECT_TYPES,
+  TEAMS
 } from "../../data/projectConstants";
+import {
+  getEngagementTypeProfile,
+  projectTypeSkinClass
+} from "../../data/engagementTypeProfiles";
 import {
   formatWorkspaceStatusSummary,
   WorkspaceStatusOverviewBar
 } from "../progress-board/WorkspaceStatusOverviewBar";
-import { countActiveMembers, filterProjects, sortProjects } from "./projectSearch";
+import {
+  applyProjectListFilters,
+  countActiveMembers,
+  sortProjects
+} from "./projectSearch";
 import { getProjectWorkspaceStatusOverview } from "./projectProgressOverview";
 import { PROJECT_SORT_OPTIONS } from "./specialistConstants";
+import { ledTeamLabel } from "../command-center/commandCenterUtils";
 
 function ProjectCardProgress({ project, tasks }) {
   const breakdown = getProjectWorkspaceStatusOverview(project.id, tasks);
@@ -42,33 +53,44 @@ function ProjectCardProgress({ project, tasks }) {
 
 function ProjectCard({ project, tasks, active, onOpen }) {
   const controlCount = tasks.filter((task) => task.projectId === project.id).length;
+  const profile = getEngagementTypeProfile(project.projectType);
 
   return (
     <button
-      className={`project-card ${active ? "active" : ""}`}
+      className={[
+        "project-card",
+        projectTypeSkinClass(project.projectType),
+        active ? "active" : ""
+      ].filter(Boolean).join(" ")}
       type="button"
       onClick={() => onOpen(project.id)}
+      style={{ "--type-accent": profile.color }}
     >
-      <div className="project-card-top">
-        <span className="team-pill">{labelOfTeam(project.team)}</span>
-        <span className="engagement-pill">{labelOfEngagement(project.engagementType)}</span>
-      </div>
-      <p className="project-card-client">{project.clientName || "未填写客户"}</p>
-      <h3>{project.name}</h3>
-      <p>{labelOfProjectType(project.projectType)}</p>
-      <div className="project-card-meta">
-        <span>{labelOfIndustry(project.industry)}</span>
-        <span>Start {project.startDate}</span>
-      </div>
-      {project.reportDate ? (
-        <div className="project-card-report">Report Date · {project.reportDate}</div>
-      ) : null}
-      <ProjectCardProgress project={project} tasks={tasks} />
-      <div className="project-card-footer">
-        <span className="scope-badge defined">
-          {controlCount ? `${controlCount} 控制点` : "暂无控制点"}
-        </span>
-        <span>{countActiveMembers(project)} members</span>
+      <div className="project-card-accent" aria-hidden="true" />
+      <div className="project-card-body">
+        <div className="project-card-top">
+          <span className="type-badge">{profile.badge}</span>
+          <span className="team-pill">{ledTeamLabel(project.team)}</span>
+          <span className="engagement-pill">{labelOfEngagement(project.engagementType)}</span>
+        </div>
+        <p className="project-card-client">{project.clientName || "未填写客户"}</p>
+        <h3>{project.name}</h3>
+        <p>{labelOfProjectType(project.projectType)}</p>
+        <div className="project-card-meta">
+          <span>{labelOfIndustry(project.industry)}</span>
+          <span>{labelOfTeam(project.team)}</span>
+          <span>Start {project.startDate}</span>
+        </div>
+        {project.reportDate ? (
+          <div className="project-card-report">Report Date · {project.reportDate}</div>
+        ) : null}
+        <ProjectCardProgress project={project} tasks={tasks} />
+        <div className="project-card-footer">
+          <span className="scope-badge defined">
+            {controlCount ? `${controlCount} 控制点` : "暂无控制点"}
+          </span>
+          <span>{countActiveMembers(project)} members</span>
+        </div>
       </div>
     </button>
   );
@@ -79,15 +101,22 @@ export function ProjectsHomePage({
   tasks = [],
   currentProjectId,
   onCreate,
-  onOpen
+  onOpen,
+  onOpenCommand
 }) {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("recent");
+  const [teamFilter, setTeamFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
 
   const visibleProjects = useMemo(() => {
-    const filtered = filterProjects(projects, search);
+    const filtered = applyProjectListFilters(projects, {
+      search,
+      team: teamFilter,
+      projectType: typeFilter
+    });
     return sortProjects(filtered, sortBy);
-  }, [projects, search, sortBy]);
+  }, [projects, search, sortBy, teamFilter, typeFilter]);
 
   return (
     <section className="page-shell">
@@ -99,7 +128,14 @@ export function ProjectsHomePage({
             titleEn={PAGE_LABELS.projectList.titleEn}
           />
         </div>
-        <button className="button primary" type="button" onClick={onCreate}>新建项目</button>
+        <div className="page-header-actions">
+          {onOpenCommand ? (
+            <button className="button subtle" type="button" onClick={onOpenCommand}>
+              指挥中心
+            </button>
+          ) : null}
+          <button className="button primary" type="button" onClick={onCreate}>新建项目</button>
+        </div>
       </header>
 
       {projects.length ? (
@@ -112,6 +148,24 @@ export function ProjectsHomePage({
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="客户、项目名、行业、成员邮箱、Specialist..."
               />
+            </label>
+            <label className="sort-field">
+              <span className="label">牵头团队</span>
+              <select value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)}>
+                <option value="">全部</option>
+                {TEAMS.map((team) => (
+                  <option key={team.id} value={team.id}>{team.label}</option>
+                ))}
+              </select>
+            </label>
+            <label className="sort-field">
+              <span className="label">项目类型</span>
+              <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+                <option value="">全部</option>
+                {PROJECT_TYPES.map((type) => (
+                  <option key={type.id} value={type.id}>{type.label}</option>
+                ))}
+              </select>
             </label>
             <label className="sort-field">
               <span className="label">排序</span>

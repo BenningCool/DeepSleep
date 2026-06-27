@@ -30,6 +30,10 @@ import { workspaceStatusClass } from "./progressVisualTokens";
 import { ProgressOwnerFilter } from "./ProgressOwnerFilter";
 import { matchesOwnerFilter } from "./progressOwnerUtils";
 import { collectNodeDueDateEntries } from "./progressNodeDisplay";
+import {
+  getProgressBoardPreset,
+  labelOfViewAs
+} from "../../data/viewAsPresets";
 
 function statusClass(status) {
   return workspaceStatusClass(status);
@@ -88,10 +92,13 @@ export function ProgressBoardPage({
   onGoWorkspace,
   onGoBoard,
   focusControlId = "",
-  dataRefreshKey = 0
+  dataRefreshKey = 0,
+  viewAs = "ic",
+  ownerFilterOverride = ""
 }) {
   const [groupFilter, setGroupFilter] = useState("");
   const [ownerFilter, setOwnerFilter] = useState("");
+  const [viewPresetApplied, setViewPresetApplied] = useState(false);
   const [controlTypeTab, setControlTypeTab] = useState("ALL");
   const [selectedId, setSelectedId] = useState(focusControlId);
   const [refreshToken, setRefreshToken] = useState(0);
@@ -177,6 +184,17 @@ export function ProgressBoardPage({
   useEffect(() => {
     setRefreshToken((value) => value + 1);
   }, [dataRefreshKey]);
+
+  function applyViewPreset() {
+    const preset = getProgressBoardPreset(viewAs, project);
+    setGroupFilter(preset.groupFilter);
+    setOwnerFilter(ownerFilterOverride || preset.ownerFilter);
+    setViewPresetApplied(true);
+  }
+
+  useEffect(() => {
+    applyViewPreset();
+  }, [viewAs, project?.id, ownerFilterOverride]);
 
   useEffect(() => {
     if (!focusControlId) return;
@@ -305,6 +323,19 @@ export function ProgressBoardPage({
           <h2>{project.clientName || project.name}</h2>
         </div>
       </header>
+
+      {viewPresetApplied ? (
+        <div className="progress-view-as-banner">
+          <span>
+            当前视角：<strong>{labelOfViewAs(viewAs)}</strong>
+            {groupFilter ? ` · 负责组 = ${labelOfContributorGroup(groupFilter)}` : " · 负责组 = 全部"}
+            {ownerFilter ? ` · 负责人 = ${ownerFilter}` : ""}
+          </span>
+          <button className="button subtle compact" type="button" onClick={applyViewPreset}>
+            恢复视角默认
+          </button>
+        </div>
+      ) : null}
 
       <div className="progress-filter-row">
         {CONTRIBUTOR_FILTER_OPTIONS.map((option) => (

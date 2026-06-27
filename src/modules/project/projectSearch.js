@@ -53,6 +53,18 @@ export function filterProjects(projects, keyword) {
   return projects.filter((project) => buildProjectSearchText(project).includes(query));
 }
 
+export function filterProjectsByFacets(projects, { team = "", projectType = "" } = {}) {
+  return projects.filter((project) => {
+    if (team && project.team !== team) return false;
+    if (projectType && project.projectType !== projectType) return false;
+    return true;
+  });
+}
+
+export function applyProjectListFilters(projects, { search = "", team = "", projectType = "" } = {}) {
+  return filterProjectsByFacets(filterProjects(projects, search), { team, projectType });
+}
+
 export function sortProjects(projects, sortBy) {
   const list = [...projects];
 

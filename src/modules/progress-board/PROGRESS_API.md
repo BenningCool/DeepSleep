@@ -470,6 +470,103 @@ REVIEW_STATUS = {
    - **测试节点进度**概览：按 `completedNodes/totalNodes` 汇总，分 **全部 / GITC / ITAC** 三行横条（`computeNodeProgressOverviewRows`）；**不再**使用 workspaceStatus 环形图。
 8. 模块 2 保存后，模块 3 重新调用 snapshot/detail 即可拿到最新进度。
 
+## 指挥中心跨项目聚合（v1.7）
+
+新增 **指挥中心** 页为只读消费者，**不修改**工作台 service 写入逻辑。推荐复用：
+
+```js
+import { getControlProgressSnapshot } from "../../services/workspaceProgressService";
+import { computeWorkspaceStatusBreakdown, filterOverdueControls } from "./progressDashboardUtils";
+import { buildTaskMap } from "./progressBoardUtils";
+```
+
+| 用途 | 接口 / 工具 |
+| --- | --- |
+| 项目卡迷你四态条 | `getControlProgressSnapshot` → `computeWorkspaceStatusBreakdown(controls)` |
+| 逾期计数 | `filterOverdueControls(controls, taskMap)` |
+| 协作组 pills | 遍历 `projectTasks[].contributorGroup` 去重（非 snapshot 字段） |
+
+### View as 与进度看板初始筛选（v1.7）
+
+```js
+import { getProgressBoardPreset } from "../../data/viewAsPresets";
+
+const { groupFilter, ownerFilter } = getProgressBoardPreset(viewAs, project);
+// IC + audit 项目 → groupFilter = "audit"
+// IC + ita 项目   → groupFilter = "ita"
+// staff           → ownerFilter = "staff1.uat@firm.com"
+```
+
+进度看板进入时应用上述初始值；用户可手动改筛选，并提供「恢复视角默认」重置。
+
+View as 可选值：`ep` | `em` | `ic`（默认）| `staff` | `ita_lead` | `tax_lead`。存于 `sessionStorage` 键 `deepsleep-view-as-v1`。
+
+### 演示种子（v1.7）
+
+| 项目 ID | 测试点 ID 前缀 | 说明 |
+| --- | --- | --- |
+| `PRJ-UAT-DEMO` | `DS-901`…`DS-915` | Audit 年审主故事；含 audit/ita/tax contributorGroup |
+| `PRJ-SOC-DEMO` | `DS-951`…`DS-952` | ITA-led SOC 副线 |
+
+种子由 `ensureDemoData()` 在应用启动时幂等注入；模块 3 无需特殊分支，照常传入 `projectTasks` 调用 snapshot 即可。
+
+### Staff 个人工作全景（v1.7.1）
+
+指挥中心在 `viewAs === "staff"` 时使用 `StaffCommandView`，跨项目聚合：
+
+```js
+import {
+  buildStaffPortfolio,
+  computeStaffSaturation,
+  pickFocusProjectEntry
+} from "../command-center/staffWorkloadUtils";
+```
+
+| 函数 | 用途 |
+| --- | --- |
+| `buildStaffPortfolio(projects, tasks, email)` | 参与或有指派的项目 + 个人三态/逾期 |
+| `computeStaffSaturation(portfolio)` | 加权负荷 % 与 低/中/高 |
+| `pickFocusProjectEntry(portfolio)` | 当前主攻项目（逾期优先） |
+
+个人三态仍来自 `getControlProgressSnapshot` 中 **owner = staff 邮箱** 的控制点子集。
+
+### IC / EM 团队负荷 Rollup（v1.7.2）
+
+```js
+import { buildTeamRollup, formatFocusLabel } from "../command-center/teamRollupUtils";
+```
+
+| 函数 | 用途 |
+| --- | --- |
+| `getSupervisedProjects(projects, email, "ic"\|"em")` | 所辖项目 |
+| `buildTeamRollup(projects, tasks, email, viewAs)` | 成员 roster + 每人 saturation/focus |
+| `formatFocusLabel(person)` | Focus 项目展示文案 |
+
+从 IC/EM 页点击「查看测试点」时，App 传入 `ownerFilterOverride` 至 `ProgressBoardPage`，覆盖 View as 默认负责人筛选。
+
+### Report Date 与管理 Focus（v1.7.3）
+
+```js
+import {
+  getReportUrgency,
+  buildReportWatchlist,
+  detectReportStack,
+  pickManagementFocusEntry
+} from "../command-center/reportDayUtils";
+import { buildEpPortfolio } from "../command-center/epPortfolioUtils";
+```
+
+| 常量 / 函数 | 用途 |
+| --- | --- |
+| `REPORT_WINDOWS` | `{ critical: 7, warning: 14, upcoming: 30 }` |
+| `getReportUrgency(reportDate)` | 档位 tier + `className` + D-xx 文案 |
+| `buildReportWatchlist(projects, tasks)` | 未来 30 天（含未填/过期）排序列表 |
+| `detectReportStack(projects)` | 14 天内 ≥2 项目堆叠检测 |
+| `pickManagementFocusEntry(projects, tasks)` | EP/EM 管理 Focus（Report 分 + 逾期加权） |
+| `buildEpPortfolio(projects, tasks, partnerEmail)` | EP 视角 Portfolio + EM 分组 |
+
+`buildTeamRollup` 返回值新增 `managementFocus`、`reportWatchlist`、`reportStack`（EM 页使用）。
+
 ## 注意事项
 
 - 不要直接读取 `deepsleep-workspace-progress-v1`。

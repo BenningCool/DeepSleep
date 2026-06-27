@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ModuleHeading } from "../../components/ModuleHeading";
 import { PAGE_LABELS, PROJECT_SECTION_LABELS } from "../../data/pageLabels";
+import {
+  getEngagementTypeProfile,
+  projectTypeSkinClass
+} from "../../data/engagementTypeProfiles";
 import {
   ENGAGEMENT_TYPES,
   INDUSTRY_GROUPS,
@@ -33,9 +37,30 @@ const defaultForm = {
   specialists: defaultSpecialistForm()
 };
 
-export function CreateProjectPage({ onCreated, onCancel, onToast }) {
-  const [form, setForm] = useState(defaultForm);
+export function CreateProjectPage({
+  onCreated,
+  onCancel,
+  onToast,
+  prefillType = "",
+  prefillTeam = ""
+}) {
+  const [form, setForm] = useState(() => ({
+    ...defaultForm,
+    projectType: prefillType || defaultForm.projectType,
+    team: prefillTeam || defaultForm.team
+  }));
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!prefillType && !prefillTeam) return;
+    setForm((current) => ({
+      ...current,
+      ...(prefillType ? { projectType: prefillType } : {}),
+      ...(prefillTeam ? { team: prefillTeam } : {})
+    }));
+  }, [prefillType, prefillTeam]);
+
+  const typeProfile = getEngagementTypeProfile(form.projectType);
 
   function updateField(name, value) {
     setForm((current) => ({ ...current, [name]: value }));
@@ -152,6 +177,14 @@ export function CreateProjectPage({ onCreated, onCancel, onToast }) {
                 ))}
               </select>
             </label>
+
+            <div
+              className={`create-type-preview ${projectTypeSkinClass(form.projectType)}`}
+              style={{ "--type-accent": typeProfile.color }}
+            >
+              <span className="type-badge">{typeProfile.badge}</span>
+              <span>{typeProfile.primaryTeamLabel} · {typeProfile.tagline}</span>
+            </div>
 
             <label className="field">
               <span className="label">行业 Industry *</span>

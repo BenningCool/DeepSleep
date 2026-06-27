@@ -3,6 +3,30 @@ export const PAGE_LABELS = {
     title: "项目列表",
     titleEn: "Engagement Portfolio"
   },
+  commandCenter: {
+    title: "指挥中心",
+    titleEn: "Engagement Command Center"
+  },
+  staffCommand: {
+    title: "我的工作台",
+    titleEn: "My Work Portfolio"
+  },
+  icCommand: {
+    title: "组内负荷",
+    titleEn: "Team Load · IC View"
+  },
+  emCommand: {
+    title: "团队管理",
+    titleEn: "Team Management · EM View"
+  },
+  epCommand: {
+    title: "Portfolio 管理",
+    titleEn: "Portfolio · EP View"
+  },
+  engagementTypes: {
+    title: "项目类型",
+    titleEn: "Engagement Types"
+  },
   projectOverview: {
     title: "项目概览",
     titleEn: "Project Overview"
