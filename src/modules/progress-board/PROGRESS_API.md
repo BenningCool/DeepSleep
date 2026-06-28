@@ -544,14 +544,16 @@ import { buildTeamRollup, formatFocusLabel } from "../command-center/teamRollupU
 
 从 IC/EM 页点击「查看测试点」时，App 传入 `ownerFilterOverride` 至 `ProgressBoardPage`，覆盖 View as 默认负责人筛选。
 
-### Report Date 与管理 Focus（v1.7.3）
+### Report Date 与管理 Focus（v1.7.3 · v1.7.4 EP 扩展）
 
 ```js
 import {
   getReportUrgency,
   buildReportWatchlist,
   detectReportStack,
-  pickManagementFocusEntry
+  buildEngagementRiskMatrix,
+  buildAttentionQueue,
+  computeEngagementRisk
 } from "../command-center/reportDayUtils";
 import { buildEpPortfolio } from "../command-center/epPortfolioUtils";
 ```
@@ -561,11 +563,12 @@ import { buildEpPortfolio } from "../command-center/epPortfolioUtils";
 | `REPORT_WINDOWS` | `{ critical: 7, warning: 14, upcoming: 30 }` |
 | `getReportUrgency(reportDate)` | 档位 tier + `className` + D-xx 文案 |
 | `buildReportWatchlist(projects, tasks)` | 未来 30 天（含未填/过期）排序列表 |
-| `detectReportStack(projects)` | 14 天内 ≥2 项目堆叠检测 |
-| `pickManagementFocusEntry(projects, tasks)` | EP/EM 管理 Focus（Report 分 + 逾期加权） |
-| `buildEpPortfolio(projects, tasks, partnerEmail)` | EP 视角 Portfolio + EM 分组 |
+| `detectReportStack(projects)` | 14 天内 ≥2 engagement 堆叠检测 |
+| `buildEngagementRiskMatrix(projects, tasks, resolveManagerEmail)` | EP 主视图 Risk Matrix 行数据 + RAG |
+| `buildAttentionQueue(matrixRows, limit)` | Attention Queue Top N |
+| `buildEpPortfolio(projects, tasks, partnerEmail)` | EP 视角 Portfolio + matrix + queue + health summary |
 
-`buildTeamRollup` 返回值新增 `managementFocus`、`reportWatchlist`、`reportStack`（EM 页使用）。
+`buildTeamRollup` 返回值含 `managementFocus`（EM Attention Queue Top 1）、`reportWatchlist`、`reportStack`。
 
 ## 注意事项
 

@@ -1,8 +1,7 @@
 import React from "react";
 
 const VIEW_LABELS = {
-  home: "项目列表",
-  command: "指挥中心",
+  home: "项目",
   types: "项目类型",
   create: "新建项目",
   detail: "项目概览",

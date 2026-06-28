@@ -1,8 +1,13 @@
 import { labelOfRole } from "../../data/projectConstants";
 import {
+  buildAttentionQueue,
+  buildEngagementRiskMatrix,
   buildReportWatchlist,
+  countRiskTiers,
   detectReportStack,
-  pickManagementFocusEntry
+  enrichProjectWithReport,
+  pickManagementFocusEntry,
+  sortByReportUrgency
 } from "./reportDayUtils";
 import {
   buildStaffPortfolio,
@@ -133,7 +138,6 @@ export function buildTeamRollup(projects, tasks, supervisorEmail, viewAs) {
   const mediumLoadCount = people.filter((person) => (
     person.saturation.levelClass === "load-medium"
   )).length;
-  const totalOverdue = people.reduce((sum, person) => sum + person.overdue, 0);
 
   const focusProjects = new Map();
   people.forEach((person) => {
@@ -145,25 +149,45 @@ export function buildTeamRollup(projects, tasks, supervisorEmail, viewAs) {
   });
   const focusCollision = [...focusProjects.values()].some((count) => count > 1);
 
+  const riskMatrix = buildEngagementRiskMatrix(supervisedProjects, tasks);
+  const attentionQueue = buildAttentionQueue(riskMatrix, viewAs === "em" ? 1 : 3);
+  const reportWatchlist = buildReportWatchlist(supervisedProjects, tasks);
+  const reportStack = detectReportStack(supervisedProjects);
+  const nearestReport = sortByReportUrgency(
+    supervisedProjects.map((p) => enrichProjectWithReport(p, tasks))
+  )[0] || null;
+  const projectOverdueTotal = supervisedProjects.reduce(
+    (sum, project) => sum + enrichProjectWithReport(project, tasks).overdueCount,
+    0
+  );
+
   return {
     supervisedProjects,
     people,
+    riskMatrix,
+    attentionQueue,
     managementFocus: pickManagementFocusEntry(supervisedProjects, tasks),
-    reportWatchlist: buildReportWatchlist(supervisedProjects, tasks),
-    reportStack: detectReportStack(supervisedProjects),
+    reportWatchlist,
+    reportStack,
+    nearestReport,
     summary: {
       headcount: people.length,
+      fieldworkHeadcount: people.length,
+      projectCount: supervisedProjects.length,
       highLoadCount,
       mediumLoadCount,
-      totalOverdue,
-      focusCollision
+      totalOverdue: projectOverdueTotal,
+      focusCollision,
+      watchlistCount: reportWatchlist.length,
+      nearestReport,
+      riskCounts: countRiskTiers(riskMatrix)
     }
   };
 }
 
 export function formatFocusLabel(person) {
   if (!person.focusProject) {
-    return person.assignedTotal ? "—" : "暂无指派测试点";
+    return person.assignedTotal ? "—" : "暂无指派程序";
   }
   const client = person.focusProject.clientName || "未填写客户";
   const name = person.focusProject.name || person.focusProjectId;

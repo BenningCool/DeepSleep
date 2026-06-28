@@ -9,13 +9,12 @@ import { Topbar } from "./components/Topbar";
 import { COLUMNS, STORAGE_KEY } from "./data/mockData";
 import { deleteProjectWorkspaceProgress } from "./services/workspaceProgressService";
 import { ProgressBoardPage } from "./modules/progress-board/ProgressBoardPage";
-import { CommandCenterPage } from "./modules/command-center/CommandCenterPage";
 import { EngagementTypesPage } from "./modules/engagement-types/EngagementTypesPage";
 import { CreateProjectPage } from "./modules/project/CreateProjectPage";
 import { resolveTaskContributorGroup } from "./modules/project/contributorGroup";
 import { ProjectDetailPage } from "./modules/project/ProjectDetailPage";
 import { ProjectMembersPage } from "./modules/project/ProjectMembersPage";
-import { ProjectsHomePage } from "./modules/project/ProjectsHomePage";
+import { EngagementHomePage } from "./modules/project/EngagementHomePage";
 import { WorkspacePage } from "./modules/workspace/WorkspacePage";
 import {
   deleteProject,
@@ -171,6 +170,9 @@ function App() {
   }, []);
 
   function navigateTo(view) {
+    if (view === "command") {
+      view = "home";
+    }
     if (view !== "workspace" && view !== "board") {
       setFocusControlId("");
     }
@@ -402,26 +404,16 @@ function App() {
   }
 
   function renderMain() {
-    if (activeView === "home") {
+    if (activeView === "home" || activeView === "command") {
       return (
-        <ProjectsHomePage
+        <EngagementHomePage
           projects={projects}
           tasks={tasks}
           currentProjectId={currentProjectId}
-          onCreate={() => navigateTo("create")}
-          onOpen={(projectId) => openProject(projectId, "detail")}
-          onOpenCommand={() => setActiveView("command")}
-        />
-      );
-    }
-
-    if (activeView === "command") {
-      return (
-        <CommandCenterPage
-          projects={projects}
-          tasks={tasks}
           viewAs={viewAs}
           onViewAsChange={handleViewAsChange}
+          onCreate={() => navigateTo("create")}
+          onOpen={(projectId) => openProject(projectId, "detail")}
           onOpenProgress={openProjectProgress}
           onOpenDetail={(projectId) => openProject(projectId, "detail")}
           onOpenMemberProgress={openMemberProgress}
@@ -454,13 +446,19 @@ function App() {
 
     if (!currentProject) {
       return (
-        <ProjectsHomePage
+        <EngagementHomePage
           projects={projects}
           tasks={tasks}
           currentProjectId=""
+          viewAs={viewAs}
+          onViewAsChange={handleViewAsChange}
           onCreate={() => navigateTo("create")}
           onOpen={(projectId) => openProject(projectId, "detail")}
-          onOpenCommand={() => setActiveView("command")}
+          onOpenProgress={openProjectProgress}
+          onOpenDetail={(projectId) => openProject(projectId, "detail")}
+          onOpenMemberProgress={openMemberProgress}
+          onCreateAnnual={startCreateAnnual}
+          onOpenTypes={() => setActiveView("types")}
         />
       );
     }
@@ -556,12 +554,19 @@ function App() {
     }
 
     return (
-      <ProjectsHomePage
+      <EngagementHomePage
         projects={projects}
         tasks={tasks}
         currentProjectId={currentProjectId}
+        viewAs={viewAs}
+        onViewAsChange={handleViewAsChange}
         onCreate={() => setActiveView("create")}
         onOpen={(projectId) => openProject(projectId, "detail")}
+        onOpenProgress={openProjectProgress}
+        onOpenDetail={(projectId) => openProject(projectId, "detail")}
+        onOpenMemberProgress={openMemberProgress}
+        onCreateAnnual={startCreateAnnual}
+        onOpenTypes={() => setActiveView("types")}
       />
     );
   }

@@ -205,7 +205,7 @@ export function CommandCenterPage({
 
       <div className="command-toolbar">
         <label className="view-as-field">
-          <span className="label">View as · 查看身份</span>
+          <span className="label">角色视角 · View as</span>
           <select value={viewAs} onChange={(e) => onViewAsChange(e.target.value)}>
             {VIEW_AS_OPTIONS.map((option) => (
               <option key={option.id} value={option.id}>{option.label}</option>

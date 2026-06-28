@@ -2,7 +2,7 @@
 
 > **文档用途**：黑客松 DeepSleep 项目的产品需求定稿。  
 > **同步说明**：请将本文档内容复制至飞书 Wiki：[产品需求文档](https://my.feishu.cn/wiki/GDGcwzpuciqBpjkgoCdcLYO2n3c)  
-> **当前版本**：v1.7.3 · 2026-06-17
+> **当前版本**：v1.7.6 · 2026-06-17
 
 ---
 
@@ -10,7 +10,7 @@
 
 | 项目 | 内容 |
 |------|------|
-| 版本号 | v1.7.3 |
+| 版本号 | v1.7.6 |
 | 创建日期 | 2026-06-04 |
 | 最近更新 | 2026-06-17 |
 | 审核人 | 待定 |
@@ -45,6 +45,9 @@
 | 2026-06-17 | v1.7.1 | 团队 | 指挥中心 **Staff 模式**改为 **个人工作全景页**：跨项目负荷摘要、当前主攻项目、仅展示参与/有指派项目；每项目展示 Staff 个人测试点三态（非全项目卡） |
 | 2026-06-17 | v1.7.2 | 团队 | 指挥中心 **IC / EM 模式**改为 **团队负荷 rollup**：所辖项目成员每人展示饱和度、Focus 项目、测试点统计；支持跳转进度看板并按成员邮箱筛选；团队摘要含高/中负荷人数与 Focus 冲突提示 |
 | 2026-06-17 | v1.7.3 | 团队 | **角色模型纠正**：EP/EM **不执行测试**；**Report Date 全员关注**，阈值 **D-30 / D-14 / D-7**；EM 页仅展示执行层 IC/Staff + 管理 Focus；新增 **EP Portfolio 页**（按 EM 分组 + Report 预警）；种子 UAT/SOC Report 调整为 D-6 / D-12 便于演示堆叠 |
+| 2026-06-17 | v1.7.4 | 团队 | EP 页重构：**Engagement Risk Matrix** 主视图 + **Attention Queue Top 3**；**Portfolio Health Bar**（nearest report / overdue / RAG 计数）；**Reporting EMs 默认折叠**；四大专业用词（Engagement / Procedures / Fieldwork team） |
+| 2026-06-17 | v1.7.5 | 团队 | **EP/EM 管理层统一风格**：中文可读文案（报告日还有 N 天）、统一摘要条/项目表/优先关注/报告日预警；EM 接入 Risk Matrix、**移除底部 project chips**、现场团队默认折叠；**指标说明**折叠区 |
+| 2026-06-17 | v1.7.6 | 团队 | **项目页与指挥中心合并**：侧栏单一入口 **项目** + **角色视角 · View as**（含「全部项目」）；默认 **EP** 便于 demo；EP/EM **看板同款外壳**（KPI 四格 + `progress-dashboard-card` + token 统一）；**项目卡片列表**替代 Risk Matrix 主视图；新增 **报告日时间轴**；`EngagementHomePage` / `ManagementCommandBody` |
 
 ---
 
@@ -168,10 +171,10 @@
 
 ```text
 DeepSleep
-├── 项目列表（v1.5 · v1.7 类型皮肤/筛选）
-│   ├── 模糊搜索、排序、牵头团队/项目类型筛选
-├── 指挥中心（v1.7 · 只读）
-│   ├── View as 演示身份、跨项目健康度、协作组 pills
+├── 项目（v1.7.6 · 统一入口）
+│   ├── 角色视角 · View as：全部项目 / EP / EM / IC / Staff / Lead
+│   ├── 全部项目：模糊搜索、排序、牵头团队/项目类型筛选、类型皮肤
+│   └── 管理视角（EP/EM/IC/Staff）：组合 KPI、项目卡片、报告日时间轴、优先关注、报告日预警
 ├── 项目类型（v1.7 · 展示）
 │   ├── 五类档案卡、查看示例、以此类型创建
 ├── 项目创建 / 详情 / 成员管理（v1.5）
@@ -198,9 +201,18 @@ DeepSleep
 
 ---
 
-## 七、功能需求 · 项目列表（v1.5 新增）
+## 七、功能需求 · 项目页（v1.5 列表 · v1.7.6 统一入口）
 
-### 7.1 列表展示
+全局侧栏入口 **项目**（`EngagementHomePage`）。页顶 **角色视角 · View as** 切换浏览模式与管理模式；选择写入 `sessionStorage`，与进度看板共用。
+
+| View as | 页面行为 |
+|---------|----------|
+| **全部项目**（浏览） | 原项目列表：卡片点击进入 **项目概览**；支持排序 |
+| EP / EM / IC / Staff / Lead | 原指挥中心各角色布局（见 §7.5） |
+
+**Demo 默认**：首次进入（无 session）View as = **EP · Partner**，直接展示组合 KPI + 项目卡片主视图。
+
+### 7.1 列表展示（View as = 全部项目）
 
 每张项目卡片展示（至少）：
 
@@ -265,9 +277,9 @@ DeepSleep
 
 排序与搜索**可叠加**：先搜索过滤，再对结果排序。
 
-### 7.5 筛选（v1.7）
+### 7.5 筛选（v1.7 · v1.7.6）
 
-项目列表与指挥中心共用：
+**全部项目**模式与 **Lead 项目卡**模式共用牵头团队 / 项目类型筛选；全部项目模式额外提供 §7.4 排序。
 
 | 筛选项 | 说明 |
 |--------|------|
@@ -285,21 +297,37 @@ DeepSleep
 
 ---
 
-## 七点五、功能需求 · 指挥中心（v1.7）
+## 七点五、功能需求 · 管理视角（v1.7 · v1.7.6）
 
-### 入口
+> 以下各模式通过 **项目** 页顶 View as 进入；**不再**占用独立侧栏「指挥中心」入口。
 
-全局侧栏：**项目列表 → 指挥中心 → 项目类型 → 新建项目**。默认着陆仍为 **项目列表**。
+### 入口与布局（v1.7.6）
+
+- 全局侧栏：**项目 → 项目类型 → 新建项目**
+- EP / EM 管理页采用与 **进度看板** 一致的 **`progress-dashboard-card`** 分区外壳 + **KPI 四格**（`StatusKpiCard` / `PortfolioKpiSection`）
+- 关注级别 RAG 与进度看板 **workspaceStatus / overdue token 同源**（`portfolioVisualTokens.js`）
+- EP/EM 共享布局组件：`ManagementCommandBody.jsx`
+
+**EP/EM 页内区块顺序（自上而下）**
+
+1. 组合 KPI 四格（Critical / Elevated / 30 天内报告 / 逾期程序）
+2. **项目卡片列表**（主视图 · `EngagementPortfolioCardList`）
+3. 报告日时间轴（未来 90 天 · `ReportTimelineStrip`）
+4. 优先关注 Top N（`AttentionQueuePanel`）
+5. 报告日预警 · 未来 30 天（`ReportDayPanel`）
+6. 指标说明（折叠 · `CommandMetricsLegend`）
+7. 折叠区：EP → 下辖 EM；EM → 现场团队工作饱和度
 
 ### View as（演示身份）
 
-页顶固定下拉（与邮箱无关，演示用）：
+页顶固定下拉 **角色视角 · View as**（与邮箱无关，演示用）：
 
 | 身份 | 默认关注 |
 |------|----------|
-| EP · Partner | **Portfolio 管理页**：下辖 EM 分组、Report 预警 D-30/14/7、管理 Focus（不执行测试） |
-| EM · Manager | **团队管理页**：Report 预警 + 管理 Focus；执行层 IC/Staff 负荷（**不含 EM 本人**） |
-| IC · In-charge（**默认**） | **组内负荷页**：所辖项目 IC/Staff 每人 Focus + 饱和度；Report 预警条 |
+| **全部项目** | 浏览全部 engagement，点击进入项目概览 |
+| **EP · Partner**（**Demo 默认**） | **Engagement Portfolio Oversight**：KPI 四格 + 项目卡片主视图 + 时间轴 + Attention Queue |
+| EM · Manager | **团队管理页**：与 EP 同款 dashboard 外壳；所辖项目卡片；现场团队默认折叠 |
+| IC · In-charge | **组内负荷页**：所辖项目 IC/Staff 每人 Focus + 饱和度；Report 预警 |
 | Staff | **个人工作全景页**（见下 §Staff 模式） |
 | ITA Lead / Tax Lead | 含对应 contributorGroup 测试点的项目优先（项目卡布局） |
 
@@ -383,20 +411,29 @@ EM 本人为 **管理角色**，页顶展示 **管理 Focus**（Report 临近 + 
 
 **团队摘要**：执行层人数、高/中负荷人数、执行层逾期总数；EM 另展示 30 天内 Report 数与 D-14 堆叠；若多人 Focus 同一项目则提示资源争抢。
 
-**底部**：所辖项目 chip（带 Report 档位色），点击进入项目进度看板。
+**底部**：~~所辖项目 chip~~（v1.7.5 已移除）；所辖项目改由 **项目卡片列表** 展示。
 
-实现：`reportDayUtils.js` + `ReportDayPanel.jsx` + `teamRollupUtils.js` + `TeamRollupCommandView.jsx`。
+实现：`reportDayUtils.js` + `ReportDayPanel.jsx` + `ReportTimelineStrip.jsx` + `teamRollupUtils.js` + `TeamRollupCommandView.jsx` + `ManagementCommandBody.jsx`。
 
-### EP 模式 · Portfolio 管理（v1.7.3）
+### EP 模式 · Engagement Portfolio Oversight（v1.7.4 · v1.7.6 卡片主视图）
 
-View as = **EP** 时，指挥中心切换为 **Portfolio 页**（`EpCommandView`）。
+View as = **EP** 时，切换为 **Portfolio Oversight 页**（`EpCommandView` + `ManagementCommandBody`）。
 
-- **Portfolio 摘要**：下辖 EM 数、项目数、D-30 内 Report 数、D-14 / D-7 计数
-- **Report 预警列表**（未来 30 天，含未填/过期）
-- **管理 Focus**：全 Portfolio 内 Report + 逾期加权最高项目
-- **下辖 EM 卡片**：每 EM 所辖项目列表（Report 档位 + 执行层逾期）、14 天内 Report 堆叠提示
+**组合 KPI 四格**（v1.7.6）：Critical engagements / Elevated / 30 天内报告 / 逾期程序合计；附组合摘要（项目数 · 下辖 EM 数）。
 
-实现：`epPortfolioUtils.js` + `EpCommandView.jsx`。
+**项目卡片列表（主视图 · v1.7.6 替代 Risk Matrix 表）**
+
+每张卡：关注级别 pill（需立即关注 / 需重点关注 / 持续跟踪 / 进展正常）、客户/项目名、Reporting EM、报告日可读文案、逾期 badge、**测试点进度条**（与列表 `WorkspaceStatusOverviewBar` 同源）。操作：**项目进度** / **项目概览**。
+
+**报告日时间轴（v1.7.6）**：横轴为距报告日天数；点大小表示逾期程序数；支持 14 天内 Report 堆叠带；点击 marker 进入项目进度。
+
+**Attention Queue · Top 3**：从组合评分取前 3 项需关注 engagement。
+
+**Report Date Watchlist**：未来 30 天；空态显示 nearest report 提示。
+
+**Reporting EMs**：**默认折叠**，展开后展示 EM 卡片（fieldwork team / overdue / report clustering）。
+
+实现：`epPortfolioUtils.js` + `EngagementPortfolioCardList.jsx` + `PortfolioKpiSection.jsx` + `ManagementCommandBody.jsx` + `AttentionQueuePanel.jsx` + `reportTimelineUtils.js`。
 
 ---
 
@@ -1104,6 +1141,15 @@ Snapshot（只读 · 进度看板）
 - [x] 进度看板用户可见文案统一为 **测试点**（列表/抽屉/KPI/卡片标题）
 - [x] 移除进度看板/项目列表/侧栏等 **模块辅助说明小字**（`page-lead` / `panel-note` 引导文案）
 
+**v1.7.6**
+
+- [x] **项目页统一入口**（`EngagementHomePage`）：侧栏 **项目**；View as 含 **全部项目**；Demo 默认 **EP**
+- [x] EP/EM **看板同款 dashboard 外壳**（`ManagementCommandBody` + `DashboardSection` + `StatusKpiCard`）
+- [x] **项目卡片列表**替代 EP/EM Risk Matrix 表（`EngagementPortfolioCardList`）
+- [x] **报告日时间轴**（`ReportTimelineStrip` + `reportTimelineUtils.js`）
+- [x] 关注级别与进度看板 **visual token 统一**（`portfolioVisualTokens.js` + `COMMAND_CENTER_LABELS`）
+- [x] EM 接入与 EP 同款布局；现场团队 / 下辖 EM 默认折叠（`CollapsibleSection`）
+
 ### 15.2 待开发
 
 （暂无 · 下一迭代待定）
@@ -1150,9 +1196,9 @@ Snapshot（只读 · 进度看板）
 ### A. 项目列表示意图（概念）
 
 ```
-┌─ 项目列表 ─────────────────────────────────────────────┐
+┌─ 项目 · View as [ 全部项目 ▼ ] ──────────────────────────┐
 │  [ 🔍 搜索客户、项目、行业、成员…          ]              │
-│  排序：[ 最近创建 ▼ ]  （客户 / 行业 / 年份）            │
+│  排序：[ 最近创建 ▼ ]  牵头团队 / 项目类型               │
 ├────────────────────────────────────────────────────────┤
 │  ┌──────────────────────────────────────────────────┐  │
 │  │ 某银行股份有限公司          Audit · New Engagement │  │

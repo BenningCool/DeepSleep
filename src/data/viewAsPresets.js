@@ -4,20 +4,25 @@ import { filterOverdueControls } from "../modules/progress-board/progressDashboa
 import { getProgressBoardPreset } from "./viewAsProgressPresets";
 
 export const VIEW_AS_STORAGE_KEY = "deepsleep-view-as-v1";
-export const DEFAULT_VIEW_AS = "ic";
+export const DEFAULT_VIEW_AS = "ep";
 
 export const VIEW_AS_OPTIONS = [
+  {
+    id: "all",
+    label: "全部项目",
+    hint: "浏览全部项目，点击进入项目概览"
+  },
   {
     id: "ep",
     label: "EP · Partner",
     demoEmail: "partner.uat@firm.com",
-    hint: "组合风险与报告日优先"
+    hint: "项目组合：报告日、程序逾期与下辖 EM"
   },
   {
     id: "em",
     label: "EM · Manager",
     demoEmail: "manager.uat@firm.com",
-    hint: "所辖项目；团队 EM/IC/Staff 负荷与 Focus"
+    hint: "所辖项目：报告日、程序逾期与现场团队饱和度"
   },
   {
     id: "ic",
@@ -44,6 +49,14 @@ export const VIEW_AS_OPTIONS = [
     hint: "Tax 组贡献"
   }
 ];
+
+export function isPortfolioBrowseView(viewAsId) {
+  return viewAsId === "all";
+}
+
+export function isCommandRoleView(viewAsId) {
+  return viewAsId !== "all";
+}
 
 export function labelOfViewAs(viewAsId) {
   return VIEW_AS_OPTIONS.find((item) => item.id === viewAsId)?.label || viewAsId;

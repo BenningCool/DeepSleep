@@ -6342,3 +6342,715 @@ button {
   color: var(--muted);
   white-space: nowrap;
 }
+
+/* v1.7.5 · 管理层统一风格 */
+.management-command-page .staff-section-title {
+  margin-bottom: 10px;
+}
+
+.summary-eyebrow-en {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.summary-readable-value {
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.report-readable {
+  display: block;
+  font-size: 13px;
+  color: #172b4d;
+}
+
+.report-readable.compact,
+.report-readable-inline {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.report-readable-inline {
+  margin: 4px 0 0;
+}
+
+.report-tier-pill.compact {
+  margin-top: 4px;
+}
+
+.risk-matrix-report {
+  min-width: 148px;
+}
+
+.command-metrics-legend {
+  margin: 12px 0 20px;
+}
+
+.command-metrics-toggle {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #42526e;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.command-metrics-list {
+  margin: 10px 0 0;
+  padding: 12px 14px 12px 28px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fafbfc;
+}
+
+.command-metrics-list li {
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.command-metrics-list li:last-child {
+  margin-bottom: 0;
+}
+
+.command-metrics-list strong {
+  display: inline-block;
+  min-width: 72px;
+  margin-right: 8px;
+  color: #172b4d;
+}
+
+/* v1.7.4 · EP Risk Matrix & Attention Queue */
+.ep-health-grid {
+  grid-template-columns: 2fr repeat(4, minmax(72px, 1fr));
+}
+
+.risk-matrix-section {
+  margin: 20px 0;
+}
+
+.risk-matrix-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.risk-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 860px;
+}
+
+.risk-matrix-table th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+  background: #fafbfc;
+}
+
+.risk-matrix-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+  font-size: 13px;
+}
+
+.risk-matrix-row {
+  border-left: 4px solid transparent;
+}
+
+.risk-matrix-row.risk-critical {
+  border-left-color: #de350b;
+}
+
+.risk-matrix-row.risk-elevated {
+  border-left-color: #ff8b00;
+}
+
+.risk-matrix-row.risk-watch {
+  border-left-color: #ffc400;
+}
+
+.risk-matrix-row.risk-on-track {
+  border-left-color: #36b37e;
+}
+
+.risk-tier-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.risk-tier-pill.risk-critical {
+  background: #ffebe6;
+  color: #bf2600;
+}
+
+.risk-tier-pill.risk-elevated {
+  background: #fff0b3;
+  color: #7a5200;
+}
+
+.risk-tier-pill.risk-watch {
+  background: #fff7d6;
+  color: #7a5200;
+}
+
+.risk-tier-pill.risk-on-track {
+  background: #e3fcef;
+  color: #006644;
+}
+
+.risk-tier-zh {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.risk-matrix-engagement {
+  min-width: 220px;
+}
+
+.risk-matrix-engagement strong {
+  display: block;
+  font-size: 14px;
+}
+
+.risk-matrix-engagement span {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.risk-matrix-em {
+  font-size: 12px;
+  color: var(--muted);
+  max-width: 180px;
+  word-break: break-all;
+}
+
+.risk-matrix-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.attention-queue-section {
+  margin: 24px 0;
+}
+
+.attention-queue-head {
+  margin-bottom: 10px;
+}
+
+.attention-queue-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.attention-queue-item {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.attention-queue-item.risk-critical {
+  border-left-color: #de350b;
+}
+
+.attention-queue-item.risk-elevated {
+  border-left-color: #ff8b00;
+}
+
+.attention-queue-item.risk-watch {
+  border-left-color: #ffc400;
+}
+
+.attention-queue-item.risk-on-track {
+  border-left-color: #36b37e;
+}
+
+.attention-queue-rank {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--muted);
+  min-width: 28px;
+}
+
+.attention-queue-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.attention-queue-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.attention-queue-subtitle {
+  margin: 4px 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.attention-queue-meta {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.attention-queue-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.report-nearest-hint {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #42526e;
+}
+
+.ep-em-collapsible {
+  margin-top: 24px;
+}
+
+.ep-em-collapse-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ep-em-collapse-icon {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.ep-em-collapse-title {
+  margin: 0;
+}
+
+.ep-em-collapse-summary {
+  margin: 6px 0 0 22px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .ep-health-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* 报告日时间轴 */
+.report-timeline-section {
+  margin: 20px 0;
+}
+
+.report-timeline-head {
+  margin-bottom: 10px;
+}
+
+.report-timeline-card {
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.report-timeline-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.legend-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
+.legend-swatch.report-critical {
+  background: #de350b;
+}
+
+.legend-swatch.report-warning {
+  background: #ff8b00;
+}
+
+.legend-swatch.report-upcoming {
+  background: #6b778c;
+}
+
+.legend-swatch.report-ok {
+  background: #c1c7d0;
+}
+
+.report-timeline-axis-labels {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 6px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.report-timeline-axis-labels span:last-child {
+  text-align: right;
+}
+
+.report-timeline-track-wrap {
+  overflow-x: auto;
+}
+
+.report-timeline-track {
+  position: relative;
+  min-width: 520px;
+  margin-bottom: 10px;
+  border: 1px solid #dfe1e6;
+  border-radius: 10px;
+  background: #fafbfc;
+}
+
+.report-timeline-zones {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.report-timeline-zone {
+  height: 100%;
+  flex: none;
+}
+
+.timeline-zone-critical {
+  background: color-mix(in srgb, #de350b 18%, white);
+}
+
+.timeline-zone-warning {
+  background: color-mix(in srgb, #ff8b00 16%, white);
+}
+
+.timeline-zone-upcoming {
+  background: color-mix(in srgb, #6b778c 12%, white);
+}
+
+.timeline-zone-ok {
+  background: #f4f5f7;
+}
+
+.report-timeline-stack-band {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: color-mix(in srgb, #ff8b00 22%, transparent);
+  border-right: 2px dashed #ff8b00;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.report-timeline-today-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  background: #172b4d;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.report-timeline-marker {
+  position: absolute;
+  transform: translate(-50%, 0);
+  border: 2px solid white;
+  border-radius: 999px;
+  box-shadow: 0 1px 4px rgba(9, 30, 66, 0.25);
+  cursor: pointer;
+  z-index: 3;
+  padding: 0;
+}
+
+.report-timeline-marker.report-critical,
+.report-timeline-marker.report-past {
+  background: #de350b;
+}
+
+.report-timeline-marker.report-warning {
+  background: #ff8b00;
+}
+
+.report-timeline-marker.report-upcoming {
+  background: #6b778c;
+}
+
+.report-timeline-marker.report-ok {
+  background: #36b37e;
+}
+
+.report-timeline-marker.report-missing {
+  background: #6554c0;
+}
+
+.report-timeline-marker-label {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  color: #172b4d;
+  pointer-events: none;
+}
+
+.report-timeline-marker-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #172b4d;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  pointer-events: none;
+}
+
+.report-timeline-footnote {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.report-timeline-inline-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #0052cc;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.report-timeline-buckets {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.report-timeline-bucket {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fafbfc;
+}
+
+.report-timeline-bucket.past {
+  border-left: 3px solid #de350b;
+}
+
+.report-timeline-bucket.missing {
+  border-left: 3px solid #6554c0;
+}
+
+.report-timeline-bucket-title {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #42526e;
+}
+
+.report-timeline-bucket-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.report-timeline-bucket-item {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  text-align: left;
+  cursor: pointer;
+}
+
+.report-timeline-bucket-item strong {
+  font-size: 13px;
+}
+
+.report-timeline-bucket-item span {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* v1.7.6 · 指挥中心 P0：看板同款外壳 + 项目卡片主视图 */
+.management-command-page .progress-dashboard {
+  margin-top: 8px;
+}
+
+.command-dashboard-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.command-portfolio-section {
+  grid-column: 1 / -1;
+}
+
+.command-portfolio-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+.command-portfolio-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--portfolio-accent, var(--line));
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.command-portfolio-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.command-portfolio-card-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.command-portfolio-card-title strong {
+  display: block;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.command-portfolio-card-title p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.command-portfolio-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.command-portfolio-card-meta {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.command-portfolio-card-progress {
+  display: grid;
+  gap: 6px;
+}
+
+.command-portfolio-card-progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.command-portfolio-card-progress-meta {
+  margin: 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.report-timeline-embedded {
+  margin: 0;
+}
+
+.report-timeline-embedded .report-timeline-card {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.management-command-page .attention-queue-item.attention-overdue-item {
+  border-left: 4px solid var(--portfolio-accent, var(--line));
+}
+
+.management-command-page .progress-attention-panel-shell {
+  margin-bottom: 0;
+}
+
+.management-command-page .command-metrics-legend {
+  margin: 0;
+}
+
+.management-command-page .ep-em-groups-section {
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .command-portfolio-card-grid {
+    grid-template-columns: 1fr;
+  }
+}

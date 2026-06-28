@@ -126,6 +126,37 @@ export const CONTRIBUTOR_FILTER_OPTIONS = [
   { id: "frm", label: "FRM team" }
 ];
 
+export const COMMAND_CENTER_LABELS = {
+  kpi: {
+    sectionTitle: "组合风险概览",
+    sectionTitleEn: "Portfolio Risk Overview",
+    critical: "需立即关注",
+    elevated: "需重点关注",
+    reportWindow: "30 天内报告",
+    overdueProcedures: "已逾期"
+  },
+  portfolioList: {
+    title: "项目列表",
+    titleEn: "Engagement List",
+    lead: "与进度看板同一测试点三态口径；点击项目进度进入单项目看板。"
+  },
+  timeline: {
+    title: "报告日时间轴",
+    titleEn: "Report Date Timeline",
+    lead: "横轴为距报告日天数；圆点越大表示逾期测试点越多。"
+  },
+  attention: {
+    title: "优先关注",
+    titleEn: "Priority Attention",
+    lead: "综合报告日与测试点逾期，建议优先跟进的 engagment。"
+  },
+  reportWatch: {
+    title: "报告日预警",
+    titleEn: "Report Date Watchlist",
+    lead: "未来 30 天内出具报告的项目。"
+  }
+};
+
 export function labelOfProgressStatus(status) {
   return PROGRESS_STATUS_LABELS[status] || status;
 }

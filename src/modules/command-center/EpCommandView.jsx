@@ -3,13 +3,14 @@ import { ModuleHeading } from "../../components/ModuleHeading";
 import { PAGE_LABELS } from "../../data/pageLabels";
 import { demoEmailOfViewAs, labelOfViewAs, VIEW_AS_OPTIONS } from "../../data/viewAsPresets";
 import { buildEpPortfolio } from "./epPortfolioUtils";
-import { ManagementFocusCard, ReportDayPanel } from "./ReportDayPanel";
+import { ManagementCommandBody } from "./ManagementCommandBody";
+import { ROLE_PAGE_INTRO } from "./managementCopy";
 
 function EmGroupCard({ group, onOpenProgress, onOpenDetail }) {
   const nearest = group.nearestReport;
 
   return (
-    <article className="ep-em-group-card">
+    <article className="ep-em-group-card progress-dashboard-card">
       <div className="ep-em-group-head">
         <div>
           <p className="staff-summary-eyebrow">Engagement Manager</p>
@@ -19,17 +20,20 @@ function EmGroupCard({ group, onOpenProgress, onOpenDetail }) {
           <span>{group.projectCount} 个项目</span>
           {nearest ? (
             <span className={`report-tier-pill ${nearest.urgency.className}`}>
-              最近 {nearest.urgency.shortLabel}
+              {nearest.urgency.readableLabel}
             </span>
           ) : null}
         </div>
       </div>
       <p className="ep-em-group-meta">
-        执行层 {group.executionHeadcount} 人 · 高负荷 {group.highLoadCount}
-        · 逾期 {group.totalOverdue}
+        现场团队 {group.executionHeadcount} 人
+        · 饱和度偏高 {group.highLoadCount} 人
+        · {group.totalOverdue} 项逾期
       </p>
       {group.reportStack.triggered ? (
-        <p className="team-collision-note">{group.reportStack.count} 个项目 Report 挤在 14 天内</p>
+        <p className="team-collision-note">
+          报告日集中：14 天内有 {group.reportStack.count} 个项目出具报告
+        </p>
       ) : null}
       <div className="ep-em-project-list">
         {group.projects.map((entry) => (
@@ -39,15 +43,15 @@ function EmGroupCard({ group, onOpenProgress, onOpenDetail }) {
             type="button"
             onClick={() => onOpenProgress(entry.project.id)}
           >
-            <span className={`report-tier-pill ${entry.urgency.className}`}>
-              {entry.urgency.shortLabel}
+            <span className="report-readable compact">
+              {entry.urgency.readableLabel}
             </span>
             <span className="ep-em-project-copy">
               <strong>{entry.project.clientName || entry.project.name}</strong>
               <small>{entry.project.name}</small>
             </span>
             <span className="ep-em-project-side">
-              {entry.overdueCount ? `逾期 ${entry.overdueCount}` : "—"}
+              {entry.overdueCount ? `${entry.overdueCount} 项逾期` : "—"}
             </span>
           </button>
         ))}
@@ -57,7 +61,7 @@ function EmGroupCard({ group, onOpenProgress, onOpenDetail }) {
         type="button"
         onClick={() => nearest && onOpenDetail(nearest.project.id)}
       >
-        查看 EM 重点项目概览
+        打开优先关注项目
       </button>
     </article>
   );
@@ -72,12 +76,22 @@ export function EpCommandView({
   onOpenDetail
 }) {
   const [search, setSearch] = useState("");
+  const [emExpanded, setEmExpanded] = useState(false);
   const partnerEmail = demoEmailOfViewAs("ep");
 
   const portfolio = useMemo(
     () => buildEpPortfolio(projects, tasks, partnerEmail),
     [projects, tasks, partnerEmail]
   );
+
+  const filteredMatrix = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return portfolio.riskMatrix;
+    return portfolio.riskMatrix.filter((row) => (
+      row.managerLabel.toLowerCase().includes(query)
+      || `${row.project.clientName} ${row.project.name}`.toLowerCase().includes(query)
+    ));
+  }, [portfolio.riskMatrix, search]);
 
   const visibleGroups = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -90,8 +104,15 @@ export function EpCommandView({
     ));
   }, [portfolio.emGroups, search]);
 
+  const emCollapseSummary = useMemo(() => {
+    if (!visibleGroups.length) return "";
+    return visibleGroups.map((group) => (
+      `${group.managerLabel} · ${group.projectCount} 个项目 · ${group.totalOverdue} 项逾期`
+    )).join(" · ");
+  }, [visibleGroups]);
+
   return (
-    <section className="page-shell ep-command-page">
+    <section className="page-shell progress-board-page management-command-page ep-command-page">
       <header className="page-header">
         <div>
           <ModuleHeading
@@ -105,7 +126,7 @@ export function EpCommandView({
 
       <div className="command-toolbar staff-command-toolbar">
         <label className="view-as-field">
-          <span className="label">View as · 查看身份</span>
+          <span className="label">角色视角 · View as</span>
           <select value={viewAs} onChange={(e) => onViewAsChange(e.target.value)}>
             {VIEW_AS_OPTIONS.map((option) => (
               <option key={option.id} value={option.id}>{option.label}</option>
@@ -113,85 +134,59 @@ export function EpCommandView({
           </select>
         </label>
         <label className="search-field">
-          <span className="label">搜索 EM / 项目</span>
+          <span className="label">搜索项目 / EM</span>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="EM 邮箱、客户、项目名..."
+            placeholder="客户、项目名、负责 EM..."
           />
         </label>
       </div>
 
       <p className="command-view-hint">
         当前视角：<strong>{labelOfViewAs(viewAs)}</strong>
-        · Portfolio 管理（不直接执行测试）· Report Date D-30 / D-14 / D-7 优先
+        · {ROLE_PAGE_INTRO.ep}
       </p>
 
       {!portfolio.partnerProjects.length ? (
         <div className="empty-state large">
-          <h3>暂无 Portfolio 项目</h3>
+          <h3>暂无组合项目</h3>
           <p>当前演示账号尚未被设为任何项目的 Partner。</p>
         </div>
       ) : (
-        <>
-          <article className="team-summary-card ep-portfolio-summary">
-            <div className="team-summary-grid">
-              <div>
-                <p className="staff-summary-eyebrow">Portfolio Overview</p>
-                <h3>
-                  {portfolio.summary.emCount} 个 EM · {portfolio.summary.projectCount} 个项目
-                </h3>
+        <ManagementCommandBody
+          mode="ep"
+          summary={portfolio.summary}
+          reportStack={portfolio.portfolioStack}
+          filteredMatrix={filteredMatrix}
+          tasks={tasks}
+          showEmColumn
+          attentionQueue={portfolio.attentionQueue}
+          attentionRoleLabel="EP"
+          attentionLimit={3}
+          watchlist={portfolio.watchlist}
+          nearestReport={portfolio.nearestReport}
+          onOpenProgress={onOpenProgress}
+          onOpenDetail={onOpenDetail}
+          collapsibleSection={{
+            title: `下辖 EM · Engagement Manager (${visibleGroups.length})`,
+            summary: emCollapseSummary,
+            expanded: emExpanded,
+            onToggle: () => setEmExpanded((open) => !open),
+            children: (
+              <div className="ep-em-group-list">
+                {visibleGroups.map((group) => (
+                  <EmGroupCard
+                    key={group.managerEmail}
+                    group={group}
+                    onOpenProgress={onOpenProgress}
+                    onOpenDetail={onOpenDetail}
+                  />
+                ))}
               </div>
-              <div className="team-summary-stat">
-                <span className="team-stat-label">30 天内 Report</span>
-                <strong>{portfolio.summary.watchlistCount}</strong>
-              </div>
-              <div className="team-summary-stat">
-                <span className="team-stat-label">D-14 内</span>
-                <strong className="load-medium-text">{portfolio.summary.warningCount}</strong>
-              </div>
-              <div className="team-summary-stat">
-                <span className="team-stat-label">D-7 内/过期</span>
-                <strong className="load-high-text">{portfolio.summary.criticalCount}</strong>
-              </div>
-            </div>
-            {portfolio.portfolioStack.triggered ? (
-              <p className="team-collision-note report-stack-note">
-                Portfolio 内 {portfolio.portfolioStack.count} 个项目 Report 落在 14 天内，需防 last minute。
-              </p>
-            ) : null}
-          </article>
-
-          <ReportDayPanel
-            watchlist={portfolio.watchlist}
-            stack={portfolio.portfolioStack}
-            onOpenProgress={onOpenProgress}
-            onOpenDetail={onOpenDetail}
-          />
-
-          <ManagementFocusCard
-            entry={portfolio.focusEntry}
-            roleLabel="EP"
-            onOpenProgress={onOpenProgress}
-            onOpenDetail={onOpenDetail}
-          />
-
-          <section className="ep-em-groups-section">
-            <h3 className="staff-section-title">
-              下辖 EM · Engagement Managers ({visibleGroups.length})
-            </h3>
-            <div className="ep-em-group-list">
-              {visibleGroups.map((group) => (
-                <EmGroupCard
-                  key={group.managerEmail}
-                  group={group}
-                  onOpenProgress={onOpenProgress}
-                  onOpenDetail={onOpenDetail}
-                />
-              ))}
-            </div>
-          </section>
-        </>
+            )
+          }}
+        />
       )}
     </section>
   );

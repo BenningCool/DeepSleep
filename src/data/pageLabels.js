@@ -1,7 +1,7 @@
 export const PAGE_LABELS = {
   projectList: {
-    title: "项目列表",
-    titleEn: "Engagement Portfolio"
+    title: "项目",
+    titleEn: "Engagements"
   },
   commandCenter: {
     title: "指挥中心",
@@ -20,8 +20,8 @@ export const PAGE_LABELS = {
     titleEn: "Team Management · EM View"
   },
   epCommand: {
-    title: "Portfolio 管理",
-    titleEn: "Portfolio · EP View"
+    title: "项目组合管理",
+    titleEn: "Engagement Portfolio Oversight"
   },
   engagementTypes: {
     title: "项目类型",

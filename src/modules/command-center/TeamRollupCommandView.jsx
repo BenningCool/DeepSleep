@@ -5,8 +5,9 @@ import { demoEmailOfViewAs, labelOfViewAs, VIEW_AS_OPTIONS } from "../../data/vi
 import { labelOfTeam } from "../../data/projectConstants";
 import { ProgressOwnerLabel } from "../progress-board/ProgressOwnerLabel";
 import { formatReportCountdown, ledTeamLabel } from "./commandCenterUtils";
-import { getReportUrgency } from "./reportDayUtils";
-import { ManagementFocusCard, ReportDayPanel } from "./ReportDayPanel";
+import { ManagementCommandBody } from "./ManagementCommandBody";
+import { ReportDayPanel } from "./ReportDayPanel";
+import { ROLE_PAGE_INTRO, SATURATION_LEVEL_LABEL } from "./managementCopy";
 import {
   buildTeamRollup,
   formatFocusLabel,
@@ -28,6 +29,7 @@ function PersonLoadRow({
 }) {
   const { saturation } = person;
   const focusLabel = formatFocusLabel(person);
+  const levelLabel = SATURATION_LEVEL_LABEL[saturation.level] || saturation.level;
 
   return (
     <article
@@ -46,14 +48,14 @@ function PersonLoadRow({
           </div>
           <div className="team-person-load">
             <span className={`team-load-level ${saturation.levelClass}`}>
-              负荷 {saturation.level}
+              工作饱和度 {levelLabel}
             </span>
             <strong>{saturation.percent}%</strong>
           </div>
         </div>
         <SaturationBar percent={saturation.percent} levelClass={saturation.levelClass} />
         <div className="team-person-stats">
-          <span>{saturation.assignedTotal} 个测试点</span>
+          <span>{saturation.assignedTotal} 个程序</span>
           <span>{saturation.projectCount} 个项目</span>
           <span>未开始 {saturation.notStarted}</span>
           <span>测试中 {saturation.inProgress}</span>
@@ -62,7 +64,7 @@ function PersonLoadRow({
           ) : null}
         </div>
         <p className="team-person-focus">
-          <span className="team-focus-label">当前 Focus</span>
+          <span className="team-focus-label">当前优先项目</span>
           <strong>{focusLabel}</strong>
         </p>
       </div>
@@ -73,7 +75,7 @@ function PersonLoadRow({
             type="button"
             onClick={() => onOpenMemberProgress(person.focusProjectId, person.email)}
           >
-            查看测试点
+            查看负责程序
           </button>
         ) : null}
         {person.portfolio[0]?.project?.id ? (
@@ -92,22 +94,70 @@ function PersonLoadRow({
 
 function SupervisedProjectChip({ project, onOpenProgress }) {
   const reportLabel = formatReportCountdown(project.reportDate);
-  const urgency = getReportUrgency(project.reportDate);
 
   return (
     <button
-      className={`team-project-chip ${urgency.className}`}
+      className="team-project-chip"
       type="button"
       onClick={() => onOpenProgress(project.id)}
     >
       <strong>{project.clientName || project.name}</strong>
       <span>{ledTeamLabel(project.team)} · {labelOfTeam(project.team)}</span>
-      {reportLabel ? (
-        <span className={`report-tier-pill ${urgency.className}`}>{reportLabel}</span>
-      ) : (
-        <span className="report-tier-pill report-missing">未填 Report</span>
-      )}
+      <span className="report-readable">{reportLabel || "未填写报告日"}</span>
     </button>
+  );
+}
+
+function EmManagementLayout({
+  rollup,
+  filteredMatrix,
+  tasks,
+  visiblePeople,
+  fieldworkExpanded,
+  onToggleFieldwork,
+  fieldworkSummary,
+  onOpenProgress,
+  onOpenDetail,
+  onOpenMemberProgress
+}) {
+  return (
+    <ManagementCommandBody
+      mode="em"
+      summary={rollup.summary}
+      reportStack={rollup.reportStack}
+      filteredMatrix={filteredMatrix}
+      tasks={tasks}
+      showEmColumn={false}
+      attentionQueue={rollup.attentionQueue}
+      attentionRoleLabel="EM"
+      attentionLimit={1}
+      watchlist={rollup.reportWatchlist}
+      nearestReport={rollup.nearestReport}
+      onOpenProgress={onOpenProgress}
+      onOpenDetail={onOpenDetail}
+      collapsibleSection={{
+        title: `现场团队工作饱和度 · IC & Staff (${visiblePeople.length})`,
+        summary: fieldworkSummary,
+        expanded: fieldworkExpanded,
+        onToggle: onToggleFieldwork,
+        children: visiblePeople.length ? (
+          <div className="team-person-list">
+            {visiblePeople.map((person) => (
+              <PersonLoadRow
+                key={person.email}
+                person={person}
+                onOpenMemberProgress={onOpenMemberProgress}
+                onOpenDetail={onOpenDetail}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state compact">
+            <p>没有匹配的成员。</p>
+          </div>
+        )
+      }}
+    />
   );
 }
 
@@ -121,12 +171,19 @@ export function TeamRollupCommandView({
   onOpenMemberProgress
 }) {
   const [search, setSearch] = useState("");
+  const [fieldworkExpanded, setFieldworkExpanded] = useState(false);
   const supervisorEmail = demoEmailOfViewAs(viewAs);
   const pageLabels = viewAs === "em" ? PAGE_LABELS.emCommand : PAGE_LABELS.icCommand;
+  const isEmView = viewAs === "em";
 
   const rollup = useMemo(
     () => buildTeamRollup(projects, tasks, supervisorEmail, viewAs),
     [projects, tasks, supervisorEmail, viewAs]
+  );
+
+  const supervisedProjects = useMemo(
+    () => getSupervisedProjects(projects, supervisorEmail, viewAs),
+    [projects, supervisorEmail, viewAs]
   );
 
   const visiblePeople = useMemo(() => {
@@ -139,15 +196,26 @@ export function TeamRollupCommandView({
     ));
   }, [rollup.people, search]);
 
-  const supervisedProjects = useMemo(
-    () => getSupervisedProjects(projects, supervisorEmail, viewAs),
-    [projects, supervisorEmail, viewAs]
-  );
+  const filteredMatrix = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return rollup.riskMatrix;
+    return rollup.riskMatrix.filter((row) => (
+      `${row.project.clientName} ${row.project.name}`.toLowerCase().includes(query)
+    ));
+  }, [rollup.riskMatrix, search]);
 
-  const isEmView = viewAs === "em";
+  const fieldworkSummary = useMemo(() => {
+    if (!rollup.summary.headcount) return "";
+    return `${rollup.summary.headcount} 人 · 饱和度偏高 ${rollup.summary.highLoadCount} · 适中 ${rollup.summary.mediumLoadCount} · ${rollup.summary.totalOverdue} 项程序逾期`;
+  }, [rollup.summary]);
+
+  const searchLabel = isEmView ? "搜索项目 / 成员" : "搜索成员";
+  const searchPlaceholder = isEmView
+    ? "客户、项目名、成员邮箱..."
+    : "邮箱、角色、优先项目...";
 
   return (
-    <section className="page-shell team-rollup-page">
+    <section className={`page-shell team-rollup-page ${isEmView ? "progress-board-page management-command-page" : ""}`}>
       <header className="page-header">
         <div>
           <ModuleHeading
@@ -161,7 +229,7 @@ export function TeamRollupCommandView({
 
       <div className="command-toolbar staff-command-toolbar">
         <label className="view-as-field">
-          <span className="label">View as · 查看身份</span>
+          <span className="label">角色视角 · View as</span>
           <select value={viewAs} onChange={(e) => onViewAsChange(e.target.value)}>
             {VIEW_AS_OPTIONS.map((option) => (
               <option key={option.id} value={option.id}>{option.label}</option>
@@ -169,20 +237,18 @@ export function TeamRollupCommandView({
           </select>
         </label>
         <label className="search-field">
-          <span className="label">搜索成员</span>
+          <span className="label">{searchLabel}</span>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="邮箱、角色、Focus 项目..."
+            placeholder={searchPlaceholder}
           />
         </label>
       </div>
 
       <p className="command-view-hint">
         当前视角：<strong>{labelOfViewAs(viewAs)}</strong>
-        {isEmView
-          ? " · 管理角色（不执行测试）· Report Date D-30 / D-14 / D-7 优先 · 下方为执行层 IC / Staff 负荷"
-          : " · 查看所辖项目上的 IC / Staff 负荷与 Focus · 全员关注 Report Date"}
+        · {isEmView ? ROLE_PAGE_INTRO.em : ROLE_PAGE_INTRO.ic}
       </p>
 
       {!supervisedProjects.length ? (
@@ -190,79 +256,59 @@ export function TeamRollupCommandView({
           <h3>暂无所辖项目</h3>
           <p>
             当前演示账号尚未被设为任何项目的
-            {viewAs === "em" ? " Manager" : " In-charge"}。
+            {isEmView ? " Manager" : " In-charge"}。
           </p>
         </div>
+      ) : isEmView ? (
+        <EmManagementLayout
+          rollup={rollup}
+          filteredMatrix={filteredMatrix}
+          tasks={tasks}
+          visiblePeople={visiblePeople}
+          fieldworkExpanded={fieldworkExpanded}
+          onToggleFieldwork={() => setFieldworkExpanded((open) => !open)}
+          fieldworkSummary={fieldworkSummary}
+          onOpenProgress={onOpenProgress}
+          onOpenDetail={onOpenDetail}
+          onOpenMemberProgress={onOpenMemberProgress}
+        />
       ) : (
         <>
           <article className="team-summary-card">
             <div className="team-summary-grid">
               <div>
-                <p className="staff-summary-eyebrow">Team Overview</p>
-                <h3>
-                  {isEmView ? "执行层 " : ""}
-                  {rollup.summary.headcount} 人 · {supervisedProjects.length} 个项目
-                </h3>
+                <p className="staff-summary-eyebrow">组内概览 · Team Overview</p>
+                <h3>{rollup.summary.headcount} 人 · {supervisedProjects.length} 个项目</h3>
               </div>
-              {isEmView ? (
-                <>
-                  <div className="team-summary-stat">
-                    <span className="team-stat-label">30 天内 Report</span>
-                    <strong>{rollup.reportWatchlist.length}</strong>
-                  </div>
-                  <div className="team-summary-stat">
-                    <span className="team-stat-label">D-14 堆叠</span>
-                    <strong className={rollup.reportStack.triggered ? "load-medium-text" : ""}>
-                      {rollup.reportStack.triggered ? rollup.reportStack.count : "—"}
-                    </strong>
-                  </div>
-                </>
-              ) : null}
               <div className="team-summary-stat">
-                <span className="team-stat-label">高负荷</span>
+                <span className="team-stat-label">饱和度偏高</span>
                 <strong className="load-high-text">{rollup.summary.highLoadCount}</strong>
               </div>
               <div className="team-summary-stat">
-                <span className="team-stat-label">中负荷</span>
+                <span className="team-stat-label">饱和度适中</span>
                 <strong className="load-medium-text">{rollup.summary.mediumLoadCount}</strong>
               </div>
               <div className="team-summary-stat">
-                <span className="team-stat-label">执行层逾期</span>
+                <span className="team-stat-label">程序逾期</span>
                 <strong className="load-high-text">{rollup.summary.totalOverdue}</strong>
               </div>
             </div>
             {rollup.summary.focusCollision ? (
               <p className="team-collision-note">
-                多人当前 Focus 落在同一项目，可能存在资源争抢，建议协调分工。
+                多人当前优先项目相同，可能存在资源争抢，建议协调分工。
               </p>
             ) : null}
           </article>
 
           <ReportDayPanel
             watchlist={rollup.reportWatchlist}
-            stack={isEmView ? rollup.reportStack : null}
+            nearestReport={rollup.nearestReport}
             onOpenProgress={onOpenProgress}
             onOpenDetail={onOpenDetail}
           />
 
-          {isEmView ? (
-            <ManagementFocusCard
-              entry={rollup.managementFocus}
-              roleLabel="EM"
-              onOpenProgress={onOpenProgress}
-              onOpenDetail={onOpenDetail}
-            />
-          ) : null}
-
           <section className="team-people-section">
-            <h3 className="staff-section-title">
-              {isEmView ? "执行层负荷 · IC & Staff" : "组内负荷 · Team Load"}
-            </h3>
-            {isEmView ? (
-              <p className="management-role-banner">
-                您当前为 <strong>Engagement Manager</strong>，不参与测试点执行；请通过 Report 预警与下方执行层负荷协调资源。
-              </p>
-            ) : null}
+            <h3 className="staff-section-title">组内工作饱和度 · IC & Staff</h3>
             {visiblePeople.length ? (
               <div className="team-person-list">
                 {visiblePeople.map((person) => (
@@ -283,7 +329,7 @@ export function TeamRollupCommandView({
 
           <section className="team-projects-section">
             <h3 className="staff-section-title">
-              所辖项目 · Supervised Engagements ({supervisedProjects.length})
+              所辖项目 ({supervisedProjects.length})
             </h3>
             <div className="team-project-chips">
               {supervisedProjects.map((project) => (

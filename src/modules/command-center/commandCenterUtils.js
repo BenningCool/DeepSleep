@@ -16,10 +16,10 @@ export function daysUntilDate(dateValue) {
 
 export function formatReportCountdown(reportDate) {
   const until = daysUntilDate(reportDate);
-  if (until === null) return "";
+  if (until === null) return "未填写报告日";
   if (until < 0) return `报告日已过 ${Math.abs(until)} 天`;
-  if (until === 0) return "报告日 · 今天";
-  return `D-${until}`;
+  if (until === 0) return "报告日为今天";
+  return `报告日还有 ${until} 天`;
 }
 
 export function ledTeamLabel(team) {

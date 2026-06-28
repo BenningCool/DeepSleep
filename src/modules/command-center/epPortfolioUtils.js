@@ -1,9 +1,11 @@
 import { normalizeStaffEmail } from "./staffWorkloadUtils";
 import {
+  buildAttentionQueue,
+  buildEngagementRiskMatrix,
   buildReportWatchlist,
+  countRiskTiers,
   detectReportStack,
   enrichProjectWithReport,
-  pickManagementFocusEntry,
   sortByReportUrgency
 } from "./reportDayUtils";
 import { buildTeamRollup } from "./teamRollupUtils";
@@ -89,21 +91,29 @@ export function buildEpPortfolio(projects, tasks, partnerEmail) {
     buildEmGroupSnapshot(group.projects, tasks, group.managerEmail)
   ));
 
+  const riskMatrix = buildEngagementRiskMatrix(partnerProjects, tasks, getManagerEmail);
+  const attentionQueue = buildAttentionQueue(riskMatrix, 3);
   const watchlist = buildReportWatchlist(partnerProjects, tasks);
   const portfolioStack = detectReportStack(partnerProjects);
-  const focusEntry = pickManagementFocusEntry(partnerProjects, tasks);
+  const nearestReport = sortByReportUrgency(
+    partnerProjects.map((p) => enrichProjectWithReport(p, tasks))
+  )[0] || null;
 
   const criticalCount = watchlist.filter((entry) => (
     entry.urgency.tier === "critical" || entry.urgency.tier === "past"
   )).length;
   const warningCount = watchlist.filter((entry) => entry.urgency.tier === "warning").length;
 
+  const riskCounts = countRiskTiers(riskMatrix);
+
   return {
     partnerProjects,
     emGroups,
+    riskMatrix,
+    attentionQueue,
     watchlist,
     portfolioStack,
-    focusEntry,
+    nearestReport,
     summary: {
       projectCount: partnerProjects.length,
       emCount: emGroups.length,
@@ -113,7 +123,9 @@ export function buildEpPortfolio(projects, tasks, partnerEmail) {
       totalOverdue: partnerProjects.reduce(
         (sum, project) => sum + enrichProjectWithReport(project, tasks).overdueCount,
         0
-      )
+      ),
+      nearestReport,
+      riskCounts
     }
   };
 }
