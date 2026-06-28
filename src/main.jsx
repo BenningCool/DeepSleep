@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
-import { Board } from "./components/Board";
-import { BoardHeader } from "./components/BoardHeader";
 import { Sidebar } from "./components/Sidebar";
-import { TaskDrawer } from "./components/TaskDrawer";
 import { Topbar } from "./components/Topbar";
-import { COLUMNS, STORAGE_KEY } from "./data/mockData";
-import { deleteProjectWorkspaceProgress } from "./services/workspaceProgressService";
+import { STORAGE_KEY } from "./data/mockData";
+import {
+  deleteControlWorkspaceProgress,
+  deleteProjectWorkspaceProgress
+} from "./services/workspaceProgressService";
 import { ProgressBoardPage } from "./modules/progress-board/ProgressBoardPage";
 import { EngagementTypesPage } from "./modules/engagement-types/EngagementTypesPage";
 import { CreateProjectPage } from "./modules/project/CreateProjectPage";
@@ -25,8 +25,7 @@ import {
   saveCurrentProjectId
 } from "./modules/project/projectStore";
 import { migrateTasks } from "./utils/taskStatusMigration";
-import { validateStatusTransition } from "./modules/scope-init/scopeRules";
-import { cloneTasks, columnTitle, nextTaskId } from "./utils/taskUtils";
+import { nextTaskId } from "./utils/taskUtils";
 import { ensureDemoData } from "./data/seedDemoProjects";
 import {
   defaultTeamForProjectType,
@@ -36,28 +35,6 @@ import {
   loadViewAs,
   saveViewAs
 } from "./data/viewAsPresets";
-
-const emptyTask = {
-  title: "",
-  description: "",
-  priority: "P1",
-  platform: "PC 端",
-  product: "",
-  owner: "",
-  due: "",
-  status: "todo",
-  comments: [],
-  projectId: ""
-};
-
-function loadTasks() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    return migrateTasks(Array.isArray(saved) ? saved : []);
-  } catch {
-    return [];
-  }
-}
 
 function saveTasks(tasks) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
@@ -74,17 +51,6 @@ function App() {
   const [viewAs, setViewAs] = useState(loadViewAs);
   const [createPrefill, setCreatePrefill] = useState({ type: "", team: "" });
   const [progressOwnerOverride, setProgressOwnerOverride] = useState("");
-  const [filters, setFilters] = useState({
-    search: "",
-    priority: "",
-    platform: "",
-    product: "",
-    owner: ""
-  });
-  const [taskDrawerOpen, setTaskDrawerOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState(null);
-  const [draft, setDraft] = useState(emptyTask);
-  const [commentDraft, setCommentDraft] = useState("");
   const [toast, setToast] = useState("");
   const [detailTick, setDetailTick] = useState(0);
   const [specialistTeamId, setSpecialistTeamId] = useState("");
@@ -100,32 +66,6 @@ function App() {
     if (!currentProjectId) return [];
     return tasks.filter((task) => task.projectId === currentProjectId);
   }, [tasks, currentProjectId]);
-
-  const visibleTasks = useMemo(() => {
-    const keyword = filters.search.trim().toLowerCase();
-    return projectTasks.filter((task) => {
-      const searchable = `${task.title} ${task.description}`.toLowerCase();
-      return (!keyword || searchable.includes(keyword))
-        && (!filters.priority || task.priority === filters.priority)
-        && (!filters.platform || task.platform === filters.platform)
-        && (!filters.product || task.product === filters.product)
-        && (!filters.owner || task.owner === filters.owner);
-    });
-  }, [filters, projectTasks]);
-
-  const filterOptions = useMemo(() => ({
-    products: [...new Set(projectTasks.map((task) => task.product).filter(Boolean))].sort(),
-    owners: [...new Set(projectTasks.map((task) => task.owner).filter(Boolean))].sort()
-  }), [projectTasks]);
-
-  const stats = useMemo(() => {
-    const done = projectTasks.filter((task) => task.status === "done").length;
-    return {
-      total: projectTasks.length,
-      doing: projectTasks.length - done,
-      done
-    };
-  }, [projectTasks]);
 
   useEffect(() => {
     if (activeView === "progress") {
@@ -173,7 +113,7 @@ function App() {
     if (view === "command") {
       view = "home";
     }
-    if (view !== "workspace" && view !== "board") {
+    if (view !== "workspace") {
       setFocusControlId("");
     }
     if (view !== "progress") {
@@ -261,9 +201,18 @@ function App() {
     return createdTask;
   }
 
-  function goToBoard(controlId = "") {
-    setFocusControlId(controlId);
-    setActiveView("board");
+  function handleDeleteWorkspaceControl(controlId) {
+    if (!controlId) return false;
+    const target = tasks.find((task) => task.id === controlId && task.projectId === currentProjectId);
+    if (!target) return false;
+
+    deleteControlWorkspaceProgress(currentProjectId, controlId);
+    setTasks((current) => current.filter((task) => task.id !== controlId));
+    if (focusControlId === controlId) {
+      setFocusControlId("");
+    }
+    setProgressDataRefreshKey((value) => value + 1);
+    return true;
   }
 
   function refreshProjects() {
@@ -280,108 +229,6 @@ function App() {
   function handleProjectCreated(project) {
     refreshProjects();
     openProject(project.id, "workspace");
-  }
-
-  function updateFilter(name, value) {
-    setFilters((current) => ({ ...current, [name]: value }));
-  }
-
-  function openTask(task) {
-    const nextTask = task || {
-      ...emptyTask,
-      id: "",
-      comments: [],
-      projectId: currentProjectId,
-      product: currentProject?.name || ""
-    };
-    setEditingTask(task || null);
-    setDraft(nextTask);
-    setCommentDraft("");
-    setTaskDrawerOpen(true);
-  }
-
-  function closeDrawer() {
-    setTaskDrawerOpen(false);
-    setEditingTask(null);
-    setDraft(emptyTask);
-    setCommentDraft("");
-  }
-
-  function updateDraft(name, value) {
-    setDraft((current) => ({ ...current, [name]: value }));
-  }
-
-  function handleSave(event) {
-    event.preventDefault();
-    const title = draft.title.trim();
-    if (!title) {
-      setToast("请先填写任务标题。");
-      return;
-    }
-
-    const existing = tasks.find((task) => task.id === draft.id);
-    if (existing && draft.status !== existing.status) {
-      const check = validateStatusTransition(existing, draft.status, projectTasks);
-      if (!check.allowed) {
-        setToast(check.message);
-        return;
-      }
-    }
-
-    const comments = [...(existing?.comments || draft.comments || [])];
-    const nextComment = commentDraft.trim();
-    if (nextComment) {
-      comments.push({ author: draft.owner.trim() || "成员", text: nextComment });
-    }
-
-    const normalizedTask = {
-      ...draft,
-      id: existing?.id || nextTaskId(tasks),
-      title,
-      description: draft.description.trim(),
-      product: draft.product.trim() || currentProject?.name || "",
-      owner: draft.owner.trim() || "未分配",
-      projectId: currentProjectId,
-      contributorGroup: resolveTaskContributorGroup(
-        { ...draft, owner: draft.owner.trim() || "未分配" },
-        currentProject?.specialistTeams
-      ),
-      comments
-    };
-
-    setTasks((current) => {
-      const exists = current.some((task) => task.id === normalizedTask.id);
-      return exists
-        ? current.map((task) => task.id === normalizedTask.id ? normalizedTask : task)
-        : [normalizedTask, ...current];
-    });
-    setToast(existing ? "任务已更新。" : "任务已创建。");
-    closeDrawer();
-  }
-
-  function deleteTask() {
-    if (!draft.id) return;
-    const confirmed = window.confirm(`删除任务「${draft.title}」？`);
-    if (!confirmed) return;
-    setTasks((current) => current.filter((task) => task.id !== draft.id));
-    setToast("任务已删除。");
-    closeDrawer();
-  }
-
-  function moveTask(taskId, nextStatus) {
-    const target = tasks.find((task) => task.id === taskId);
-    if (!target || target.status === nextStatus) return;
-
-    const check = validateStatusTransition(target, nextStatus, projectTasks);
-    if (!check.allowed) {
-      setToast(check.message);
-      return;
-    }
-
-    setTasks((current) => current.map((task) => (
-      task.id === taskId ? { ...task, status: nextStatus } : task
-    )));
-    setToast(`${target.id} 已移动到「${columnTitle(nextStatus)}」。`);
   }
 
   function handleDeleteProject(projectId, projectName) {
@@ -470,7 +317,6 @@ function App() {
           refreshToken={detailTick}
           controlPointCount={projectTasks.length}
           onOpenWorkspace={goToWorkspace}
-          onOpenBoard={() => setActiveView("board")}
           onOpenProgress={() => setActiveView("progress")}
           onOpenMembers={() => setActiveView("members")}
           onBack={goHome}
@@ -501,6 +347,7 @@ function App() {
           tasks={projectTasks}
           focusControlId={focusControlId}
           onCreateControlTask={handleCreateWorkspaceControl}
+          onDeleteControlTask={handleDeleteWorkspaceControl}
           onToast={setToast}
         />
       );
@@ -519,25 +366,6 @@ function App() {
       );
     }
 
-    if (activeView === "board") {
-      return (
-        <>
-          <BoardHeader
-            stats={stats}
-            filters={filters}
-            filterOptions={filterOptions}
-            onFilterChange={updateFilter}
-          />
-          <Board
-            columns={COLUMNS}
-            tasks={visibleTasks}
-            onOpenTask={openTask}
-            onMoveTask={moveTask}
-          />
-        </>
-      );
-    }
-
     if (activeView === "progress") {
       return (
         <ProgressBoardPage
@@ -548,7 +376,6 @@ function App() {
           viewAs={viewAs}
           ownerFilterOverride={progressOwnerOverride}
           onGoWorkspace={goToWorkspace}
-          onGoBoard={goToBoard}
         />
       );
     }
@@ -583,24 +410,11 @@ function App() {
         <Topbar
           activeView={activeView}
           project={currentProject}
-          onNewTask={() => openTask()}
         />
         <div className="content-body">
           {renderMain()}
         </div>
       </main>
-      <TaskDrawer
-        open={taskDrawerOpen}
-        editingTask={editingTask}
-        draft={draft}
-        allTasks={projectTasks}
-        commentDraft={commentDraft}
-        onClose={closeDrawer}
-        onChange={updateDraft}
-        onCommentChange={setCommentDraft}
-        onSave={handleSave}
-        onDelete={deleteTask}
-      />
       <div className={`toast ${toast ? "show" : ""}`} role="status" aria-live="polite">
         {toast}
       </div>

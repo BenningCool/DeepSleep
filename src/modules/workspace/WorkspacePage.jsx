@@ -555,7 +555,14 @@ function MaterialList({ items, onRemove }) {
   );
 }
 
-export function WorkspacePage({ project, tasks, focusControlId = "", onCreateControlTask, onToast }) {
+export function WorkspacePage({
+  project,
+  tasks,
+  focusControlId = "",
+  onCreateControlTask,
+  onDeleteControlTask,
+  onToast
+}) {
   const [ownerFilter, setOwnerFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -572,6 +579,8 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
   const [generatingNodes, setGeneratingNodes] = useState({});
   const generationTimersRef = useRef({});
   const [createOpen, setCreateOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState("");
   const [createDraft, setCreateDraft] = useState(() => {
     const firstDate = todayDate();
     return {
@@ -678,6 +687,44 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
 
   function closeCreateDialog() {
     setCreateOpen(false);
+  }
+
+  function openDeleteDialog() {
+    if (!snapshot.controls.length) {
+      onToast?.("当前项目暂无可删除的测试点。");
+      return;
+    }
+    setDeleteTargetId(selectedControl?.id || snapshot.controls[0]?.id || "");
+    setDeleteOpen(true);
+  }
+
+  function closeDeleteDialog() {
+    setDeleteOpen(false);
+    setDeleteTargetId("");
+  }
+
+  function deleteControlTask(event) {
+    event.preventDefault();
+    const control = snapshot.controls.find((item) => item.id === deleteTargetId);
+    if (!control) {
+      onToast?.("请选择要删除的测试点。");
+      return;
+    }
+
+    const confirmed = window.confirm(`确定删除测试点「${control.title}」吗？\n\n该操作会同步删除该测试点的工作台记录与进度数据。`);
+    if (!confirmed) return;
+
+    const deleted = onDeleteControlTask?.(control.id);
+    if (!deleted) {
+      onToast?.("删除测试点失败。");
+      return;
+    }
+
+    const remaining = snapshot.controls.filter((item) => item.id !== control.id);
+    setSelectedId(remaining[0]?.id || "");
+    setRefreshToken((value) => value + 1);
+    closeDeleteDialog();
+    onToast?.("测试点已删除。");
   }
 
   function updateCreateType(controlType) {
@@ -1890,9 +1937,14 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
             <div>
               <h3>测试点清单</h3>
             </div>
-            <button className="button primary" type="button" onClick={openCreateDialog}>
-              新建测试点
-            </button>
+            <div className="workspace-toolbar-actions">
+              <button className="button danger compact workspace-delete-button" type="button" onClick={openDeleteDialog}>
+                删除测试点
+              </button>
+              <button className="button primary compact" type="button" onClick={openCreateDialog}>
+                新建测试点
+              </button>
+            </div>
           </div>
 
           <div className="workspace-filter-grid">
@@ -2253,6 +2305,42 @@ export function WorkspacePage({ project, tasks, focusControlId = "", onCreateCon
               </button>
               <button className="button primary" type="submit">
                 Create
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : null}
+
+      {deleteOpen ? (
+        <div className="workspace-modal-backdrop" role="presentation">
+          <form className="workspace-modal workspace-delete-modal" onSubmit={deleteControlTask}>
+            <div className="workspace-modal-head">
+              <div>
+                <h3>删除测试点</h3>
+                <p>选择已经创建的测试点。删除后，该测试点的工作台记录和进度数据会一起清理。</p>
+              </div>
+              <button className="button subtle" type="button" onClick={closeDeleteDialog}>
+                关闭
+              </button>
+            </div>
+
+            <label className="field full">
+              <span className="label">选择测试点</span>
+              <select value={deleteTargetId} onChange={(event) => setDeleteTargetId(event.target.value)}>
+                {snapshot.controls.map((control) => (
+                  <option key={control.id} value={control.id}>
+                    {control.title} · {control.controlType} · {control.owner || "未分配"}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div className="workspace-detail-actions">
+              <button className="button subtle" type="button" onClick={closeDeleteDialog}>
+                Cancel
+              </button>
+              <button className="button danger compact workspace-delete-button" type="submit">
+                删除测试点
               </button>
             </div>
           </form>

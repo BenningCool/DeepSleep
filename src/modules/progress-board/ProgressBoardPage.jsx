@@ -90,7 +90,6 @@ export function ProgressBoardPage({
   project,
   tasks,
   onGoWorkspace,
-  onGoBoard,
   focusControlId = "",
   dataRefreshKey = 0,
   viewAs = "ic",
@@ -486,11 +485,6 @@ export function ProgressBoardPage({
               </div>
 
               <div className="panel-footer-actions progress-drawer-footer">
-                {onGoBoard ? (
-                  <button className="button" type="button" onClick={() => onGoBoard(selectedControl.id)}>
-                    去看板
-                  </button>
-                ) : null}
                 <button className="button primary" type="button" onClick={() => onGoWorkspace(selectedControl.id)}>
                   去工作台
                 </button>

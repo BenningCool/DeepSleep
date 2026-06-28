@@ -7,14 +7,12 @@ const VIEW_LABELS = {
   detail: "项目概览",
   members: "成员管理",
   workspace: "工作台",
-  board: "看板",
   progress: "进度看板"
 };
 
 export function Topbar({
   activeView = "home",
-  project,
-  onNewTask
+  project
 }) {
   const viewLabel = VIEW_LABELS[activeView] || "DeepSleep";
 
@@ -37,11 +35,7 @@ export function Topbar({
         <span>/</span>
         <span>{viewLabel}</span>
       </div>
-      <div className="actions">
-        {activeView === "board" ? (
-          <button className="button primary" type="button" onClick={onNewTask}>新建任务</button>
-        ) : null}
-      </div>
+      <div className="actions" />
     </header>
   );
 }

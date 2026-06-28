@@ -1402,6 +1402,23 @@ button {
   margin: 0;
 }
 
+.workspace-toolbar-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.workspace-delete-button {
+  border-color: var(--red);
+  background: var(--red);
+  color: #fff;
+}
+
+.workspace-delete-button:hover {
+  background: #b42318;
+}
+
 .status-pill.pending {
   background: var(--amber-soft);
   color: #7a4a00;
@@ -1848,6 +1865,10 @@ button {
   border-radius: 10px;
   background: var(--surface);
   box-shadow: var(--shadow);
+}
+
+.workspace-delete-modal {
+  width: min(520px, 100%);
 }
 
 .workspace-modal-head {

@@ -33,7 +33,6 @@ export function ProjectDetailPage({
   refreshToken = 0,
   controlPointCount = 0,
   onOpenWorkspace,
-  onOpenBoard,
   onOpenMembers,
   onOpenProgress,
   onBack,
@@ -212,7 +211,6 @@ export function ProjectDetailPage({
           </p>
 
           <div className="scope-defined-links">
-            <button className="button" type="button" onClick={onOpenBoard}>查看看板</button>
             <button className="button primary" type="button" onClick={onOpenProgress}>查看进度看板</button>
           </div>
         </section>

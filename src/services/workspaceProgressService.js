@@ -1213,6 +1213,37 @@ export function deleteProjectWorkspaceProgress(projectId, controlIds = []) {
   }
 }
 
+export function deleteControlWorkspaceProgress(projectId, controlId) {
+  if (!controlId) return false;
+
+  const store = loadStore();
+  let changed = false;
+
+  if (projectId && store.projects?.[projectId]?.records?.[controlId]) {
+    delete store.projects[projectId].records[controlId];
+    changed = true;
+
+    if (!Object.keys(store.projects[projectId].records).length) {
+      delete store.projects[projectId];
+    }
+  }
+
+  if (store.records?.[controlId]) {
+    delete store.records[controlId];
+    changed = true;
+    if (!Object.keys(store.records).length) {
+      delete store.records;
+    }
+  }
+
+  if (changed) {
+    store.updatedAt = nowIso();
+    saveStore(store);
+  }
+
+  return changed;
+}
+
 export function updateWorkspaceNodeResponse(controlId, nodeId, value, projectId = "") {
   const current = getControlProgressDetail(controlId, projectId ? { id: controlId, projectId } : null);
   return upsertControlProgress(controlId, {
