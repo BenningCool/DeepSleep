@@ -2,7 +2,13 @@ import { PROJECT_TYPES } from "./projectConstants";
 
 export const DEMO_PROJECT_IDS = {
   uatAnnual: "PRJ-UAT-DEMO",
-  socIta: "PRJ-SOC-DEMO"
+  socIta: "PRJ-SOC-DEMO",
+  ipo: "PRJ-IPO-DEMO",
+  privacy: "PRJ-PRIV-DEMO",
+  specialIt: "PRJ-SPECIAL-IT-DEMO",
+  retailAnnual: "PRJ-RETAIL-DEMO",
+  mfgAnnual: "PRJ-MFG-DEMO",
+  fintechSoc: "PRJ-FINTECH-SOC-DEMO"
 };
 
 /** 五类项目视觉与叙事配置（v1.7 · 看起来不同，不驱动测试点生成） */
@@ -27,8 +33,7 @@ export const ENGAGEMENT_TYPE_PROFILES = {
     collaboration: "ITA standalone",
     progressFocus: "Scope scoping · Key systems",
     tagline: "Targeted IT assurance",
-    demoProjectId: DEMO_PROJECT_IDS.socIta,
-    demoNote: "演示采用 ITA 主导 SOC 示例项目"
+    demoProjectId: DEMO_PROJECT_IDS.specialIt
   },
   ipo: {
     id: "ipo",
@@ -39,8 +44,7 @@ export const ENGAGEMENT_TYPE_PROFILES = {
     collaboration: "Audit + ITA",
     progressFocus: "Readiness · Disclosure cycles",
     tagline: "Pre-IPO readiness",
-    demoProjectId: DEMO_PROJECT_IDS.uatAnnual,
-    demoNote: "演示暂共用 Audit 年审示例项目"
+    demoProjectId: DEMO_PROJECT_IDS.ipo
   },
   soc: {
     id: "soc",
@@ -62,8 +66,7 @@ export const ENGAGEMENT_TYPE_PROFILES = {
     collaboration: "ITA (+ FRM optional)",
     progressFocus: "PIPL controls · Data mapping",
     tagline: "PIPL / privacy compliance",
-    demoProjectId: DEMO_PROJECT_IDS.socIta,
-    demoNote: "演示采用 ITA 主导 SOC 示例项目"
+    demoProjectId: DEMO_PROJECT_IDS.privacy
   }
 };
 

@@ -9,16 +9,19 @@ export function PortfolioKpiSection({ mode, summary, reportStack }) {
   const critical = summary.riskCounts?.critical ?? 0;
   const elevated = summary.riskCounts?.elevated ?? 0;
   const watchlistCount = summary.watchlistCount ?? 0;
-  const totalOverdue = summary.totalOverdue ?? 0;
 
   const headline = mode === "ep"
     ? `${projectCount} 个项目 · ${summary.emCount ?? 0} 位下辖 EM`
-    : `${projectCount} 个项目 · 现场团队 ${summary.fieldworkHeadcount ?? summary.headcount ?? 0} 人`;
+    : mode === "staff"
+      ? `${projectCount} 个项目 · ${summary.assignedTotal ?? 0} 个指派测试点 · 负荷 ${summary.saturationLevel ?? "—"}`
+      : mode === "contributor"
+        ? `${projectCount} 个协作项目 · ${summary.contributorLabel ?? ""} 组贡献`
+        : `${projectCount} 个项目 · 现场团队 ${summary.fieldworkHeadcount ?? summary.headcount ?? 0} 人`;
 
   const labels = COMMAND_CENTER_LABELS.kpi;
 
   return (
-    <div className="progress-dashboard-kpi-section">
+    <div className="progress-dashboard-kpi-section portfolio-kpi-section">
       <header className="progress-dashboard-kpi-head">
         <ModuleHeading
           title={labels.sectionTitle}
@@ -26,9 +29,10 @@ export function PortfolioKpiSection({ mode, summary, reportStack }) {
         />
         <p className="panel-note">{headline}</p>
       </header>
-      <div className="progress-dashboard-kpi-row">
+
+      <div className="progress-dashboard-kpi-row portfolio-kpi-project-row">
         <StatusKpiCard
-          iconType="overdue"
+          iconType="flag"
           label={labels.critical}
           value={critical}
           percent={formatSharePercent(critical, projectCount)}
@@ -36,7 +40,7 @@ export function PortfolioKpiSection({ mode, summary, reportStack }) {
           alert
           badge={critical ? "需跟进" : ""}
           extraClassName={critical ? "is-overdue-kpi" : ""}
-          subject="项目"
+          subject="个项目"
         />
         <StatusKpiCard
           iconType="not-started"
@@ -45,7 +49,7 @@ export function PortfolioKpiSection({ mode, summary, reportStack }) {
           percent={formatSharePercent(elevated, projectCount)}
           tone="status-not-started"
           alert={elevated > 0}
-          subject="项目"
+          subject="个项目"
         />
         <StatusKpiCard
           iconType="in-progress"
@@ -53,19 +57,10 @@ export function PortfolioKpiSection({ mode, summary, reportStack }) {
           value={watchlistCount}
           percent={formatSharePercent(watchlistCount, projectCount)}
           tone="status-in-progress"
-          subject="30 天内报告"
-        />
-        <StatusKpiCard
-          iconType="overdue"
-          label={labels.overdueProcedures}
-          value={totalOverdue}
-          tone={totalOverdue > 0 ? "due-risk-alert" : "status-overdue-idle"}
-          alert
-          badge={totalOverdue ? "需跟进" : ""}
-          extraClassName={totalOverdue ? "is-overdue-kpi" : ""}
-          subject=""
+          subject="个项目"
         />
       </div>
+
       {reportStack?.triggered ? (
         <p className="team-collision-note report-stack-note">
           {formatReportStackMessage(reportStack)}

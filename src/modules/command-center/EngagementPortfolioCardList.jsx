@@ -4,29 +4,50 @@ import {
   formatWorkspaceStatusSummary,
   WorkspaceStatusOverviewBar
 } from "../progress-board/WorkspaceStatusOverviewBar";
-import { formatProcedureOverdue } from "./managementCopy";
+import { formatCompletionLabel, formatProcedureOverdue } from "./managementCopy";
 import { riskTierVisual } from "./portfolioVisualTokens";
+
+function formatCardMeta(row) {
+  const parts = [row.urgency.readableLabel || row.urgency.label];
+  if (row.completion?.total) {
+    parts.push(formatCompletionLabel(row.completion));
+  }
+  return parts.join(" · ");
+}
 
 function EngagementPortfolioCard({
   row,
   tasks,
   showEmColumn,
+  attentionRank = 0,
   onOpenProgress,
   onOpenDetail
 }) {
   const { project, urgency, overdueCount, risk, managerLabel } = row;
   const visual = riskTierVisual(risk.tier);
+  const hasOverdue = overdueCount > 0;
 
   const breakdown = useMemo(
     () => getProjectWorkspaceStatusOverview(project.id, tasks),
     [project.id, tasks]
   );
 
+  const emMetaLine = showEmColumn && managerLabel
+    ? `负责 EM · ${managerLabel}`
+    : "";
+
   return (
     <article
-      className="command-portfolio-card"
+      className={[
+        "command-portfolio-card",
+        attentionRank ? "is-attention-ranked" : "",
+        hasOverdue ? "has-procedure-overdue" : ""
+      ].filter(Boolean).join(" ")}
       style={{ "--portfolio-accent": visual.borderColor }}
     >
+      {attentionRank ? (
+        <div className="command-portfolio-card-rank">#{attentionRank}</div>
+      ) : null}
       <div className="command-portfolio-card-head">
         <div className="command-portfolio-card-title">
           <span className={visual.pillClass}>{risk.labelZh}</span>
@@ -47,8 +68,16 @@ function EngagementPortfolioCard({
         </div>
       </div>
 
-      {showEmColumn && managerLabel ? (
-        <p className="command-portfolio-card-meta">负责 EM · {managerLabel}</p>
+      {emMetaLine ? (
+        <p className="command-portfolio-card-meta">{emMetaLine}</p>
+      ) : null}
+
+      {attentionRank && hasOverdue ? (
+        <div className="attention-queue-overdue-alert" role="alert">
+          <span className="progress-flag overdue attention-overdue-chip">
+            {overdueCount} 项程序逾期 · 需跟进
+          </span>
+        </div>
       ) : null}
 
       <div className="command-portfolio-card-progress">
@@ -63,6 +92,8 @@ function EngagementPortfolioCard({
             : "暂无测试点"}
         </p>
       </div>
+
+      <p className="command-portfolio-card-report-meta">{formatCardMeta(row)}</p>
 
       <div className="command-card-actions">
         <button
@@ -88,13 +119,14 @@ export function EngagementPortfolioCardList({
   rows = [],
   tasks = [],
   showEmColumn = true,
+  emptyHint = "该月暂无报告日项目。",
   onOpenProgress,
   onOpenDetail
 }) {
   if (!rows.length) {
     return (
       <div className="empty-state compact">
-        <p>暂无所辖项目。</p>
+        <p>{emptyHint}</p>
       </div>
     );
   }
@@ -107,6 +139,7 @@ export function EngagementPortfolioCardList({
           row={row}
           tasks={tasks}
           showEmColumn={showEmColumn}
+          attentionRank={row.attentionRank || 0}
           onOpenProgress={onOpenProgress}
           onOpenDetail={onOpenDetail}
         />

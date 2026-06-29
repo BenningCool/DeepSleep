@@ -2,7 +2,7 @@
 
 > **文档用途**：黑客松 DeepSleep 项目的产品需求定稿。  
 > **同步说明**：请将本文档内容复制至飞书 Wiki：[产品需求文档](https://my.feishu.cn/wiki/GDGcwzpuciqBpjkgoCdcLYO2n3c)  
-> **当前版本**：v1.7.6 · 2026-06-17
+> **当前版本**：v1.7.7 · 2026-06-29
 
 ---
 
@@ -10,9 +10,9 @@
 
 | 项目 | 内容 |
 |------|------|
-| 版本号 | v1.7.6 |
+| 版本号 | v1.7.7 |
 | 创建日期 | 2026-06-04 |
-| 最近更新 | 2026-06-17 |
+| 最近更新 | 2026-06-29 |
 | 审核人 | 待定 |
 | 状态 | 黑客松 MVP 迭代中 |
 
@@ -48,6 +48,7 @@
 | 2026-06-17 | v1.7.4 | 团队 | EP 页重构：**Engagement Risk Matrix** 主视图 + **Attention Queue Top 3**；**Portfolio Health Bar**（nearest report / overdue / RAG 计数）；**Reporting EMs 默认折叠**；四大专业用词（Engagement / Procedures / Fieldwork team） |
 | 2026-06-17 | v1.7.5 | 团队 | **EP/EM 管理层统一风格**：中文可读文案（报告日还有 N 天）、统一摘要条/项目表/优先关注/报告日预警；EM 接入 Risk Matrix、**移除底部 project chips**、现场团队默认折叠；**指标说明**折叠区 |
 | 2026-06-17 | v1.7.6 | 团队 | **项目页与指挥中心合并**：侧栏单一入口 **项目** + **角色视角 · View as**（含「全部项目」）；默认 **EP** 便于 demo；EP/EM **看板同款外壳**（KPI 四格 + `progress-dashboard-card` + token 统一）；**项目卡片列表**替代 Risk Matrix 主视图；新增 **报告日时间轴**；`EngagementHomePage` / `ManagementCommandBody` |
+| 2026-06-29 | v1.7.7 | 团队 | **指挥中心布局统一**（EP/EM/IC/Staff/Lead）：KPI **三格项目风险** → **项目列表**（内置搜索/筛选/排序）→ **资源分配** → **报告日日历｜预警** 并排；移除程序执行 KPI 与 **指标说明**；**资源分配改人维度**（`PersonWorkloadTable`：IC/Staff 各多少项目与控制点）；EP 按 EM 折叠；Staff/Contributor 仍按项目表；**演示种子 v2**（8 项目、2 EM、3 Staff）；日历月份切换；可读性优化 |
 
 ---
 
@@ -174,7 +175,7 @@ DeepSleep
 ├── 项目（v1.7.6 · 统一入口）
 │   ├── 角色视角 · View as：全部项目 / EP / EM / IC / Staff / Lead
 │   ├── 全部项目：模糊搜索、排序、牵头团队/项目类型筛选、类型皮肤
-│   └── 管理视角（EP/EM/IC/Staff）：组合 KPI、项目卡片、报告日时间轴、优先关注、报告日预警
+│   └── 管理视角（EP/EM/IC/Staff/Lead）：组合 KPI、项目列表、资源分配、报告日日历｜预警
 ├── 项目类型（v1.7 · 展示）
 │   ├── 五类档案卡、查看示例、以此类型创建
 ├── 项目创建 / 详情 / 成员管理（v1.5）
@@ -297,26 +298,24 @@ DeepSleep
 
 ---
 
-## 七点五、功能需求 · 管理视角（v1.7 · v1.7.6）
+## 七点五、功能需求 · 管理视角（v1.7 · v1.7.7）
 
 > 以下各模式通过 **项目** 页顶 View as 进入；**不再**占用独立侧栏「指挥中心」入口。
 
-### 入口与布局（v1.7.6）
+### 入口与布局（v1.7.7）
 
 - 全局侧栏：**项目 → 项目类型 → 新建项目**
-- EP / EM 管理页采用与 **进度看板** 一致的 **`progress-dashboard-card`** 分区外壳 + **KPI 四格**（`StatusKpiCard` / `PortfolioKpiSection`）
+- **EP / EM / IC / Staff / ITA·Tax Lead** 共用 `ManagementCommandBody.jsx` 壳层
 - 关注级别 RAG 与进度看板 **workspaceStatus / overdue token 同源**（`portfolioVisualTokens.js`）
-- EP/EM 共享布局组件：`ManagementCommandBody.jsx`
 
-**EP/EM 页内区块顺序（自上而下）**
+**各角色页内区块顺序（自上而下 · v1.7.7）**
 
-1. 组合 KPI 四格（Critical / Elevated / 30 天内报告 / 逾期程序）
-2. **项目卡片列表**（主视图 · `EngagementPortfolioCardList`）
-3. 报告日时间轴（未来 90 天 · `ReportTimelineStrip`）
-4. 优先关注 Top N（`AttentionQueuePanel`）
-5. 报告日预警 · 未来 30 天（`ReportDayPanel`）
-6. 指标说明（折叠 · `CommandMetricsLegend`）
-7. 折叠区：EP → 下辖 EM；EM → 现场团队工作饱和度
+1. **组合风险概览** KPI **三格**：需立即关注 / 需重点关注 / 30 天内报告（**已移除**程序执行 KPI 行）
+2. **项目列表**（`EngagementPortfolioCardList` + `PortfolioListToolbar`）：展示当前视角下**全部**相关项目（不按报告月过滤）；搜索 / 牵头团队 / 项目类型 / 排序 / 计数并入列表模块
+3. **资源分配**（`ResourceAllocationSection` · 见 §7.7）
+4. **报告日日历**（`ReportDateCalendar` · 月份切换）与 **报告日预警**（`ReportDayPanel`）**左右并排**
+
+**v1.7.7 移除**：独立「优先关注」区块（排名并入项目卡片 `#1–#N`）、**报告日时间轴**（`ReportTimelineStrip`）、**指标说明**（`CommandMetricsLegend`）、EP/EM 底部「下辖 EM / 现场团队」折叠区（信息并入资源分配）
 
 ### View as（演示身份）
 
@@ -371,69 +370,34 @@ View as = **Staff** 时，指挥中心 **切换为独立布局**（`StaffCommand
 
 实现：`staffWorkloadUtils.js` + `StaffCommandView.jsx`。
 
-### IC / EM 模式 · 团队负荷 Rollup（v1.7.2 · v1.7.3 角色纠正）
+### IC / EM 模式 · 团队负荷 Rollup（v1.7.2 · v1.7.7 资源分配人维度）
 
-View as = **IC** 或 **EM** 时，指挥中心切换为 **团队负荷页**（`TeamRollupCommandView`），与 Staff 个人页、EP Portfolio 均不同。
+View as = **IC** 或 **EM** 时，页内 **资源分配** 区块展示所辖 **IC + Staff** 每人一行（`PersonWorkloadTable`），列：**成员 / 角色 / 项目数 / 控制点 / 逾期 / 负荷 / 参与项目**（项目 pill 可点击进进度；默认展示前 3 个项目，其余 `+N` 展开）。
 
-**Report Date 预警（v1.7.3 · 全员）**
+| 视角 | 资源分配块标题角色 | 人员范围 |
+|------|-------------------|----------|
+| **EM** | Engagement Manager | 所辖项目上全部 **In-charge + Staff** |
+| **IC** | **In-charge**（非 EM） | **本人 + 组内 Staff**（本人行带「我」） |
 
-| 档位 | 条件 | 视觉 |
-|------|------|------|
-| 过期 | 报告日已过 | 红 |
-| D-7 | ≤ 7 天 | 红 |
-| D-14 | ≤ 14 天 | 琥珀 |
-| D-30 | ≤ 30 天 | 灰 |
-| 未填 | 无 reportDate | 紫 |
+**不再**在资源分配区使用「按项目列执行人」表（`ProjectExecutorTable` 仅 Staff / Contributor 模式保留）。
 
-14 天内 ≥2 个项目 Report 堆叠时提示 last minute 风险。
+实现：`personWorkloadUtils.js` + `PersonWorkloadTable.jsx` + `teamRollupUtils.js` + `TeamRollupCommandView.jsx` + `ManagementCommandBody.jsx`。
 
-**所辖项目判定**
-
-| 视角 | 条件 |
-|------|------|
-| IC | `project.members` 中 `in_charge` = 当前演示邮箱 |
-| EM | `project.members` 中 `manager` = 当前演示邮箱 |
-
-**可见成员（执行层 only · v1.7.3）**
-
-| 视角 | Roster |
-|------|--------|
-| IC / EM | 所辖项目上的 **In-charge + Staff**（**不含 Manager / Partner**） |
-
-EM 本人为 **管理角色**，页顶展示 **管理 Focus**（Report 临近 + 执行层逾期加权），不参与测试点执行。
-
-**每人一行（Person 快照）**
-
-- 负荷 % / 低中高（与 Staff 同一算法，跨项目汇总）
-- **当前 Focus** 项目（客户 · 项目名）
-- 测试点：总数、未开始/测试中/逾期
-- **查看测试点** → 进度看板并 **按该成员邮箱筛选**（`ownerFilterOverride`）
-
-**团队摘要**：执行层人数、高/中负荷人数、执行层逾期总数；EM 另展示 30 天内 Report 数与 D-14 堆叠；若多人 Focus 同一项目则提示资源争抢。
-
-**底部**：~~所辖项目 chip~~（v1.7.5 已移除）；所辖项目改由 **项目卡片列表** 展示。
-
-实现：`reportDayUtils.js` + `ReportDayPanel.jsx` + `ReportTimelineStrip.jsx` + `teamRollupUtils.js` + `TeamRollupCommandView.jsx` + `ManagementCommandBody.jsx`。
-
-### EP 模式 · Engagement Portfolio Oversight（v1.7.4 · v1.7.6 卡片主视图）
+### EP 模式 · Engagement Portfolio Oversight（v1.7.4 · v1.7.7）
 
 View as = **EP** 时，切换为 **Portfolio Oversight 页**（`EpCommandView` + `ManagementCommandBody`）。
 
-**组合 KPI 四格**（v1.7.6）：Critical engagements / Elevated / 30 天内报告 / 逾期程序合计；附组合摘要（项目数 · 下辖 EM 数）。
+**组合 KPI 三格**（v1.7.7）：需立即关注 / 需重点关注 / 30 天内报告；附组合摘要（项目数 · 下辖 EM 数）。
 
-**项目卡片列表（主视图 · v1.7.6 替代 Risk Matrix 表）**
+**项目卡片列表**：带 `#1–#N` 优先排名、测试点进度条、报告日/逾期 badge；操作：**项目进度** / **项目概览**。
 
-每张卡：关注级别 pill（需立即关注 / 需重点关注 / 持续跟踪 / 进展正常）、客户/项目名、Reporting EM、报告日可读文案、逾期 badge、**测试点进度条**（与列表 `WorkspaceStatusOverviewBar` 同源）。操作：**项目进度** / **项目概览**。
+**资源分配**：按 **下辖 EM** 分块（多 EM 时默认折叠，可展开）；每块内为 **PersonWorkloadTable**（该 EM 所辖 IC/Staff 人维度）。
 
-**报告日时间轴（v1.7.6）**：横轴为距报告日天数；点大小表示逾期程序数；支持 14 天内 Report 堆叠带；点击 marker 进入项目进度。
+**报告日日历**：月历 + ‹上月›/›下月›；色块按 D-7/D-14/D-30 预警档；点击项目进进度。
 
-**Attention Queue · Top 3**：从组合评分取前 3 项需关注 engagement。
+**报告日预警**：未来 30 天 watchlist；空态显示 nearest report。
 
-**Report Date Watchlist**：未来 30 天；空态显示 nearest report 提示。
-
-**Reporting EMs**：**默认折叠**，展开后展示 EM 卡片（fieldwork team / overdue / report clustering）。
-
-实现：`epPortfolioUtils.js` + `EngagementPortfolioCardList.jsx` + `PortfolioKpiSection.jsx` + `ManagementCommandBody.jsx` + `AttentionQueuePanel.jsx` + `reportTimelineUtils.js`。
+实现：`epPortfolioUtils.js` + `EngagementPortfolioCardList.jsx` + `PortfolioKpiSection.jsx` + `ResourceAllocationSection.jsx` + `ReportDateCalendar.jsx` + `ManagementCommandBody.jsx`。
 
 ---
 
@@ -443,25 +407,51 @@ View as = **EP** 时，切换为 **Portfolio Oversight 页**（`EpCommandView` +
 
 | 操作 | 行为 |
 |------|------|
-| **查看示例** | `annual`/`ipo` → `PRJ-UAT-DEMO`；`soc`/`special-it`/`privacy` → `PRJ-SOC-DEMO`（副线注明 ITA 主导范式） |
+| **查看示例** | 各类型指向独立 demo 项目（见 §七点七）；`annual`→PRJ-UAT-DEMO；`ipo`→PRJ-IPO-DEMO；`soc`→PRJ-SOC-DEMO；`special-it`→PRJ-SPECIAL-IT-DEMO；`privacy`→PRJ-PRIV-DEMO |
 | **以此类型创建** | 跳转创建页并预填 `projectType` + 默认 `team`（annual/ipo→audit；soc/special-it/privacy→ita） |
 
 ---
 
-## 七点七、演示种子项目（v1.7）
+## 七点七、演示种子项目（v1.7 · v1.7.7）
 
-首次启动幂等注入（`deepsleep-demo-seed-v1`）：
+首次启动幂等注入（`deepsleep-demo-seed-v1`，**版本 2** 覆盖演示项目字段并刷新演示测试点）：
 
 | ID | 叙事 | 要点 |
 |----|------|------|
-| **PRJ-UAT-DEMO** | Audit 年审 + ITA/Tax | 15 条演示测试点、ITA+Tax Specialist、Report **D-6**、部分逾期/测试中 |
-| **PRJ-SOC-DEMO** | ITA-led SOC | 0～2 条 ITA 测试点、Report **D-12**（与 UAT 形成 14 天内堆叠演示） |
+| **PRJ-UAT-DEMO** | Audit 年审 + ITA/Tax | 15 控制点、Report **D+5**、多逾期 |
+| **PRJ-SOC-DEMO** | ITA-led SOC 2 | 5 控制点、Report **D+10** |
+| **PRJ-IPO-DEMO** | Audit IPO | 6 控制点、Report **D+25** |
+| **PRJ-MFG-DEMO** | Audit 装备制造年审 | 5 控制点、Report **D+18** |
+| **PRJ-PRIV-DEMO** | ITA 隐私合规 | 6 控制点、Report **D+3**（Critical） |
+| **PRJ-SPECIAL-IT-DEMO** | ITA 专项 IT | 5 控制点、Report **D+10**（与 SOC 同窗堆叠） |
+| **PRJ-RETAIL-DEMO** | Audit 零售年审 | 4 控制点、Report **D+42**（日历远期） |
+| **PRJ-FINTECH-SOC-DEMO** | ITA 金融科技 SOC 1 | 5 控制点、Report **D+28** |
 
-**原则**：工作台页面与写入逻辑 **不修改**；种子仅写 `projects` / `tasks` / 可选 workspace progress。
+**角色分布**：Partner `partner.uat@firm.com`；EM1 `manager.uat@firm.com`（4 项目）；EM2 `manager2.uat@firm.com`（4 项目）；IC `incharge` / `incharge2`；Staff `staff1/2/3.uat@firm.com`；ITA/Tax Lead 演示邮箱不变。
+
+**原则**：工作台页面与写入逻辑 **不修改**；种子仅写 `projects` / `tasks` / 可选 workspace progress。升级种子版本后需清 `localStorage` 中 `deepsleep-demo-seed-v1` 或首次访问自动重灌。
 
 ---
 
-## 七点八、进度看板 View as（v1.7）
+## 七点八、资源分配（v1.7.7）
+
+| 视角 | 展示维度 | 组件 |
+|------|----------|------|
+| **EP** | 按下辖 **EM** 分块 → 每块 **IC/Staff 人列表** | `PersonWorkloadTable` |
+| **EM** | 所辖 **IC/Staff 人列表** | `PersonWorkloadTable` |
+| **IC** | **本人 + Staff** 人列表（块标题 **In-charge**） | `PersonWorkloadTable` |
+| **Staff** | 按 **项目** 列指派与执行人 | `ProjectExecutorTable` |
+| **ITA/Tax Lead** | 按 **项目** 列协作组执行人 | `ProjectExecutorTable` |
+
+**人维度行字段**：成员邮箱、角色、参与项目数、控制点总数、逾期数、负荷档（低/中/高）、参与项目 pills（默认 3 + `+N`）。
+
+**摘要统计**：人现场 · 项目数 · 控制点数 · 偏高人数（**不含**「人均 X 项目/人」）。
+
+实现：`resourceAllocationUtils.js` + `personWorkloadUtils.js` + `resourceAllocationConfig.js`。
+
+---
+
+## 七点九、进度看板 View as（v1.7）
 
 进入进度看板时根据 View as 设置 **初始** 负责组/负责人筛选（用户可手动修改）：
 
@@ -1141,6 +1131,15 @@ Snapshot（只读 · 进度看板）
 - [x] 进度看板用户可见文案统一为 **测试点**（列表/抽屉/KPI/卡片标题）
 - [x] 移除进度看板/项目列表/侧栏等 **模块辅助说明小字**（`page-lead` / `panel-note` 引导文案）
 
+**v1.7.7**
+
+- [x] **指挥中心统一布局**：KPI 三格 → 项目列表（含 Toolbar）→ 资源分配 → 日历｜预警（`ManagementCommandBody`）
+- [x] **资源分配人维度**（EP/EM/IC）：`PersonWorkloadTable` + `personWorkloadUtils`
+- [x] **报告日日历**（`ReportDateCalendar` + 月份导航）
+- [x] **演示种子 v2**：8 项目、2 EM、3 Staff（`DEMO_SEED_VERSION=2`）
+- [x] 移除 **CommandMetricsLegend**、程序执行 KPI 行、报告日时间轴独立区块
+- [x] IC 资源分配块角色文案 **In-charge**；移除「人均项目/人」
+
 **v1.7.6**
 
 - [x] **项目页统一入口**（`EngagementHomePage`）：侧栏 **项目**；View as 含 **全部项目**；Demo 默认 **EP**
@@ -1247,4 +1246,4 @@ Snapshot（只读 · 进度看板）
 
 ---
 
-*文档结束 · DeepSleep PRD v1.6.12*
+*文档结束 · DeepSleep PRD v1.7.7*

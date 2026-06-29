@@ -9,7 +9,10 @@ export const SATURATION_LEVEL_LABEL = {
 export const ROLE_PAGE_INTRO = {
   ep: "以 Engagement Partner 身份查看项目组合：各项目报告日与程序逾期情况，以及下辖 EM 概况（本人不执行现场程序）。",
   em: "以 Engagement Manager 身份查看所辖项目：报告日进度、程序逾期与现场团队工作饱和度（本人不执行现场程序）。",
-  ic: "查看所辖项目上 IC / Staff 的工作饱和度与当前优先项目，并关注各项目报告日。"
+  ic: "以 In-charge 身份查看所辖项目：报告日、程序逾期与组内 IC / Staff 工作饱和度。",
+  staff: "跨项目个人工作全景：参与项目的报告日、程序逾期与指派测试点进度。",
+  ita_lead: "查看 ITA 组有贡献的项目：报告日预警与各项目测试点进度。",
+  tax_lead: "查看 Tax 组有贡献的项目：报告日预警与各项目测试点进度。"
 };
 
 export const METRICS_LEGEND = [
@@ -30,8 +33,8 @@ export const METRICS_LEGEND = [
     body: "根据跨项目未开始 / 测试中 / 逾期程序的加权估算，分为偏高、适中、偏低。"
   },
   {
-    title: "报告日时间轴",
-    body: "横轴表示从今天起距报告日的天数；色带区分 7 / 14 / 30 天预警区；圆点越大表示逾期程序越多。"
+    title: "报告日日历",
+    body: "按实际报告日期展示未来数月的组合安排；色块区分 7 / 14 / 30 天预警区；标记数字表示逾期程序数。"
   }
 ];
 

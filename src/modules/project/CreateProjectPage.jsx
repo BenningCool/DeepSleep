@@ -2,12 +2,15 @@ import { useEffect, useState } from "react";
 import { ModuleHeading } from "../../components/ModuleHeading";
 import { PAGE_LABELS, PROJECT_SECTION_LABELS } from "../../data/pageLabels";
 import {
+  defaultTeamForProjectType,
   getEngagementTypeProfile,
+  listEngagementTypeCards,
   projectTypeSkinClass
 } from "../../data/engagementTypeProfiles";
 import {
   ENGAGEMENT_TYPES,
   INDUSTRY_GROUPS,
+  labelOfProjectType,
   PROJECT_TYPES,
   TEAMS
 } from "../../data/projectConstants";
@@ -41,6 +44,7 @@ export function CreateProjectPage({
   onCreated,
   onCancel,
   onToast,
+  onViewDemo,
   prefillType = "",
   prefillTeam = ""
 }) {
@@ -61,6 +65,15 @@ export function CreateProjectPage({
   }, [prefillType, prefillTeam]);
 
   const typeProfile = getEngagementTypeProfile(form.projectType);
+  const typeTemplates = listEngagementTypeCards();
+
+  function applyProjectType(projectType) {
+    setForm((current) => ({
+      ...current,
+      projectType,
+      team: defaultTeamForProjectType(projectType)
+    }));
+  }
 
   function updateField(name, value) {
     setForm((current) => ({ ...current, [name]: value }));
@@ -168,7 +181,7 @@ export function CreateProjectPage({
               <span className="label">项目类型 Type *</span>
               <select
                 value={form.projectType}
-                onChange={(e) => updateField("projectType", e.target.value)}
+                onChange={(e) => applyProjectType(e.target.value)}
               >
                 {PROJECT_TYPES.map((item) => (
                   <option key={item.id} value={item.id}>
@@ -242,6 +255,70 @@ export function CreateProjectPage({
               />
               <span className="field-hint">选填，可稍后在项目详情中补充</span>
             </label>
+          </div>
+
+          <div className="create-type-templates">
+            <div className="create-type-templates-head">
+              <h4>类型参考模板 · Engagement Type Templates</h4>
+              <p className="panel-note">
+                点击「选用」同步上方 Type 与 Team；与 Type 下拉双向联动。
+              </p>
+            </div>
+            <div className="create-type-template-grid">
+              {typeTemplates.map(({ id, profile }) => (
+                <article
+                  key={id}
+                  className={[
+                    "create-type-template-card",
+                    projectTypeSkinClass(id),
+                    form.projectType === id ? "active" : ""
+                  ].filter(Boolean).join(" ")}
+                  style={{ "--type-accent": profile.color }}
+                >
+                  <div className="create-type-template-head">
+                    <span className="type-badge">{profile.badge}</span>
+                    <strong>{labelOfProjectType(id)}</strong>
+                  </div>
+                  <p className="create-type-template-tagline">{profile.tagline}</p>
+                  <dl className="create-type-template-meta">
+                    <div>
+                      <dt>Primary team</dt>
+                      <dd>{profile.primaryTeamLabel}</dd>
+                    </div>
+                    <div>
+                      <dt>Collaboration</dt>
+                      <dd>{profile.collaboration}</dd>
+                    </div>
+                    <div>
+                      <dt>Progress focus</dt>
+                      <dd>{profile.progressFocus}</dd>
+                    </div>
+                  </dl>
+                  {profile.demoNote ? (
+                    <p className="create-type-template-note">{profile.demoNote}</p>
+                  ) : null}
+                  <div className="create-type-template-actions">
+                    <button
+                      className="button primary compact"
+                      type="button"
+                      onClick={() => applyProjectType(id)}
+                    >
+                      {form.projectType === id ? "已选用" : "选用"}
+                    </button>
+                    {onViewDemo ? (
+                      <button
+                        className="button subtle compact"
+                        type="button"
+                        disabled={!profile.demoProjectId}
+                        onClick={() => onViewDemo(id)}
+                      >
+                        查看示例
+                      </button>
+                    ) : null}
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
         </div>
 

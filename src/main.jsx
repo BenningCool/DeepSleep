@@ -9,7 +9,6 @@ import {
   deleteProjectWorkspaceProgress
 } from "./services/workspaceProgressService";
 import { ProgressBoardPage } from "./modules/progress-board/ProgressBoardPage";
-import { EngagementTypesPage } from "./modules/engagement-types/EngagementTypesPage";
 import { CreateProjectPage } from "./modules/project/CreateProjectPage";
 import { resolveTaskContributorGroup } from "./modules/project/contributorGroup";
 import { ProjectDetailPage } from "./modules/project/ProjectDetailPage";
@@ -110,8 +109,8 @@ function App() {
   }, []);
 
   function navigateTo(view) {
-    if (view === "command") {
-      view = "home";
+    if (view === "command" || view === "types") {
+      view = view === "types" ? "create" : "home";
     }
     if (view !== "workspace") {
       setFocusControlId("");
@@ -265,16 +264,7 @@ function App() {
           onOpenDetail={(projectId) => openProject(projectId, "detail")}
           onOpenMemberProgress={openMemberProgress}
           onCreateAnnual={startCreateAnnual}
-          onOpenTypes={() => setActiveView("types")}
-        />
-      );
-    }
-
-    if (activeView === "types") {
-      return (
-        <EngagementTypesPage
-          onViewDemo={viewDemoProject}
-          onCreateWithType={startCreateWithType}
+          onBrowseTemplates={() => navigateTo("create")}
         />
       );
     }
@@ -285,6 +275,7 @@ function App() {
           onCreated={handleProjectCreated}
           onCancel={() => setActiveView(currentProjectId ? "detail" : "home")}
           onToast={setToast}
+          onViewDemo={viewDemoProject}
           prefillType={createPrefill.type}
           prefillTeam={createPrefill.team}
         />
@@ -305,7 +296,7 @@ function App() {
           onOpenDetail={(projectId) => openProject(projectId, "detail")}
           onOpenMemberProgress={openMemberProgress}
           onCreateAnnual={startCreateAnnual}
-          onOpenTypes={() => setActiveView("types")}
+          onBrowseTemplates={() => navigateTo("create")}
         />
       );
     }
@@ -393,7 +384,7 @@ function App() {
         onOpenDetail={(projectId) => openProject(projectId, "detail")}
         onOpenMemberProgress={openMemberProgress}
         onCreateAnnual={startCreateAnnual}
-        onOpenTypes={() => setActiveView("types")}
+        onBrowseTemplates={() => navigateTo("create")}
       />
     );
   }

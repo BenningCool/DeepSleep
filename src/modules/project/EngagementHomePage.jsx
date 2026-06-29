@@ -14,7 +14,7 @@ export function EngagementHomePage({
   onOpenDetail,
   onOpenMemberProgress,
   onCreateAnnual,
-  onOpenTypes
+  onBrowseTemplates
 }) {
   if (isPortfolioBrowseView(viewAs)) {
     return (
@@ -40,7 +40,7 @@ export function EngagementHomePage({
       onOpenDetail={onOpenDetail}
       onOpenMemberProgress={onOpenMemberProgress}
       onCreateAnnual={onCreateAnnual}
-      onOpenTypes={onOpenTypes}
+      onBrowseTemplates={onBrowseTemplates}
     />
   );
 }

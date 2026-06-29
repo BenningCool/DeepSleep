@@ -130,20 +130,24 @@ export const COMMAND_CENTER_LABELS = {
   kpi: {
     sectionTitle: "组合风险概览",
     sectionTitleEn: "Portfolio Risk Overview",
+    projectRowTitle: "项目风险",
+    projectRowTitleEn: "Engagement Risk",
+    procedureRowTitle: "程序执行",
+    procedureRowTitleEn: "Procedure Execution",
     critical: "需立即关注",
     elevated: "需重点关注",
     reportWindow: "30 天内报告",
-    overdueProcedures: "已逾期"
+    overdueProcedures: "逾期程序"
   },
   portfolioList: {
     title: "项目列表",
     titleEn: "Engagement List",
-    lead: "与进度看板同一测试点三态口径；点击项目进度进入单项目看板。"
+    lead: "展示当前视角下全部相关项目；带 # 排名者为建议优先跟进。"
   },
   timeline: {
-    title: "报告日时间轴",
-    titleEn: "Report Date Timeline",
-    lead: "横轴为距报告日天数；圆点越大表示逾期测试点越多。"
+    title: "报告日日历",
+    titleEn: "Report Date Calendar",
+    lead: "按实际报告日出示日期查看组合安排；色块表示预警档位，数字为逾期程序数。"
   },
   attention: {
     title: "优先关注",
@@ -154,6 +158,16 @@ export const COMMAND_CENTER_LABELS = {
     title: "报告日预警",
     titleEn: "Report Date Watchlist",
     lead: "未来 30 天内出具报告的项目。"
+  },
+  resourceAllocation: {
+    title: "资源分配",
+    titleEn: "Resource Allocation",
+    lead: "查看 IC / Staff 各参与多少项目与控制点指派。",
+    leadEp: "按下辖 EM 查看 IC / Staff 各参与多少项目与控制点指派。",
+    leadEm: "查看所辖 IC 与 Staff 各参与多少项目、多少控制点。",
+    leadIc: "查看组内 IC 与 Staff（含本人）各参与多少项目、多少控制点。",
+    leadStaff: "按项目查看本人被指派的控制点与执行人分布。",
+    leadContributor: "按项目查看协作组贡献与执行测试人员。"
   }
 };
 

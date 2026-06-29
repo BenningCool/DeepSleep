@@ -1,9 +1,8 @@
-import { formatCompletionLabel, formatProcedureOverdue } from "./managementCopy";
+import { formatCompletionLabel } from "./managementCopy";
 import { riskTierVisual } from "./portfolioVisualTokens";
 
 function formatQueueMeta(row) {
   const parts = [row.urgency.readableLabel || row.urgency.label];
-  parts.push(formatProcedureOverdue(row.overdueCount));
   if (row.completion.total) {
     parts.push(formatCompletionLabel(row.completion));
   }
@@ -25,13 +24,18 @@ export function AttentionQueuePanel({
   const list = (
     <ol className={`attention-queue-list ${embedded ? "progress-attention-list" : ""}`}>
       {visible.map((row, index) => {
-        const { project, risk } = row;
+        const { project, risk, overdueCount } = row;
         const visual = riskTierVisual(risk.tier);
+        const hasOverdue = overdueCount > 0;
 
         return (
           <li
             key={project.id}
-            className={`attention-queue-item ${embedded ? "attention-overdue-item" : ""}`}
+            className={[
+              "attention-queue-item",
+              embedded ? "attention-overdue-item" : "",
+              hasOverdue ? "has-procedure-overdue" : ""
+            ].filter(Boolean).join(" ")}
             style={embedded ? { "--portfolio-accent": visual.borderColor } : undefined}
           >
             <div className="attention-queue-rank">#{index + 1}</div>
@@ -42,6 +46,15 @@ export function AttentionQueuePanel({
               </div>
               <p className="attention-queue-subtitle">{project.name}</p>
               <p className="attention-queue-meta">{formatQueueMeta(row)}</p>
+              {hasOverdue ? (
+                <div className="attention-queue-overdue-alert" role="alert">
+                  <span className="progress-flag overdue attention-overdue-chip">
+                    {overdueCount} 项程序逾期 · 需跟进
+                  </span>
+                </div>
+              ) : (
+                <p className="attention-queue-overdue-idle">无逾期程序</p>
+              )}
               <div className="attention-queue-actions">
                 <button
                   className="button primary compact"

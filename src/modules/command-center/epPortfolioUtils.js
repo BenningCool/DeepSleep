@@ -8,7 +8,7 @@ import {
   enrichProjectWithReport,
   sortByReportUrgency
 } from "./reportDayUtils";
-import { buildTeamRollup } from "./teamRollupUtils";
+import { buildPersonWorkloadRows } from "./personWorkloadUtils";
 import { labelOfRole } from "../../data/projectConstants";
 
 function memberEmail(member) {
@@ -64,9 +64,11 @@ export function groupProjectsByManager(projects) {
 export function buildEmGroupSnapshot(projects, tasks, managerEmail) {
   const enriched = sortByReportUrgency(projects.map((p) => enrichProjectWithReport(p, tasks)));
   const nearest = enriched[0] || null;
-  const teamRollup = managerEmail && managerEmail !== "__unassigned__"
-    ? buildTeamRollup(projects, tasks, managerEmail, "em")
-    : { summary: { highLoadCount: 0, totalOverdue: 0 }, people: [] };
+  const personTeams = managerEmail && managerEmail !== "__unassigned__"
+    ? buildPersonWorkloadRows(projects, tasks, managerEmail, "em")
+    : [];
+  const assignedTotal = personTeams.reduce((sum, row) => sum + (row.assignedTotal || 0), 0);
+  const highLoadCount = personTeams.filter((row) => row.loadLevelClass === "load-high").length;
 
   const totalOverdue = enriched.reduce((sum, entry) => sum + entry.overdueCount, 0);
   const reportStack = detectReportStack(projects);
@@ -76,10 +78,12 @@ export function buildEmGroupSnapshot(projects, tasks, managerEmail) {
     managerLabel: managerEmail === "__unassigned__" ? "未指定 EM" : managerEmail,
     projectCount: projects.length,
     projects: enriched,
+    personTeams,
+    assignedTotal,
     nearestReport: nearest,
     totalOverdue,
-    highLoadCount: teamRollup.summary.highLoadCount,
-    executionHeadcount: teamRollup.summary.headcount,
+    highLoadCount,
+    executionHeadcount: personTeams.length,
     reportStack
   };
 }
