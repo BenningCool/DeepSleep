@@ -63,7 +63,10 @@ function AiResultItem({ item, onOpenProgress }) {
         <button
           className="button primary compact"
           type="button"
-          onClick={() => onOpenProgress?.(project?.id || task.projectId)}
+          onClick={() => onOpenProgress?.({
+            projectId: project?.id || task.projectId,
+            controlId: task.id
+          })}
         >
           打开进度看板
         </button>

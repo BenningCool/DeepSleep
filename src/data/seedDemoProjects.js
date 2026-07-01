@@ -4,7 +4,7 @@ import { PROJECTS_STORAGE_KEY, migrateProject, saveProjects, loadProjects } from
 import { WORKSPACE_PROGRESS_STORAGE_KEY, MATERIAL_CATEGORY } from "../services/workspaceProgressService";
 import { enrichTaskWithFinancialContext } from "../modules/command-center/financialAuditContext";
 
-export const DEMO_SEED_VERSION = 3;
+export const DEMO_SEED_VERSION = 4;
 export const DEMO_SEED_FLAG_KEY = "deepsleep-demo-seed-v1";
 
 const DEMO_EMAILS = {
@@ -167,7 +167,7 @@ function buildAllDemoProjects() {
       startOffset: -45,
       managerEmail: DEMO_EMAILS.manager1,
       icEmail: DEMO_EMAILS.ic1,
-      staffEmails: [DEMO_EMAILS.staff2, DEMO_EMAILS.staff3]
+      staffEmails: [DEMO_EMAILS.staff3]
     }),
     buildDemoProject({
       id: DEMO_PROJECT_IDS.privacy,
@@ -270,11 +270,11 @@ function buildAllDemoTasks() {
     buildDemoTask({ id: "DS-906", projectId: P.uatAnnual, title: "所得税计提 Tax 专项", owner: DEMO_EMAILS.taxLead, due: daysFromToday(14), contributorGroup: "tax", product: "2026 年度财务报表审计（演示）" }),
     buildDemoTask({ id: "DS-907", projectId: P.uatAnnual, title: "递延所得税 Tax 核对", owner: DEMO_EMAILS.taxLead, due: daysFromToday(-2), contributorGroup: "tax", product: "2026 年度财务报表审计（演示）" }),
     buildDemoTask({ id: "DS-908", projectId: P.uatAnnual, title: "采购与付款 GITC", owner: DEMO_EMAILS.ic1, due: daysFromToday(20), contributorGroup: "audit", auditDomain: "itgc", product: "2026 年度财务报表审计（演示）" }),
-    buildDemoTask({ id: "DS-909", projectId: P.uatAnnual, title: "固定资产 ITAC", owner: DEMO_EMAILS.staff2, due: daysFromToday(7), contributorGroup: "audit", auditDomain: "itac", product: "2026 年度财务报表审计（演示）" }),
+    buildDemoTask({ id: "DS-909", projectId: P.uatAnnual, title: "固定资产 ITAC", owner: DEMO_EMAILS.staff1, due: daysFromToday(7), contributorGroup: "audit", auditDomain: "itac", product: "2026 年度财务报表审计（演示）" }),
     buildDemoTask({ id: "DS-910", projectId: P.uatAnnual, title: "备份与恢复 GITC", owner: DEMO_EMAILS.itaStaff, due: daysFromToday(12), contributorGroup: "ita", auditDomain: "itgc", product: "2026 年度财务报表审计（演示）" }),
     buildDemoTask({ id: "DS-911", projectId: P.uatAnnual, title: "监管报送接口 ITAC", owner: DEMO_EMAILS.staff1, due: daysFromToday(3), contributorGroup: "audit", auditDomain: "itac", product: "2026 年度财务报表审计（演示）" }),
     buildDemoTask({ id: "DS-912", projectId: P.uatAnnual, title: "关联方交易 Tax 核对", owner: DEMO_EMAILS.taxLead, due: daysFromToday(18), contributorGroup: "tax", product: "2026 年度财务报表审计（演示）" }),
-    buildDemoTask({ id: "DS-913", projectId: P.uatAnnual, title: "总账结账 GITC", owner: DEMO_EMAILS.staff2, due: daysFromToday(-1), contributorGroup: "audit", auditDomain: "itgc", product: "2026 年度财务报表审计（演示）" }),
+    buildDemoTask({ id: "DS-913", projectId: P.uatAnnual, title: "总账结账 GITC", owner: DEMO_EMAILS.staff1, due: daysFromToday(-1), contributorGroup: "audit", auditDomain: "itgc", product: "2026 年度财务报表审计（演示）" }),
     buildDemoTask({ id: "DS-914", projectId: P.uatAnnual, title: "权限复核 ITAC", owner: DEMO_EMAILS.itaLead, due: daysFromToday(8), contributorGroup: "ita", auditDomain: "itac", product: "2026 年度财务报表审计（演示）" }),
     buildDemoTask({ id: "DS-915", projectId: P.uatAnnual, title: "薪酬循环 GITC", owner: DEMO_EMAILS.staff1, due: daysFromToday(30), contributorGroup: "audit", auditDomain: "itgc", product: "2026 年度财务报表审计（演示）" }),
 
@@ -282,13 +282,13 @@ function buildAllDemoTasks() {
     buildDemoTask({ id: "DS-951", projectId: P.socIta, title: "信任服务准则范围确认", owner: DEMO_EMAILS.ic1, due: daysFromToday(21), contributorGroup: "ita", product: "2026 SOC 2 Type II 审计（演示）" }),
     buildDemoTask({ id: "DS-952", projectId: P.socIta, title: "关键系统清单与边界", owner: DEMO_EMAILS.itaLead, due: daysFromToday(-2), contributorGroup: "ita", product: "2026 SOC 2 Type II 审计（演示）" }),
     buildDemoTask({ id: "DS-953", projectId: P.socIta, title: "逻辑访问控制 GITC", owner: DEMO_EMAILS.itaStaff, due: daysFromToday(8), status: "doing", contributorGroup: "ita", product: "2026 SOC 2 Type II 审计（演示）" }),
-    buildDemoTask({ id: "DS-954", projectId: P.socIta, title: "变更管理抽样 ITAC", owner: DEMO_EMAILS.staff1, due: daysFromToday(15), contributorGroup: "ita", auditDomain: "itac", product: "2026 SOC 2 Type II 审计（演示）" }),
+    buildDemoTask({ id: "DS-954", projectId: P.socIta, title: "变更管理抽样 ITAC", owner: DEMO_EMAILS.staff1, due: daysFromToday(6), contributorGroup: "ita", auditDomain: "itac", product: "2026 SOC 2 Type II 审计（演示）" }),
     buildDemoTask({ id: "DS-955", projectId: P.socIta, title: "监控与告警 GITC", owner: DEMO_EMAILS.itaLead, due: daysFromToday(6), contributorGroup: "ita", product: "2026 SOC 2 Type II 审计（演示）" }),
 
     // —— IPO ——
     buildDemoTask({ id: "DS-961", projectId: P.ipo, title: "招股书 IT 章节复核", owner: DEMO_EMAILS.ic1, due: daysFromToday(22), contributorGroup: "audit", product: "2026 科创板 IPO 核查（演示）" }),
     buildDemoTask({ id: "DS-962", projectId: P.ipo, title: "收入确认 ITAC", owner: DEMO_EMAILS.staff1, due: daysFromToday(18), contributorGroup: "audit", auditDomain: "itac", product: "2026 科创板 IPO 核查（演示）" }),
-    buildDemoTask({ id: "DS-963", projectId: P.ipo, title: "募集资金运用 GITC", owner: DEMO_EMAILS.staff3, due: daysFromToday(26), contributorGroup: "audit", product: "2026 科创板 IPO 核查（演示）" }),
+    buildDemoTask({ id: "DS-963", projectId: P.ipo, title: "募集资金运用 GITC", owner: DEMO_EMAILS.staff1, due: daysFromToday(12), contributorGroup: "audit", product: "2026 科创板 IPO 核查（演示）" }),
     buildDemoTask({ id: "DS-964", projectId: P.ipo, title: "数据室访问 GITC", owner: DEMO_EMAILS.itaLead, due: daysFromToday(20), contributorGroup: "ita", product: "2026 科创板 IPO 核查（演示）" }),
     buildDemoTask({ id: "DS-965", projectId: P.ipo, title: "关联交易系统 ITAC", owner: DEMO_EMAILS.staff1, due: daysFromToday(24), contributorGroup: "audit", auditDomain: "itac", product: "2026 科创板 IPO 核查（演示）" }),
     buildDemoTask({ id: "DS-966", projectId: P.ipo, title: "上市前内控缺陷 GITC", owner: DEMO_EMAILS.ic1, due: daysFromToday(28), contributorGroup: "audit", product: "2026 科创板 IPO 核查（演示）" }),
@@ -296,7 +296,7 @@ function buildAllDemoTasks() {
     // —— 装备制造年审 ——
     buildDemoTask({ id: "DS-971", projectId: P.mfgAnnual, title: "存货循环 GITC", owner: DEMO_EMAILS.ic1, due: daysFromToday(16), contributorGroup: "audit", product: "2026 年度财务报表审计（演示）· 装备制造" }),
     buildDemoTask({ id: "DS-972", projectId: P.mfgAnnual, title: "生产成本 ITAC", owner: DEMO_EMAILS.staff2, due: daysFromToday(-4), contributorGroup: "audit", auditDomain: "itac", product: "2026 年度财务报表审计（演示）· 装备制造" }),
-    buildDemoTask({ id: "DS-973", projectId: P.mfgAnnual, title: "设备台账 GITC", owner: DEMO_EMAILS.staff3, due: daysFromToday(19), contributorGroup: "audit", product: "2026 年度财务报表审计（演示）· 装备制造" }),
+    buildDemoTask({ id: "DS-973", projectId: P.mfgAnnual, title: "设备台账 GITC", owner: DEMO_EMAILS.staff1, due: daysFromToday(9), contributorGroup: "audit", product: "2026 年度财务报表审计（演示）· 装备制造" }),
     buildDemoTask({ id: "DS-974", projectId: P.mfgAnnual, title: "MES 接口 ITAC", owner: DEMO_EMAILS.itaLead, due: daysFromToday(14), contributorGroup: "ita", auditDomain: "itac", product: "2026 年度财务报表审计（演示）· 装备制造" }),
     buildDemoTask({ id: "DS-975", projectId: P.mfgAnnual, title: "委外加工 GITC", owner: DEMO_EMAILS.staff2, due: daysFromToday(21), contributorGroup: "audit", product: "2026 年度财务报表审计（演示）· 装备制造" }),
 

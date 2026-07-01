@@ -14,6 +14,7 @@ import { resolveTaskContributorGroup } from "./modules/project/contributorGroup"
 import { ProjectDetailPage } from "./modules/project/ProjectDetailPage";
 import { ProjectMembersPage } from "./modules/project/ProjectMembersPage";
 import { EngagementHomePage } from "./modules/project/EngagementHomePage";
+import { CommandCenterPage } from "./modules/command-center/CommandCenterPage";
 import { WorkspacePage } from "./modules/workspace/WorkspacePage";
 import {
   deleteProject,
@@ -44,7 +45,7 @@ function App() {
   const [projects, setProjects] = useState(initialDemo.projects);
   const [currentProjectId, setCurrentProjectId] = useState(loadCurrentProjectId);
   const [activeView, setActiveView] = useState(
-    loadCurrentProjectId() ? "detail" : "home"
+    loadCurrentProjectId() ? "detail" : "command"
   );
   const [tasks, setTasks] = useState(() => migrateTasks(initialDemo.tasks));
   const [viewAs, setViewAs] = useState(loadViewAs);
@@ -109,8 +110,8 @@ function App() {
   }, []);
 
   function navigateTo(view) {
-    if (view === "command" || view === "types") {
-      view = view === "types" ? "create" : "home";
+    if (view === "types") {
+      view = "create";
     }
     if (view !== "workspace") {
       setFocusControlId("");
@@ -136,9 +137,26 @@ function App() {
     refreshProjects();
   }
 
-  function openProjectProgress(projectId, ownerEmail = "") {
-    setProgressOwnerOverride(ownerEmail || "");
-    openProject(projectId, "progress");
+  function normalizeProgressTarget(target, ownerEmail = "") {
+    if (target && typeof target === "object") {
+      return {
+        projectId: target.projectId || "",
+        controlId: target.controlId || "",
+        ownerEmail: target.ownerEmail || ownerEmail || ""
+      };
+    }
+    return {
+      projectId: target || "",
+      controlId: "",
+      ownerEmail: ownerEmail || ""
+    };
+  }
+
+  function openProjectProgress(target, ownerEmail = "") {
+    const next = normalizeProgressTarget(target, ownerEmail);
+    setFocusControlId(next.controlId);
+    setProgressOwnerOverride(next.ownerEmail || "");
+    openProject(next.projectId, "progress");
   }
 
   function openMemberProgress(projectId, ownerEmail) {
@@ -250,19 +268,29 @@ function App() {
   }
 
   function renderMain() {
-    if (activeView === "home" || activeView === "command") {
+    if (activeView === "home") {
       return (
         <EngagementHomePage
           projects={projects}
           tasks={tasks}
           currentProjectId={currentProjectId}
-          viewAs={viewAs}
-          onViewAsChange={handleViewAsChange}
           onCreate={() => navigateTo("create")}
           onOpen={(projectId) => openProject(projectId, "detail")}
+        />
+      );
+    }
+
+    if (activeView === "command") {
+      return (
+        <CommandCenterPage
+          projects={projects}
+          tasks={tasks}
+          viewAs={viewAs}
+          onViewAsChange={handleViewAsChange}
           onOpenProgress={openProjectProgress}
           onOpenDetail={(projectId) => openProject(projectId, "detail")}
           onOpenMemberProgress={openMemberProgress}
+          onOpenAllProjects={goHome}
           onCreateAnnual={startCreateAnnual}
           onBrowseTemplates={() => navigateTo("create")}
         />
@@ -288,15 +316,8 @@ function App() {
           projects={projects}
           tasks={tasks}
           currentProjectId=""
-          viewAs={viewAs}
-          onViewAsChange={handleViewAsChange}
           onCreate={() => navigateTo("create")}
           onOpen={(projectId) => openProject(projectId, "detail")}
-          onOpenProgress={openProjectProgress}
-          onOpenDetail={(projectId) => openProject(projectId, "detail")}
-          onOpenMemberProgress={openMemberProgress}
-          onCreateAnnual={startCreateAnnual}
-          onBrowseTemplates={() => navigateTo("create")}
         />
       );
     }
@@ -308,7 +329,7 @@ function App() {
           refreshToken={detailTick}
           controlPointCount={projectTasks.length}
           onOpenWorkspace={goToWorkspace}
-          onOpenProgress={() => setActiveView("progress")}
+          onOpenProgress={() => openProjectProgress(currentProjectId)}
           onOpenMembers={() => setActiveView("members")}
           onBack={goHome}
           onDelete={() => handleDeleteProject(currentProjectId, currentProject.name)}
@@ -376,15 +397,8 @@ function App() {
         projects={projects}
         tasks={tasks}
         currentProjectId={currentProjectId}
-        viewAs={viewAs}
-        onViewAsChange={handleViewAsChange}
         onCreate={() => setActiveView("create")}
         onOpen={(projectId) => openProject(projectId, "detail")}
-        onOpenProgress={openProjectProgress}
-        onOpenDetail={(projectId) => openProject(projectId, "detail")}
-        onOpenMemberProgress={openMemberProgress}
-        onCreateAnnual={startCreateAnnual}
-        onBrowseTemplates={() => navigateTo("create")}
       />
     );
   }

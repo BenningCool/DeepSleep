@@ -5547,11 +5547,11 @@ button {
 
 .command-view-hint {
   margin: 0 0 16px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border-radius: 8px;
-  background: color-mix(in srgb, var(--accent) 8%, white);
+  background: color-mix(in srgb, var(--accent) 5%, white);
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .command-project-grid,
@@ -6956,6 +6956,20 @@ button {
 /* v1.7.6 · 指挥中心 P0：看板同款外壳 + 项目卡片主视图 */
 .management-command-page .progress-dashboard {
   margin-top: 8px;
+  gap: 14px;
+}
+
+.management-command-page .page-header {
+  margin-bottom: 10px;
+}
+
+.management-command-page .command-toolbar-view-as-only {
+  max-width: 280px;
+  margin-bottom: 8px;
+}
+
+.management-command-page .command-view-hint {
+  margin-bottom: 12px;
 }
 
 .ai-audit-command-panel {
@@ -7324,6 +7338,214 @@ button {
   gap: 16px;
 }
 
+.resource-dispatch-panel {
+  display: grid;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, #ff8b00 28%, var(--line));
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, #ffab00 9%, white), white 44%),
+    var(--surface);
+  box-shadow: 0 8px 22px rgba(9, 30, 66, 0.06);
+}
+
+.resource-dispatch-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 16px;
+}
+
+.resource-dispatch-head h3 {
+  margin: 4px 0;
+  font-size: 20px;
+  color: var(--ink);
+}
+
+.resource-dispatch-head p {
+  margin: 0;
+  max-width: 760px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.resource-dispatch-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(74px, 1fr));
+  gap: 8px;
+  min-width: min(100%, 430px);
+}
+
+.resource-dispatch-stat {
+  display: grid;
+  gap: 2px;
+  min-height: 54px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  text-align: center;
+}
+
+.resource-dispatch-stat strong {
+  font-size: 22px;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.resource-dispatch-stat span {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.resource-dispatch-stat.is-hot strong {
+  color: #de350b;
+}
+
+.resource-dispatch-stat.is-cool strong {
+  color: #00875a;
+}
+
+.resource-dispatch-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.resource-dispatch-card {
+  display: grid;
+  gap: 10px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-left: 4px solid #ff8b00;
+  border-radius: 8px;
+  background: white;
+}
+
+.resource-dispatch-card-head,
+.resource-dispatch-route {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.resource-dispatch-rank,
+.resource-dispatch-report {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.resource-dispatch-rank {
+  background: #fff0b3;
+  color: #974f0c;
+}
+
+.resource-dispatch-report {
+  background: #ffebe6;
+  color: #bf2600;
+}
+
+.resource-dispatch-route {
+  align-items: stretch;
+}
+
+.resource-dispatch-route > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 0;
+  padding: 8px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--accent) 4%, white);
+}
+
+.resource-dispatch-route span {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.resource-dispatch-route strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.resource-dispatch-route small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.resource-dispatch-arrow {
+  align-self: center;
+  flex: 0 0 auto;
+  color: #ff8b00;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.resource-dispatch-task {
+  display: grid;
+  gap: 3px;
+}
+
+.resource-dispatch-task strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.resource-dispatch-task span,
+.resource-dispatch-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.command-detail-actions {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) auto;
+  gap: 10px 16px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fafbfc;
+}
+
+.command-detail-actions h3 {
+  margin: 3px 0 3px;
+  color: var(--ink);
+  font-size: 16px;
+}
+
+.command-detail-actions p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.command-detail-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.command-detail-actions-meta {
+  grid-column: 1 / -1;
+}
+
 .command-portfolio-section,
 .command-resource-section {
   grid-column: 1 / -1;
@@ -7610,6 +7832,24 @@ button {
   margin: 0 0 12px;
   font-size: 14px;
   color: var(--muted);
+}
+
+.progress-focus-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, #ff8b00 28%, var(--line));
+  border-radius: 8px;
+  background: #fff7e6;
+  color: #974f0c;
+  font-size: 13px;
+}
+
+.progress-focus-banner strong {
+  color: #7a3f00;
 }
 
 .resource-allocation-groups {
@@ -8203,8 +8443,18 @@ button {
   .ai-audit-query-form,
   .ai-audit-answer-grid,
   .ai-audit-collapsed-summary,
-  .command-portfolio-collapsed-summary {
+  .command-portfolio-collapsed-summary,
+  .command-detail-actions,
+  .resource-dispatch-grid {
     grid-template-columns: 1fr;
+  }
+
+  .command-detail-action-buttons {
+    justify-content: flex-start;
+  }
+
+  .resource-dispatch-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .ai-audit-chain {

@@ -25,11 +25,6 @@ import {
 import { getProjectWorkspaceStatusOverview } from "./projectProgressOverview";
 import { PROJECT_SORT_OPTIONS } from "./specialistConstants";
 import { ledTeamLabel } from "../command-center/commandCenterUtils";
-import {
-  hintOfViewAs,
-  labelOfViewAs,
-  VIEW_AS_OPTIONS
-} from "../../data/viewAsPresets";
 
 function ProjectCardProgress({ project, tasks }) {
   const breakdown = getProjectWorkspaceStatusOverview(project.id, tasks);
@@ -105,8 +100,6 @@ export function ProjectsHomePage({
   projects,
   tasks = [],
   currentProjectId,
-  viewAs = "all",
-  onViewAsChange,
   onCreate,
   onOpen
 }) {
@@ -138,26 +131,6 @@ export function ProjectsHomePage({
           <button className="button primary" type="button" onClick={onCreate}>新建项目</button>
         </div>
       </header>
-
-      {onViewAsChange ? (
-        <div className="command-toolbar engagement-home-toolbar">
-          <label className="view-as-field">
-            <span className="label">角色视角 · View as</span>
-            <select value={viewAs} onChange={(e) => onViewAsChange(e.target.value)}>
-              {VIEW_AS_OPTIONS.map((option) => (
-                <option key={option.id} value={option.id}>{option.label}</option>
-              ))}
-            </select>
-          </label>
-        </div>
-      ) : null}
-
-      {onViewAsChange ? (
-        <p className="command-view-hint">
-          当前视角：<strong>{labelOfViewAs(viewAs)}</strong>
-          {hintOfViewAs(viewAs) ? ` · ${hintOfViewAs(viewAs)}` : ""}
-        </p>
-      ) : null}
 
       {projects.length ? (
         <>

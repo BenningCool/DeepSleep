@@ -1,14 +1,12 @@
 import { useMemo } from "react";
 import { ModuleHeading } from "../../components/ModuleHeading";
 import { PAGE_LABELS } from "../../data/pageLabels";
-import { demoEmailOfViewAs, labelOfViewAs, VIEW_AS_OPTIONS } from "../../data/viewAsPresets";
+import { COMMAND_VIEW_AS_OPTIONS, demoEmailOfViewAs, labelOfViewAs } from "../../data/viewAsPresets";
 import {
   buildCommandListMetrics,
-  buildFilteredRiskMatrix,
-  useCommandListFilters
+  buildFilteredRiskMatrix
 } from "./commandPortfolioFilters";
 import { ManagementCommandBody } from "./ManagementCommandBody";
-import { PortfolioListToolbar } from "./PortfolioListToolbar";
 import { buildStaffResourceGroup } from "./resourceAllocationUtils";
 import { ROLE_PAGE_INTRO } from "./managementCopy";
 import { buildStaffCommandPortfolio } from "./staffCommandPortfolio";
@@ -19,19 +17,9 @@ export function StaffCommandView({
   viewAs,
   onViewAsChange,
   onOpenProgress,
-  onOpenDetail
+  onOpenDetail: _onOpenDetail,
+  onOpenAllProjects
 }) {
-  const {
-    filters,
-    search,
-    setSearch,
-    teamFilter,
-    setTeamFilter,
-    typeFilter,
-    setTypeFilter,
-    sortBy,
-    setSortBy
-  } = useCommandListFilters();
   const staffEmail = demoEmailOfViewAs("staff");
 
   const basePortfolio = useMemo(
@@ -40,8 +28,8 @@ export function StaffCommandView({
   );
 
   const { filteredProjects, riskMatrix: filteredMatrix } = useMemo(
-    () => buildFilteredRiskMatrix(basePortfolio.staffProjects, tasks, filters),
-    [basePortfolio.staffProjects, tasks, filters]
+    () => buildFilteredRiskMatrix(basePortfolio.staffProjects, tasks, {}),
+    [basePortfolio.staffProjects, tasks]
   );
 
   const listMetrics = useMemo(
@@ -78,7 +66,7 @@ export function StaffCommandView({
         <label className="view-as-field">
           <span className="label">角色视角 · View as</span>
           <select value={viewAs} onChange={(e) => onViewAsChange(e.target.value)}>
-            {VIEW_AS_OPTIONS.map((option) => (
+            {COMMAND_VIEW_AS_OPTIONS.map((option) => (
               <option key={option.id} value={option.id}>{option.label}</option>
             ))}
           </select>
@@ -86,7 +74,7 @@ export function StaffCommandView({
       </div>
 
       <p className="command-view-hint">
-        当前视角：<strong>{labelOfViewAs(viewAs)}</strong>
+        <strong>{labelOfViewAs(viewAs)}</strong>
         · {ROLE_PAGE_INTRO.staff}
       </p>
 
@@ -102,31 +90,11 @@ export function StaffCommandView({
           reportStack={listMetrics.reportStack}
           filteredMatrix={filteredMatrix}
           tasks={tasks}
-          showEmColumn={false}
           attentionQueue={listMetrics.attentionQueue}
-          attentionLimit={1}
-          watchlist={listMetrics.watchlist}
-          nearestReport={listMetrics.nearestReport}
           totalProjectCount={basePortfolio.staffProjects.length}
           resourceGroups={resourceGroups}
-          listToolbar={({ visibleCount, totalCount }) => (
-            <PortfolioListToolbar
-              search={search}
-              teamFilter={teamFilter}
-              typeFilter={typeFilter}
-              sortBy={sortBy}
-              onSearchChange={setSearch}
-              onTeamFilterChange={setTeamFilter}
-              onTypeFilterChange={setTypeFilter}
-              onSortChange={setSortBy}
-              searchLabel="搜索我的项目"
-              searchPlaceholder="客户、项目名..."
-              visibleCount={visibleCount}
-              totalCount={totalCount}
-            />
-          )}
           onOpenProgress={onOpenProgress}
-          onOpenDetail={onOpenDetail}
+          onOpenAllProjects={onOpenAllProjects}
         />
       )}
     </section>

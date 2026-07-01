@@ -4,7 +4,7 @@ import { labelOfContributorGroup } from "../project/contributorGroup";
 export const AI_AUDIT_PROMPTS = [
   "下周报告日前，哪些财审关键循环被 IT 控制阻塞？",
   "收入循环 IT 控制有哪些风险？",
-  "谁的工作负荷会影响财审报告日？"
+  "报告日前如何重新分配 staff 工作？"
 ];
 
 const GOLDEN_CONTROL_IDS = new Set(["DS-901", "DS-902", "DS-905"]);
@@ -348,7 +348,7 @@ function buildResourceItems(tasks, projectsById) {
 
 function classifyQuery(query) {
   const normalized = normalize(query);
-  if (/谁|资源|负荷|人手|工作量|workload|capacity/i.test(normalized)) return "resource";
+  if (/谁|资源|负荷|人手|工作量|重新分配|分配|调度|staff|workload|capacity/i.test(normalized)) return "resource";
   if (/收入|revenue/i.test(normalized)) return "revenue";
   if (/报告日|下周|逾期|阻塞|关键循环|财审|deadline|overdue/i.test(normalized)) return "report_blocker";
   return "general";
@@ -364,7 +364,7 @@ function buildQueryCopy(type, resultItems, resourceItems) {
         : "当前未发现明显资源冲突。",
       auditImpact: "资源冲突会让关键 IT 控制复核滞后，财审团队可能无法按原计划依赖系统控制。",
       recommendedAction: first
-        ? `先协调 ${first.owner} 处理报告日前项目的逾期测试点，并将非关键测试点后移。`
+        ? `先协调 ${first.owner} 的报告日前逾期测试点，优先转给低负荷 Staff 协助完成底稿推进。`
         : "保持现有排期，继续监控未来 14 天报告日项目。"
     };
   }

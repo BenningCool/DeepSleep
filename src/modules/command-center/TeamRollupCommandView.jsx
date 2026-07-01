@@ -1,14 +1,12 @@
 import { useMemo } from "react";
 import { ModuleHeading } from "../../components/ModuleHeading";
 import { PAGE_LABELS } from "../../data/pageLabels";
-import { demoEmailOfViewAs, labelOfViewAs, VIEW_AS_OPTIONS } from "../../data/viewAsPresets";
+import { COMMAND_VIEW_AS_OPTIONS, demoEmailOfViewAs, labelOfViewAs } from "../../data/viewAsPresets";
 import {
   buildCommandListMetrics,
-  buildFilteredRiskMatrix,
-  useCommandListFilters
+  buildFilteredRiskMatrix
 } from "./commandPortfolioFilters";
 import { ManagementCommandBody } from "./ManagementCommandBody";
-import { PortfolioListToolbar } from "./PortfolioListToolbar";
 import { buildSupervisorResourceGroup } from "./resourceAllocationUtils";
 import { ROLE_PAGE_INTRO } from "./managementCopy";
 import {
@@ -24,10 +22,10 @@ function RollupManagementLayout({
   supervisedProjects,
   resourceGroups,
   tasks,
-  listToolbar,
   attentionLimit,
   onOpenProgress,
-  onOpenDetail
+  onOpenDetail: _onOpenDetail,
+  onOpenAllProjects
 }) {
   return (
     <ManagementCommandBody
@@ -36,16 +34,11 @@ function RollupManagementLayout({
       reportStack={listMetrics.reportStack}
       filteredMatrix={filteredMatrix}
       tasks={tasks}
-      showEmColumn={false}
       attentionQueue={listMetrics.attentionQueue}
-      attentionLimit={attentionLimit}
-      watchlist={listMetrics.watchlist}
-      nearestReport={listMetrics.nearestReport}
       totalProjectCount={supervisedProjects.length}
       resourceGroups={resourceGroups}
-      listToolbar={listToolbar}
       onOpenProgress={onOpenProgress}
-      onOpenDetail={onOpenDetail}
+      onOpenAllProjects={onOpenAllProjects}
     />
   );
 }
@@ -57,19 +50,9 @@ export function TeamRollupCommandView({
   onViewAsChange,
   onOpenProgress,
   onOpenDetail,
-  onOpenMemberProgress: _onOpenMemberProgress
+  onOpenMemberProgress: _onOpenMemberProgress,
+  onOpenAllProjects
 }) {
-  const {
-    filters,
-    search,
-    setSearch,
-    teamFilter,
-    setTeamFilter,
-    typeFilter,
-    setTypeFilter,
-    sortBy,
-    setSortBy
-  } = useCommandListFilters();
   const supervisorEmail = demoEmailOfViewAs(viewAs);
   const pageLabels = viewAs === "em" ? PAGE_LABELS.emCommand : PAGE_LABELS.icCommand;
   const isEmView = viewAs === "em";
@@ -86,8 +69,8 @@ export function TeamRollupCommandView({
   );
 
   const { filteredProjects, riskMatrix: filteredMatrix } = useMemo(
-    () => buildFilteredRiskMatrix(supervisedProjects, tasks, filters),
-    [supervisedProjects, tasks, filters]
+    () => buildFilteredRiskMatrix(supervisedProjects, tasks, {}),
+    [supervisedProjects, tasks]
   );
 
   const listMetrics = useMemo(
@@ -109,9 +92,6 @@ export function TeamRollupCommandView({
     riskCounts: listMetrics.riskCounts
   }), [rollup.summary, filteredProjects.length, listMetrics]);
 
-  const searchLabel = "搜索项目 / 成员";
-  const searchPlaceholder = "客户、项目名、成员邮箱...";
-
   return (
     <section className="page-shell progress-board-page management-command-page team-rollup-page">
       <header className="page-header">
@@ -129,7 +109,7 @@ export function TeamRollupCommandView({
         <label className="view-as-field">
           <span className="label">角色视角 · View as</span>
           <select value={viewAs} onChange={(e) => onViewAsChange(e.target.value)}>
-            {VIEW_AS_OPTIONS.map((option) => (
+            {COMMAND_VIEW_AS_OPTIONS.map((option) => (
               <option key={option.id} value={option.id}>{option.label}</option>
             ))}
           </select>
@@ -137,7 +117,7 @@ export function TeamRollupCommandView({
       </div>
 
       <p className="command-view-hint">
-        当前视角：<strong>{labelOfViewAs(viewAs)}</strong>
+        <strong>{labelOfViewAs(viewAs)}</strong>
         · {isEmView ? ROLE_PAGE_INTRO.em : ROLE_PAGE_INTRO.ic}
       </p>
 
@@ -159,24 +139,9 @@ export function TeamRollupCommandView({
           resourceGroups={resourceGroups}
           tasks={tasks}
           attentionLimit={attentionLimit}
-          listToolbar={({ visibleCount, totalCount }) => (
-            <PortfolioListToolbar
-              search={search}
-              teamFilter={teamFilter}
-              typeFilter={typeFilter}
-              sortBy={sortBy}
-              onSearchChange={setSearch}
-              onTeamFilterChange={setTeamFilter}
-              onTypeFilterChange={setTypeFilter}
-              onSortChange={setSortBy}
-              searchLabel={searchLabel}
-              searchPlaceholder={searchPlaceholder}
-              visibleCount={visibleCount}
-              totalCount={totalCount}
-            />
-          )}
           onOpenProgress={onOpenProgress}
           onOpenDetail={onOpenDetail}
+          onOpenAllProjects={onOpenAllProjects}
         />
       )}
     </section>

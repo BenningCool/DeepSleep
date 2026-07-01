@@ -3,8 +3,8 @@ import { buildTaskMap } from "../modules/progress-board/progressBoardUtils";
 import { filterOverdueControls } from "../modules/progress-board/progressDashboardUtils";
 import { getProgressBoardPreset } from "./viewAsProgressPresets";
 
-export const VIEW_AS_STORAGE_KEY = "deepsleep-view-as-v1";
-export const DEFAULT_VIEW_AS = "ep";
+export const VIEW_AS_STORAGE_KEY = "deepsleep-view-as-v2";
+export const DEFAULT_VIEW_AS = "em";
 
 export const VIEW_AS_OPTIONS = [
   {
@@ -50,6 +50,8 @@ export const VIEW_AS_OPTIONS = [
   }
 ];
 
+export const COMMAND_VIEW_AS_OPTIONS = VIEW_AS_OPTIONS.filter((item) => item.id !== "all");
+
 export function isPortfolioBrowseView(viewAsId) {
   return viewAsId === "all";
 }
@@ -73,7 +75,7 @@ export function demoEmailOfViewAs(viewAsId) {
 export function loadViewAs() {
   try {
     const saved = sessionStorage.getItem(VIEW_AS_STORAGE_KEY);
-    if (saved && VIEW_AS_OPTIONS.some((item) => item.id === saved)) {
+    if (saved && COMMAND_VIEW_AS_OPTIONS.some((item) => item.id === saved)) {
       return saved;
     }
   } catch {

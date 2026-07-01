@@ -12,11 +12,12 @@ export function Sidebar({
   ] : [];
 
   const globalNav = [
-    { id: "home", icon: "P", label: "项目" },
+    { id: "home", icon: "P", label: "全部项目" },
+    { id: "command", icon: "M", label: "团队管理" },
     { id: "create", icon: "+", label: "新建项目" }
   ];
 
-  const globalViews = new Set(["home", "create"]);
+  const globalViews = new Set(["home", "command", "create"]);
   const showProjectNav = currentProject && !globalViews.has(activeView);
   const navItems = showProjectNav ? projectNav : globalNav;
 

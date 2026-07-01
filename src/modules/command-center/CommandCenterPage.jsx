@@ -10,7 +10,8 @@ export function CommandCenterPage({
   onViewAsChange,
   onOpenProgress,
   onOpenDetail,
-  onOpenMemberProgress
+  onOpenMemberProgress,
+  onOpenAllProjects
 }) {
   if (viewAs === "staff") {
     return (
@@ -21,6 +22,7 @@ export function CommandCenterPage({
         onViewAsChange={onViewAsChange}
         onOpenProgress={onOpenProgress}
         onOpenDetail={onOpenDetail}
+        onOpenAllProjects={onOpenAllProjects}
       />
     );
   }
@@ -35,6 +37,7 @@ export function CommandCenterPage({
         onOpenProgress={onOpenProgress}
         onOpenDetail={onOpenDetail}
         onOpenMemberProgress={onOpenMemberProgress}
+        onOpenAllProjects={onOpenAllProjects}
       />
     );
   }
@@ -48,6 +51,7 @@ export function CommandCenterPage({
         onViewAsChange={onViewAsChange}
         onOpenProgress={onOpenProgress}
         onOpenDetail={onOpenDetail}
+        onOpenAllProjects={onOpenAllProjects}
       />
     );
   }
@@ -61,6 +65,7 @@ export function CommandCenterPage({
         onViewAsChange={onViewAsChange}
         onOpenProgress={onOpenProgress}
         onOpenDetail={onOpenDetail}
+        onOpenAllProjects={onOpenAllProjects}
       />
     );
   }

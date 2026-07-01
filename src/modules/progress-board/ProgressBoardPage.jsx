@@ -336,6 +336,14 @@ export function ProgressBoardPage({
         </div>
       ) : null}
 
+      {focusControlId ? (
+        <div className="progress-focus-banner">
+          <span>
+            调度关注：<strong>{focusControlId}</strong> · 已定位到建议跟进测试点
+          </span>
+        </div>
+      ) : null}
+
       <div className="progress-filter-row">
         {CONTRIBUTOR_FILTER_OPTIONS.map((option) => (
           <button

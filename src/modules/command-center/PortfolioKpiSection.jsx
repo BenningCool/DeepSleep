@@ -24,8 +24,8 @@ export function PortfolioKpiSection({ mode, summary, reportStack }) {
     <div className="progress-dashboard-kpi-section portfolio-kpi-section">
       <header className="progress-dashboard-kpi-head">
         <ModuleHeading
-          title={labels.sectionTitle}
-          titleEn={labels.sectionTitleEn}
+          title="交付风险摘要"
+          titleEn="Delivery Risk Summary"
         />
         <p className="panel-note">{headline}</p>
       </header>

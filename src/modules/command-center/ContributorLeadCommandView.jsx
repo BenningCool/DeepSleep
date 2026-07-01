@@ -1,15 +1,13 @@
 import { useMemo } from "react";
 import { ModuleHeading } from "../../components/ModuleHeading";
 import { PAGE_LABELS } from "../../data/pageLabels";
-import { demoEmailOfViewAs, labelOfViewAs, VIEW_AS_OPTIONS } from "../../data/viewAsPresets";
+import { COMMAND_VIEW_AS_OPTIONS, demoEmailOfViewAs, labelOfViewAs } from "../../data/viewAsPresets";
 import {
   buildCommandListMetrics,
-  buildFilteredRiskMatrix,
-  useCommandListFilters
+  buildFilteredRiskMatrix
 } from "./commandPortfolioFilters";
 import { buildContributorLeadPortfolio } from "./contributorLeadUtils";
 import { ManagementCommandBody } from "./ManagementCommandBody";
-import { PortfolioListToolbar } from "./PortfolioListToolbar";
 import { buildContributorResourceGroup } from "./resourceAllocationUtils";
 import { ROLE_PAGE_INTRO } from "./managementCopy";
 
@@ -24,19 +22,9 @@ export function ContributorLeadCommandView({
   viewAs,
   onViewAsChange,
   onOpenProgress,
-  onOpenDetail
+  onOpenDetail: _onOpenDetail,
+  onOpenAllProjects
 }) {
-  const {
-    filters,
-    search,
-    setSearch,
-    teamFilter,
-    setTeamFilter,
-    typeFilter,
-    setTypeFilter,
-    sortBy,
-    setSortBy
-  } = useCommandListFilters();
   const leadEmail = demoEmailOfViewAs(viewAs);
   const contributorGroup = CONTRIBUTOR_GROUP_BY_VIEW[viewAs] || "ita";
 
@@ -46,8 +34,8 @@ export function ContributorLeadCommandView({
   );
 
   const { filteredProjects, riskMatrix: filteredMatrix } = useMemo(
-    () => buildFilteredRiskMatrix(basePortfolio.leadProjects, tasks, filters),
-    [basePortfolio.leadProjects, tasks, filters]
+    () => buildFilteredRiskMatrix(basePortfolio.leadProjects, tasks, {}),
+    [basePortfolio.leadProjects, tasks]
   );
 
   const listMetrics = useMemo(
@@ -91,7 +79,7 @@ export function ContributorLeadCommandView({
         <label className="view-as-field">
           <span className="label">角色视角 · View as</span>
           <select value={viewAs} onChange={(e) => onViewAsChange(e.target.value)}>
-            {VIEW_AS_OPTIONS.map((option) => (
+            {COMMAND_VIEW_AS_OPTIONS.map((option) => (
               <option key={option.id} value={option.id}>{option.label}</option>
             ))}
           </select>
@@ -99,7 +87,7 @@ export function ContributorLeadCommandView({
       </div>
 
       <p className="command-view-hint">
-        当前视角：<strong>{labelOfViewAs(viewAs)}</strong>
+        <strong>{labelOfViewAs(viewAs)}</strong>
         · {ROLE_PAGE_INTRO[viewAs]}
       </p>
 
@@ -117,31 +105,11 @@ export function ContributorLeadCommandView({
           reportStack={listMetrics.reportStack}
           filteredMatrix={filteredMatrix}
           tasks={tasks}
-          showEmColumn={false}
           attentionQueue={listMetrics.attentionQueue}
-          attentionLimit={3}
-          watchlist={listMetrics.watchlist}
-          nearestReport={listMetrics.nearestReport}
           totalProjectCount={basePortfolio.leadProjects.length}
           resourceGroups={resourceGroups}
-          listToolbar={({ visibleCount, totalCount }) => (
-            <PortfolioListToolbar
-              search={search}
-              teamFilter={teamFilter}
-              typeFilter={typeFilter}
-              sortBy={sortBy}
-              onSearchChange={setSearch}
-              onTeamFilterChange={setTeamFilter}
-              onTypeFilterChange={setTypeFilter}
-              onSortChange={setSortBy}
-              searchLabel="搜索项目"
-              searchPlaceholder="客户、项目名、行业、成员邮箱..."
-              visibleCount={visibleCount}
-              totalCount={totalCount}
-            />
-          )}
           onOpenProgress={onOpenProgress}
-          onOpenDetail={onOpenDetail}
+          onOpenAllProjects={onOpenAllProjects}
         />
       )}
     </section>
