@@ -8,6 +8,7 @@ import { ReportDayPanel } from "./ReportDayPanel";
 import { ReportDateCalendar } from "./ReportDateCalendar";
 import { ResourceAllocationSection } from "./ResourceAllocationSection";
 import { resolveResourceUiConfig } from "./resourceAllocationConfig";
+import { AiAuditCommandPanel } from "./AiAuditCommandPanel";
 import {
   addMonthOffset,
   mergeAttentionWithMonthRows,
@@ -41,6 +42,7 @@ export function ManagementCommandBody({
   );
 
   const [visibleMonth, setVisibleMonth] = useState(initialMonth);
+  const [portfolioListExpanded, setPortfolioListExpanded] = useState(false);
 
   useEffect(() => {
     setVisibleMonth(initialMonth);
@@ -68,6 +70,10 @@ export function ManagementCommandBody({
 
   const visibleCount = filteredMatrix.length;
   const totalCount = totalProjectCount || visibleCount;
+  const topPortfolioProject = listRows[0]?.project || null;
+  const portfolioListSummary = topPortfolioProject
+    ? `当前展示 ${visibleCount} / ${totalCount} 个项目；优先关注：${topPortfolioProject.clientName || topPortfolioProject.name}。`
+    : `当前展示 ${visibleCount} / ${totalCount} 个项目。`;
 
   return (
     <section className="progress-dashboard" aria-label="组合指挥中心">
@@ -77,28 +83,58 @@ export function ManagementCommandBody({
         reportStack={reportStack}
       />
 
+      <AiAuditCommandPanel
+        projects={filteredMatrix.map((row) => row.project)}
+        tasks={tasks}
+        onOpenProgress={onOpenProgress}
+      />
+
       <div className="command-dashboard-grid">
         <DashboardSection
           title={labels.portfolioList.title}
           titleEn={labels.portfolioList.titleEn}
           lead={listLead}
+          headerExtra={(
+            <button
+              className="button subtle compact"
+              type="button"
+              aria-expanded={portfolioListExpanded}
+              onClick={() => setPortfolioListExpanded((value) => !value)}
+            >
+              {portfolioListExpanded ? "收起" : "展开"}
+            </button>
+          )}
           className="command-portfolio-section"
         >
-          {listToolbar ? (
-            <div className="command-portfolio-list-toolbar-wrap">
-              {typeof listToolbar === "function"
-                ? listToolbar({ visibleCount, totalCount })
-                : listToolbar}
-            </div>
-          ) : null}
-          <EngagementPortfolioCardList
-            rows={listRows}
-            tasks={tasks}
-            showEmColumn={showEmColumn}
-            emptyHint="当前筛选条件下暂无项目。"
-            onOpenProgress={onOpenProgress}
-            onOpenDetail={onOpenDetail}
-          />
+          {!portfolioListExpanded ? (
+            <button
+              className="command-portfolio-collapsed-summary"
+              type="button"
+              onClick={() => setPortfolioListExpanded(true)}
+            >
+              <span>项目列表已收起</span>
+              <strong>{portfolioListSummary}</strong>
+              <small>{rankedCount ? `#1-#${rankedCount} 为建议优先跟进。` : labels.portfolioList.lead}</small>
+            </button>
+          ) : (
+            <>
+              {listToolbar ? (
+                <div className="command-portfolio-list-toolbar-wrap">
+                  {typeof listToolbar === "function"
+                    ? listToolbar({ visibleCount, totalCount })
+                    : listToolbar}
+                </div>
+              ) : null}
+              <EngagementPortfolioCardList
+                rows={listRows}
+                tasks={tasks}
+                showEmColumn={showEmColumn}
+                emptyHint="当前筛选条件下暂无项目。"
+                onOpenProgress={onOpenProgress}
+                onOpenDetail={onOpenDetail}
+              />
+            </>
+          )}
         </DashboardSection>
 
         {resourceGroups?.length ? (

@@ -6,6 +6,7 @@ import {
 } from "../progress-board/WorkspaceStatusOverviewBar";
 import { formatCompletionLabel, formatProcedureOverdue } from "./managementCopy";
 import { riskTierVisual } from "./portfolioVisualTokens";
+import { getTopAuditChainForProject } from "./financialAuditContext";
 
 function formatCardMeta(row) {
   const parts = [row.urgency.readableLabel || row.urgency.label];
@@ -29,6 +30,10 @@ function EngagementPortfolioCard({
 
   const breakdown = useMemo(
     () => getProjectWorkspaceStatusOverview(project.id, tasks),
+    [project.id, tasks]
+  );
+  const auditChain = useMemo(
+    () => getTopAuditChainForProject(project.id, tasks),
     [project.id, tasks]
   );
 
@@ -94,6 +99,19 @@ function EngagementPortfolioCard({
       </div>
 
       <p className="command-portfolio-card-report-meta">{formatCardMeta(row)}</p>
+
+      {auditChain ? (
+        <div className="command-audit-chain-card">
+          <span className="command-audit-chain-label">
+            Audit → ITA 风险链
+          </span>
+          <div className="command-audit-chain-steps">
+            {auditChain.chain.map((step, index) => (
+              <span key={`${auditChain.task.id}-${index}`}>{step}</span>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <div className="command-card-actions">
         <button

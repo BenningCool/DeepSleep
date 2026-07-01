@@ -2,8 +2,9 @@ import { STORAGE_KEY } from "./mockData";
 import { DEMO_PROJECT_IDS } from "./engagementTypeProfiles";
 import { PROJECTS_STORAGE_KEY, migrateProject, saveProjects, loadProjects } from "../modules/project/projectStore";
 import { WORKSPACE_PROGRESS_STORAGE_KEY, MATERIAL_CATEGORY } from "../services/workspaceProgressService";
+import { enrichTaskWithFinancialContext } from "../modules/command-center/financialAuditContext";
 
-export const DEMO_SEED_VERSION = 2;
+export const DEMO_SEED_VERSION = 3;
 export const DEMO_SEED_FLAG_KEY = "deepsleep-demo-seed-v1";
 
 const DEMO_EMAILS = {
@@ -237,7 +238,7 @@ function buildDemoTask({
   auditDomain = "itgc",
   product
 }) {
-  return {
+  return enrichTaskWithFinancialContext({
     id,
     title,
     description: `演示测试点 · ${title}`,
@@ -253,7 +254,7 @@ function buildDemoTask({
     auditDomain,
     scopeGenerated: false,
     contributorGroup
-  };
+  });
 }
 
 function buildAllDemoTasks() {
